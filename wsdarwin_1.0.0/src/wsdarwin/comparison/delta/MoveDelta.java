@@ -26,7 +26,7 @@ public class MoveDelta extends Delta {
 	@Override
 	public void printDelta(int level) {
 		String deltaText = DeltaUtil.indent(level);
-		deltaText += "Move\t";
+		deltaText += "Move\t"+this.getSource().getClass().getSimpleName()+"\t";
 		deltaText += this.getSource().toString() + "\t" + oldParent.toString() + " ->" + newParent.toString();
 		System.out.println(deltaText);
 		if (!this.getDeltas().isEmpty()) {

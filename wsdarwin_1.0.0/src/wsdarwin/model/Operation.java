@@ -1,10 +1,10 @@
 package wsdarwin.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import wsdarwin.comparison.delta.*;
 import wsdarwin.util.DeltaUtil;
-
 
 public class Operation implements WSElement {
 
@@ -12,16 +12,16 @@ public class Operation implements WSElement {
 	 * 
 	 */
 	private static final long serialVersionUID = -5993682650342253465L;
-	
+
 	private String name;
 	private String method;
 	private String pattern;
-	
+
 	private IType request;
 	private IType response;
-	
-	public Operation(String name, String method, String pattern,
-			IType request, IType response) {
+
+	public Operation(String name, String method, String pattern, IType request,
+			IType response) {
 		super();
 		this.name = name;
 		this.method = method;
@@ -70,100 +70,109 @@ public class Operation implements WSElement {
 		this.response = response;
 	}
 
-	public boolean equals(Object o) {
-		if(this == o) {
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if(o instanceof Operation) {
-			Operation op = (Operation)o;
-			return this.name.equals(op.name) && this.request.equals(op.request) && this.response.equals(op.response);
-		}
-		else {
+		if (obj == null)
 			return false;
-		}
+		if (getClass() != obj.getClass())
+			return false;
+		Operation other = (Operation) obj;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
 	}
-	
+
 	public String toString() {
 		return name;
 	}
-	
-	/*public String diff(Operation operation) {
-		String difference = "";
-		if(!this.name.equals(operation.name)) {
-			difference += "rename\n";
-		}
-		if(!this.input.equals(operation.input)) {
-			difference += "input changed\n"+this.input.diff(operation.input, 0);
-		}
-		if(!this.output.equals(operation.output)) {
-			difference += "output changed\n"+this.output.diff(operation.output, 0);
-		}
-		return difference;
-	}*/
-	
+
+	/*
+	 * public String diff(Operation operation) { String difference = "";
+	 * if(!this.name.equals(operation.name)) { difference += "rename\n"; }
+	 * if(!this.input.equals(operation.input)) { difference +=
+	 * "input changed\n"+this.input.diff(operation.input, 0); }
+	 * if(!this.output.equals(operation.output)) { difference +=
+	 * "output changed\n"+this.output.diff(operation.output, 0); } return
+	 * difference; }
+	 */
+
 	public Delta diff(WSElement element) {
 		Operation operation = null;
-		if(element instanceof Operation) {
-			operation = (Operation)element;
-		}
-		else {
+		if (element instanceof Operation) {
+			operation = (Operation) element;
+		} else {
 			return null;
 		}
 		Delta elementDelta = null;
 		ArrayList<Delta> deltas = new ArrayList<Delta>();
-		if(!this.name.equals(operation.name)) {
-			ChangeDelta delta = new ChangeDelta(this, operation, "name", this.getName(), operation.getName());
-			deltas.add(delta);
+		if (!this.name.equals(operation.name)) {
+			elementDelta = new ChangeDelta(this, operation, "name",
+					this.getName(), operation.getName());
 		}
-		else if(!this.method.equals(operation.method)) {
-			ChangeDelta delta = new ChangeDelta(this, operation, "method", this.getMethod(), operation.getMethod());
-			deltas.add(delta);
+		if (!this.method.equals(operation.method)) {
+			if (elementDelta == null) {
+				elementDelta = new ChangeDelta(this, operation, "method",
+						this.getMethod(), operation.getMethod());
+			} else {
+				((ChangeDelta) elementDelta).addChangedAttribute("method",
+						this.getMethod(), operation.getMethod());
+			}
 		}
-		else if(!this.pattern.equals(operation.pattern)) {
-			ChangeDelta delta = new ChangeDelta(this, operation, "pattern", this.getPattern(), operation.getPattern());
-			deltas.add(delta);
+		if (!this.pattern.equals(operation.pattern)) {
+			if (elementDelta == null) {
+				elementDelta = new ChangeDelta(this, operation, "pattern",
+						this.getPattern(), operation.getPattern());
+			} else {
+				((ChangeDelta) elementDelta).addChangedAttribute("pattern",
+						this.getPattern(), operation.getPattern());
+			}
 		}
-		//if(!this.input.equals(operation.input)) {
-			deltas.add(this.request.diff(operation.request));
-		//}
-		//if(!this.output.equals(operation.output)) {
-			deltas.add(this.response.diff(operation.response));
-		//}
-		if(DeltaUtil.containsOnlyMatchDeltas(deltas)) {
-			elementDelta = new MatchDelta(this, operation);
-			elementDelta.addAllDeltas(deltas);
-			elementDelta.adoptOrphanDeltas();
+
+		deltas.add(this.request.diff(operation.request));
+		deltas.add(this.response.diff(operation.response));
+
+		if (elementDelta == null) {
+			if (DeltaUtil.containsOnlyMatchDeltas(deltas)) {
+				elementDelta = new MatchDelta(this, operation);
+			} else {
+				elementDelta = new ChangeDelta(this, operation, "", null, null);
+			}
 		}
-		else {
-			elementDelta = new ChangeDelta(this, operation, "", null, null);
-			elementDelta.addAllDeltas(deltas);
-			elementDelta.adoptOrphanDeltas();
-		}
+		elementDelta.addAllDeltas(deltas);
+		elementDelta.adoptOrphanDeltas();
 		return elementDelta;
 	}
 
-
-
 	@Override
 	public boolean equalsByName(Object o) {
-		if(o instanceof Operation) {
-			return name.equals(((Operation)o).name);
-		}
-		else {
+		if (o instanceof Operation) {
+			return name.equals(((Operation) o).name);
+		} else {
 			return false;
 		}
 	}
-
-
 
 	@Override
 	public boolean equalsAfterRename(Object o) {
-		if(o instanceof Operation) {
-			return request.equals(((Operation)o).request) && response.equals(((Operation)o).response);
-		}
-		else {
+		if (o instanceof Operation) {
+			return request.equals(((Operation) o).request)
+					&& response.equals(((Operation) o).response);
+		} else {
 			return false;
 		}
 	}
 
+	@Override
+	public HashMap<String, WSElement> getChildren() {
+		HashMap<String, WSElement> children = new HashMap<String, WSElement>();
+		children.put(request.getName(), request);
+		children.put(response.getName(), response);
+		return children;
+	}
+
+	
 }

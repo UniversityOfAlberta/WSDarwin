@@ -12,7 +12,7 @@ public class MatchDelta extends Delta {
 	@Override
 	public void printDelta(int level) {
 		String deltaText = DeltaUtil.indent(level);
-		deltaText += "Match\t";
+		deltaText += "Match\t"+this.getSource().getClass().getSimpleName()+"\t";
 		deltaText += this.getSource().toString()+" -> "+this.getTarget().toString();
 		System.out.println(deltaText);
 		if(!this.getDeltas().isEmpty()) {

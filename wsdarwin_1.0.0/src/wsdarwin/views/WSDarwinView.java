@@ -1,17 +1,41 @@
 package wsdarwin.views;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.part.*;
+import org.eclipse.ui.wizards.IWizardDescriptor;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 import org.eclipse.ui.*;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.SWT;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+
+import wsdarwin.clientadaptation.ClientAdaptationRefactoring;
+import wsdarwin.comparison.delta.ChangeDelta;
+import wsdarwin.comparison.delta.Delta;
+import wsdarwin.model.Operation;
+import wsdarwin.wizards.MyRefactoringWizard;
+import wsdarwin.wizards.NewClientAdapterWizard;
 
 
 /**
@@ -40,137 +64,105 @@ public class WSDarwinView extends ViewPart {
 	public static final String ID = "wsdarwin.views.WSDarwinView";
 
 	private TreeViewer viewer;
-	private DrillDownAdapter drillDownAdapter;
-	private Action action1;
-	private Action action2;
+	private Action compareInterfaces;
+	private Action adaptClient;
 	private Action doubleClickAction;
+	private Delta[] diffTable;
+	private String oldWSDL;
+	private String newWSDL;
+	private ICompilationUnit oldStub;
+	private ICompilationUnit newStub;
 
 	/*
-	 * The content provider class is responsible for
-	 * providing objects to the view. It can wrap
-	 * existing objects in adapters or simply return
-	 * objects as-is. These objects may be sensitive
-	 * to the current input of the view, or ignore
-	 * it and always show the same content 
-	 * (like Task List, for example).
+	 * The content provider class is responsible for providing objects to the
+	 * view. It can wrap existing objects in adapters or simply return objects
+	 * as-is. These objects may be sensitive to the current input of the view,
+	 * or ignore it and always show the same content (like Task List, for
+	 * example).
+	 * 
+	 * 
+	 * public class TreeObject implements IAdaptable { private String name;
+	 * private TreeParent parent;
+	 * 
+	 * public TreeObject(String name) { this.name = name; } public String
+	 * getName() { return name; } public void setParent(TreeParent parent) {
+	 * this.parent = parent; } public TreeParent getParent() { return parent; }
+	 * public String toString() { return getName(); } public Object
+	 * getAdapter(Class key) { return null; } }
+	 * 
+	 * public class TreeParent extends TreeObject { private ArrayList children;
+	 * public TreeParent(String name) { super(name); children = new ArrayList();
+	 * } public void addChild(TreeObject child) { children.add(child);
+	 * child.setParent(this); } public void removeChild(TreeObject child) {
+	 * children.remove(child); child.setParent(null); } public TreeObject []
+	 * getChildren() { return (TreeObject [])children.toArray(new
+	 * TreeObject[children.size()]); } public boolean hasChildren() { return
+	 * children.size()>0; } }
 	 */
-	 
-	class TreeObject implements IAdaptable {
-		private String name;
-		private TreeParent parent;
-		
-		public TreeObject(String name) {
-			this.name = name;
-		}
-		public String getName() {
-			return name;
-		}
-		public void setParent(TreeParent parent) {
-			this.parent = parent;
-		}
-		public TreeParent getParent() {
-			return parent;
-		}
-		public String toString() {
-			return getName();
-		}
-		public Object getAdapter(Class key) {
-			return null;
-		}
-	}
-	
-	class TreeParent extends TreeObject {
-		private ArrayList children;
-		public TreeParent(String name) {
-			super(name);
-			children = new ArrayList();
-		}
-		public void addChild(TreeObject child) {
-			children.add(child);
-			child.setParent(this);
-		}
-		public void removeChild(TreeObject child) {
-			children.remove(child);
-			child.setParent(null);
-		}
-		public TreeObject [] getChildren() {
-			return (TreeObject [])children.toArray(new TreeObject[children.size()]);
-		}
-		public boolean hasChildren() {
-			return children.size()>0;
-		}
-	}
 
-	class ViewContentProvider implements IStructuredContentProvider, 
-										   ITreeContentProvider {
-		private TreeParent invisibleRoot;
+	class ViewContentProvider implements IStructuredContentProvider,
+			ITreeContentProvider {
 
 		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
 		}
+
 		public void dispose() {
 		}
+
 		public Object[] getElements(Object parent) {
-			if (parent.equals(getViewSite())) {
-				if (invisibleRoot==null) initialize();
-				return getChildren(invisibleRoot);
+			if (diffTable != null) {
+				return diffTable;
+			} else {
+				return new Delta[] {};
 			}
-			return getChildren(parent);
 		}
+
 		public Object getParent(Object child) {
-			if (child instanceof TreeObject) {
-				return ((TreeObject)child).getParent();
-			}
+			return ((Delta) child).getParent();
+		}
+
+		public Object[] getChildren(Object parent) {
+			return ((Delta) parent).getDeltas().toArray(
+					new Delta[((Delta) parent).getDeltas().size()]);
+		}
+
+		public boolean hasChildren(Object parent) {
+			return getChildren(parent).length > 0;
+		}
+		/*
+		 * We will set up a dummy model to initialize tree heararchy. In a real
+		 * code, you will connect to a real model and expose its hierarchy.
+		 * 
+		 * private void initialize() { TreeObject to1 = new
+		 * TreeObject("Leaf 1"); TreeObject to2 = new TreeObject("Leaf 2");
+		 * TreeObject to3 = new TreeObject("Leaf 3"); TreeParent p1 = new
+		 * TreeParent("Parent 1"); p1.addChild(to1); p1.addChild(to2);
+		 * p1.addChild(to3);
+		 * 
+		 * TreeObject to4 = new TreeObject("Leaf 4"); TreeParent p2 = new
+		 * TreeParent("Parent 2"); p2.addChild(to4);
+		 * 
+		 * TreeParent root = new TreeParent("Root"); root.addChild(p1);
+		 * root.addChild(p2);
+		 * 
+		 * invisibleRoot = new TreeParent(""); invisibleRoot.addChild(root); }
+		 */
+	}
+
+	class ViewLabelProvider extends LabelProvider implements
+			ITableLabelProvider {
+		@Override
+		public Image getColumnImage(Object o, int i) {
+
 			return null;
 		}
-		public Object [] getChildren(Object parent) {
-			if (parent instanceof TreeParent) {
-				return ((TreeParent)parent).getChildren();
-			}
-			return new Object[0];
-		}
-		public boolean hasChildren(Object parent) {
-			if (parent instanceof TreeParent)
-				return ((TreeParent)parent).hasChildren();
-			return false;
-		}
-/*
- * We will set up a dummy model to initialize tree heararchy.
- * In a real code, you will connect to a real model and
- * expose its hierarchy.
- */
-		private void initialize() {
-			TreeObject to1 = new TreeObject("Leaf 1");
-			TreeObject to2 = new TreeObject("Leaf 2");
-			TreeObject to3 = new TreeObject("Leaf 3");
-			TreeParent p1 = new TreeParent("Parent 1");
-			p1.addChild(to1);
-			p1.addChild(to2);
-			p1.addChild(to3);
-			
-			TreeObject to4 = new TreeObject("Leaf 4");
-			TreeParent p2 = new TreeParent("Parent 2");
-			p2.addChild(to4);
-			
-			TreeParent root = new TreeParent("Root");
-			root.addChild(p1);
-			root.addChild(p2);
-			
-			invisibleRoot = new TreeParent("");
-			invisibleRoot.addChild(root);
-		}
-	}
-	class ViewLabelProvider extends LabelProvider {
 
-		public String getText(Object obj) {
-			return obj.toString();
-		}
-		public Image getImage(Object obj) {
-			String imageKey = ISharedImages.IMG_OBJ_ELEMENT;
-			if (obj instanceof TreeParent)
-			   imageKey = ISharedImages.IMG_OBJ_FOLDER;
-			return PlatformUI.getWorkbench().getSharedImages().getImage(imageKey);
+		@Override
+		public String getColumnText(Object o, int i) {
+			return "";
 		}
 	}
+
 	class NameSorter extends ViewerSorter {
 	}
 
@@ -181,21 +173,40 @@ public class WSDarwinView extends ViewPart {
 	}
 
 	/**
-	 * This is a callback that will allow us
-	 * to create the viewer and initialize it.
+	 * This is a callback that will allow us to create the viewer and initialize
+	 * it.
 	 */
 	public void createPartControl(Composite parent) {
-		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		drillDownAdapter = new DrillDownAdapter(viewer);
+		viewer = new TreeViewer(parent, SWT.SINGLE | SWT.H_SCROLL
+				| SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		viewer.setContentProvider(new ViewContentProvider());
 		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setSorter(new NameSorter());
 		viewer.setInput(getViewSite());
+		TableLayout layout = new TableLayout();
+		layout.addColumnData(new ColumnWeightData(40, true));
+		layout.addColumnData(new ColumnWeightData(40, true));
+		layout.addColumnData(new ColumnWeightData(40, true));
+		layout.addColumnData(new ColumnWeightData(40, true));
+		layout.addColumnData(new ColumnWeightData(40, true));
+		viewer.getTree().setLayout(layout);
+		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
+		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("File");
+		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Operation");
+		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Complex Type");
+		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Change Source");
+		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Change Target");
+		viewer.expandAll();
 
-		// Create the help context id for the viewer's control
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(), "wsdarwin_1.0.0.viewer");
+		for (int i = 0, n = viewer.getTree().getColumnCount(); i < n; i++) {
+			viewer.getTree().getColumn(i).pack();
+		}
+		viewer.setCellEditors(new CellEditor[] { new TextCellEditor(),
+				new TextCellEditor(), new TextCellEditor(),
+				new TextCellEditor(), new TextCellEditor() });
+		viewer.getTree().setLinesVisible(true);
+		viewer.getTree().setHeaderVisible(true);
 		makeActions();
-		hookContextMenu();
 		hookDoubleClickAction();
 		contributeToActionBars();
 	}
@@ -215,59 +226,140 @@ public class WSDarwinView extends ViewPart {
 
 	private void contributeToActionBars() {
 		IActionBars bars = getViewSite().getActionBars();
-		fillLocalPullDown(bars.getMenuManager());
 		fillLocalToolBar(bars.getToolBarManager());
 	}
 
-	private void fillLocalPullDown(IMenuManager manager) {
-		manager.add(action1);
-		manager.add(new Separator());
-		manager.add(action2);
-	}
-
 	private void fillContextMenu(IMenuManager manager) {
-		manager.add(action1);
-		manager.add(action2);
+		manager.add(compareInterfaces);
+		manager.add(adaptClient);
 		manager.add(new Separator());
-		drillDownAdapter.addNavigationActions(manager);
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
-	
+
 	private void fillLocalToolBar(IToolBarManager manager) {
-		manager.add(action1);
-		manager.add(action2);
+		manager.add(compareInterfaces);
+		manager.add(adaptClient);
 		manager.add(new Separator());
-		drillDownAdapter.addNavigationActions(manager);
 	}
 
 	private void makeActions() {
-		action1 = new Action() {
+		compareInterfaces = new Action() {
 			public void run() {
-				showMessage("Action 1 executed");
+				IWizardDescriptor descriptor = PlatformUI.getWorkbench()
+						.getNewWizardRegistry()
+						.findWizard("wsca2.wizards.NewClientAdapterWizard");
+				try {
+					IWizard wizard = descriptor.createWizard();
+					NewClientAdapterWizard ncaw = null;
+					if (wizard instanceof NewClientAdapterWizard) {
+						ncaw = (NewClientAdapterWizard) wizard;
+						ncaw.setAction(this);
+						if (oldWSDL != null) {
+							ncaw.setOldWSDL(oldWSDL);
+						}
+						if (newWSDL != null) {
+							ncaw.setNewWSDL(newWSDL);
+						}
+						if (oldStub != null) {
+							ncaw.setOldStub(oldStub);
+						}
+						if (newStub != null) {
+							ncaw.setNewStub(newStub);
+						}
+					}
+					WizardDialog wd = new WizardDialog(PlatformUI
+							.getWorkbench().getActiveWorkbenchWindow()
+							.getShell(), wizard);
+					wd.setTitle(wizard.getWindowTitle());
+					wd.open();
+					diffTable = new Delta[] { ncaw.getDiff() };
+					oldWSDL = ncaw.getOldWSDL();
+					newWSDL = ncaw.getNewWSDL();
+					oldStub = ncaw.getOldStub();
+					newStub = ncaw.getNewStub();
+					// viewer.refresh();
+					// viewer.setContentProvider(new ViewContentProvider());
+				} catch (CoreException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			}
 		};
-		action1.setText("Action 1");
-		action1.setToolTipText("Action 1 tooltip");
-		action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
-			getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-		
-		action2 = new Action() {
+		compareInterfaces.setText("diff");
+		compareInterfaces.setToolTipText("WSDL Diff");
+		compareInterfaces.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
+				.getImageDescriptor(ISharedImages.IMG_OBJS_TASK_TSK));
+
+		adaptClient = new Action() {
 			public void run() {
-				showMessage("Action 2 executed");
+				diffTable[0].printDelta(0);
+				CompilationUnit oldCompilationUnit = parseAST(oldStub);
+				Map<String, Delta> changedOperationNames = getChangedOperations();
+				Map<MethodDeclaration, Delta> changedMethods = getChangedMethods(
+						changedOperationNames, oldCompilationUnit);
+				CompilationUnit newCompilationUnit = parseAST(newStub);
+
+				ClientAdaptationRefactoring refactoring = new ClientAdaptationRefactoring(
+						oldCompilationUnit, newCompilationUnit,
+						(TypeDeclaration)oldCompilationUnit.types().get(0),
+						(TypeDeclaration)newCompilationUnit.types().get(0),
+						changedMethods);
+				MyRefactoringWizard wizard = new MyRefactoringWizard(
+						refactoring);
+				RefactoringWizardOpenOperation op = new RefactoringWizardOpenOperation(
+						wizard);
+				try {
+					String titleForFailedChecks = ""; //$NON-NLS-1$ 
+					op.run(getSite().getShell(), titleForFailedChecks);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		};
-		action2.setText("Action 2");
-		action2.setToolTipText("Action 2 tooltip");
-		action2.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
-				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+		adaptClient.setText("Adapt Client");
+		adaptClient.setToolTipText("Adapt Client");
+		adaptClient.setImageDescriptor(PlatformUI.getWorkbench()
+				.getSharedImages()
+				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
 		doubleClickAction = new Action() {
 			public void run() {
 				ISelection selection = viewer.getSelection();
-				Object obj = ((IStructuredSelection)selection).getFirstElement();
-				showMessage("Double-click detected on "+obj.toString());
+				Object obj = ((IStructuredSelection) selection)
+						.getFirstElement();
+				showMessage("Double-click detected on " + obj.toString());
 			}
 		};
+	}
+
+	private Map<MethodDeclaration, Delta> getChangedMethods(
+			Map<String, Delta> changedOperationNames,
+			CompilationUnit compilationUnit) {
+		Map<MethodDeclaration, Delta> changedMethods = new HashMap<MethodDeclaration, Delta>();
+		List<TypeDeclaration> types = compilationUnit.types();
+		TypeDeclaration typeDeclaration = types.get(0);
+		MethodDeclaration[] methods = typeDeclaration.getMethods();
+		for (int i = 0; i < methods.length; i++) {
+			String name = containsKeyIgnoreCase(changedOperationNames, methods[i].getName()
+					.getIdentifier());
+			if (name != null) {
+				changedMethods.put(methods[i], changedOperationNames
+						.get(name));
+			}
+		}
+		System.out.println();
+		return changedMethods;
+	}
+
+	private String containsKeyIgnoreCase(
+			Map<String, Delta> changedOperationNames, String identifier) {
+		for(String key : changedOperationNames.keySet()) {
+			if(key.equalsIgnoreCase(identifier)) {
+				return key;
+			}
+		}
+		return null;
 	}
 
 	private void hookDoubleClickAction() {
@@ -277,11 +369,10 @@ public class WSDarwinView extends ViewPart {
 			}
 		});
 	}
+
 	private void showMessage(String message) {
-		MessageDialog.openInformation(
-			viewer.getControl().getShell(),
-			"WSDarwin View",
-			message);
+		MessageDialog.openInformation(viewer.getControl().getShell(),
+				"WSDL Diff", message);
 	}
 
 	/**
@@ -289,5 +380,28 @@ public class WSDarwinView extends ViewPart {
 	 */
 	public void setFocus() {
 		viewer.getControl().setFocus();
+	}
+
+
+	private CompilationUnit parseAST(ICompilationUnit iCompilationUnit) {
+		// ASTInformationGenerator.setCurrentITypeRoot(iCompilationUnit);
+		IFile iFile = (IFile) iCompilationUnit.getResource();
+		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setSource(iCompilationUnit);
+		parser.setResolveBindings(true); // we need bindings later on
+		return (CompilationUnit) parser.createAST(null);
+	}
+
+	private Map<String, Delta> getChangedOperations() {
+		Map<String, Delta> changedOperationNames = new HashMap<String, Delta>();
+		for (Delta delta : diffTable[0].getDeltas()) {
+			if (delta instanceof ChangeDelta
+					&& delta.getSource() instanceof Operation) {
+				changedOperationNames.put(
+						((Operation) delta.getSource()).getName(), delta);
+			}
+		}
+		return changedOperationNames;
 	}
 }

@@ -7,12 +7,20 @@ public class AddDelta extends Delta {
 	
 	public AddDelta(WSElement source, WSElement target) {
 		super(source, target);
+		addChildren();
+	}
+
+	private void addChildren() {
+		for(WSElement child : target.getChildren().values()) {
+			this.deltas.add(new AddDelta(null, child));
+		}
+		
 	}
 
 	@Override
 	public void printDelta(int level) {
 		String deltaText = DeltaUtil.indent(level);
-		deltaText += "Add\t";
+		deltaText += "Add\t"+this.getTarget().getClass().getSimpleName()+"\t";
 		deltaText += "\t -> "+this.getTarget().toString();
 		System.out.println(deltaText);
 		if(!this.getDeltas().isEmpty()) {

@@ -19,7 +19,15 @@ public class ComplexType implements IType {
 
 	private String name;
 	private String elementName;
-	private HashMap<String, IType> elements;
+	private HashMap<String, WSElement> elements;
+
+	
+	
+	public ComplexType(String name, String elementName) {
+		this.name = name;
+		this.elementName = elementName;
+		this.elements = new HashMap<String, WSElement>();
+	}
 
 	@Override
 	public boolean equalsAfterRename(Object o) {
@@ -44,10 +52,6 @@ public class ComplexType implements IType {
 
 	}
 
-	public HashMap<String, IType> getElements() {
-		return elements;
-	}
-
 	@Override
 	public String getName() {
 		return name;
@@ -69,26 +73,34 @@ public class ComplexType implements IType {
 		}
 		Delta elementDelta = null;
 		ArrayList<Delta> deltas = new ArrayList<Delta>();
-		HashMap<String, IType> typesAdded = new HashMap<String, IType>();
-		HashMap<String, IType> typesDeleted = new HashMap<String, IType>();
-		HashMap<String, IType> typesIncluded = new HashMap<String, IType>();
+		HashMap<String, WSElement> typesAdded = new HashMap<String, WSElement>();
+		HashMap<String, WSElement> typesDeleted = new HashMap<String, WSElement>();
+		HashMap<String, WSElement> typesIncluded = new HashMap<String, WSElement>();
 		for (String name : this.elements.keySet()) {
 			typesIncluded.put(name, this.elements.get(name));
 		}
 		if (!type.getName().equals(this.getName())) {
-			ChangeDelta delta = new ChangeDelta(this, type, "name",
+			elementDelta = new ChangeDelta(this, type, "name",
 					this.getName(), type.getName());
-			deltas.add(delta);
+		}
+		if (!type.getVariableName().equals(this.getVariableName())) {
+			if (elementDelta == null) {
+				elementDelta = new ChangeDelta(this, type, "elementName",
+						this.getVariableName(), type.getVariableName());
+			}
+			else {
+				((ChangeDelta)elementDelta).addChangedAttribute("elementName", this.getVariableName(), type.getVariableName());
+			}
 		}
 		for (String name : this.elements.keySet()) {
-			if (!type.getElements().containsKey(name)) {
+			if (!type.getChildren().containsKey(name)) {
 				typesDeleted.put(name, this.elements.get(name));
 				typesIncluded.remove(name);
 			}
 		}
-		for (String name : type.getElements().keySet()) {
-			if (!this.getElements().containsKey(name)) {
-				typesAdded.put(name, type.getElements().get(name));
+		for (String name : type.getChildren().keySet()) {
+			if (!this.getChildren().containsKey(name)) {
+				typesAdded.put(name, type.getChildren().get(name));
 			}
 		}
 		ArrayList<String> typesNotAdded = new ArrayList<String>();
@@ -99,8 +111,8 @@ public class ComplexType implements IType {
 						&& typesDeleted.get(nameDeleted) instanceof ComplexType) {
 					if (typesAdded
 							.get(nameAdded)
-							.getElements()
-							.equals(typesDeleted.get(nameDeleted).getElements())) {
+							.getChildren()
+							.equals(typesDeleted.get(nameDeleted).getChildren())) {
 						deltas.add(typesAdded.get(nameAdded).diff(
 								typesDeleted.get(nameDeleted)));
 						typesNotAdded.add(nameAdded);
@@ -108,8 +120,8 @@ public class ComplexType implements IType {
 					}
 				} else if (typesAdded.get(nameAdded) instanceof PrimitiveType
 						&& typesDeleted.get(nameDeleted) instanceof PrimitiveType) {
-					if (typesAdded.get(nameAdded).getName()
-							.equals(typesDeleted.get(nameDeleted).getName())) {
+					if (((IType)typesAdded.get(nameAdded)).getName()
+							.equals(((IType)typesDeleted.get(nameDeleted)).getName())) {
 						deltas.add(typesAdded.get(nameAdded).diff(
 								typesDeleted.get(nameDeleted)));
 						typesNotAdded.add(nameAdded);
@@ -126,70 +138,59 @@ public class ComplexType implements IType {
 		}
 		for (String name : typesAdded.keySet()) {
 			AddDelta delta = new AddDelta(null, typesAdded.get(name));
-			addTypeElements(typesAdded.get(name), delta);
 			deltas.add(delta);
 		}
 		for (String name : typesDeleted.keySet()) {
 			DeleteDelta delta = new DeleteDelta(typesDeleted.get(name), null);
-			deleteTypeElements(typesDeleted.get(name), delta);
 			deltas.add(delta);
 		}
 		for (String name : typesIncluded.keySet()) {
 			// if(!this.elements.get(name).equals(type.getElements().get(name)))
 			// {
 			deltas.add(this.elements.get(name).diff(
-					type.getElements().get(name)));
+					type.getChildren().get(name)));
 			// }
 		}
-		if (DeltaUtil.containsOnlyMatchDeltas(deltas)) {
-			elementDelta = new MatchDelta(this, type);
-			elementDelta.addAllDeltas(deltas);
-			elementDelta.adoptOrphanDeltas();
-		} else {
-			elementDelta = new ChangeDelta(this, type, "", null, null);
-			elementDelta.addAllDeltas(deltas);
-			elementDelta.adoptOrphanDeltas();
+		if (elementDelta == null) {
+			if (DeltaUtil.containsOnlyMatchDeltas(deltas)) {
+				elementDelta = new MatchDelta(this, type);
+			} else {
+				elementDelta = new ChangeDelta(this, type, "", null, null);
+			}
 		}
+		elementDelta.addAllDeltas(deltas);
+		elementDelta.adoptOrphanDeltas();
 		return elementDelta;
 	}
 
-	private void deleteTypeElements(IType type, DeleteDelta delta) {
-		if (type instanceof ComplexType) {
-			for (IType element : type.getElements().values()) {
-				deleteTypeElements(element, delta);
-			}
-		} else {
-			if (!delta.getSource().equals(type)) {
-				DeleteDelta deleteDelta = new DeleteDelta(type, null);
-				delta.addDelta(deleteDelta);
-				deleteDelta.setParent(delta);
-			}
-		}
-
+	@Override
+	public HashMap<String, WSElement> getChildren() {
+		// TODO Auto-generated method stub
+		return elements;
 	}
 
-	private void addTypeElements(IType type, AddDelta delta) {
-		if (type instanceof ComplexType) {
-			AddDelta addDelta = null;
-			if (!delta.getTarget().equals(type)) {
-				addDelta = new AddDelta(null, type);
-				delta.addDelta(addDelta);
-				addDelta.setParent(delta);
-			}
-			for (IType element : type.getElements().values()) {
-				if (addDelta == null) {
-					addTypeElements(element, delta);
-				} else {
-					addTypeElements(element, addDelta);
-				}
-			}
-		} else {
-			if (!delta.getTarget().equals(type)) {
-				AddDelta addDelta = new AddDelta(null, type);
-				delta.addDelta(addDelta);
-				addDelta.setParent(delta);
-			}
-		}
-
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ComplexType other = (ComplexType) obj;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
 	}
+
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return name+":"+elementName;
+	}
+	
+	
 }

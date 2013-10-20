@@ -2,7 +2,9 @@ package wsdarwin.model;
 
 import java.util.HashMap;
 
+import wsdarwin.comparison.delta.ChangeDelta;
 import wsdarwin.comparison.delta.Delta;
+import wsdarwin.comparison.delta.MatchDelta;
 
 public enum PrimitiveType implements IType {
 	
@@ -12,6 +14,7 @@ public enum PrimitiveType implements IType {
 	FLOAT,
 	LONG,
 	DATE,
+	BOOLEAN,
 	URL;
 	
 	private String variableName;
@@ -40,10 +43,6 @@ public enum PrimitiveType implements IType {
 		
 	}
 	@Override
-	public HashMap<String, IType> getElements() {
-		return new HashMap<String, IType>();
-	}
-	@Override
 	public String getName() {
 		return this.name();
 	}
@@ -51,10 +50,34 @@ public enum PrimitiveType implements IType {
 	public String getVariableName() {
 		return variableName;
 	}
+	
+	
+	public void setVariableName(String variableName) {
+		this.variableName = variableName;
+	}
 	@Override
 	public Delta diff(WSElement input) {
+		PrimitiveType type = null;
+		if(input instanceof PrimitiveType) {
+			type = (PrimitiveType)input;
+		}
+		else {
+			return null;
+		}
+		if(!type.getName().equals(this.getName())) {
+			return new ChangeDelta(this, type, "name", this.getName(), type.getName());
+		}
+		return new MatchDelta(this, type);
+	}
+	@Override
+	public HashMap<String, WSElement> getChildren() {
+		return new HashMap<String, WSElement>();
+	}
+	@Override
+	public String toString() {
 		// TODO Auto-generated method stub
-		return null;
+		return variableName+":"+this.name();
 	}
 
+	
 }
