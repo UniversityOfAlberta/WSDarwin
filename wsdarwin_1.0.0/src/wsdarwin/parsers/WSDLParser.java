@@ -1,12 +1,8 @@
 package wsdarwin.parsers;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,6 +26,7 @@ import wsdarwin.model.Interface;
 import wsdarwin.model.Operation;
 import wsdarwin.model.SimpleType;
 import wsdarwin.model.WSElement;
+import wsdarwin.util.DeltaUtil;
 
 public class WSDLParser {
 
@@ -581,12 +578,14 @@ public class WSDLParser {
 	 */
 
 	public static void main(String[] args) {
-		WSDLParser parser1 = new WSDLParser(new File("files/amazon.wsdl2"));
-		WSDLParser parser2 = new WSDLParser(new File("files/amazon2.wsdl2"));
-		parser1.getService().diff(parser2.getService()).printDelta(0);
+		WSDLParser parser1 = new WSDLParser(new File("files/amazon2.wsdl2"));
+		WSDLParser parser2 = new WSDLParser(new File("files/amazon3.wsdl2"));
+		Delta delta = parser1.getService().diff(parser2.getService());
+		DeltaUtil.findMoveDeltas(delta);
+		delta.printDelta(0);
 		try {
-			parser1.createXML("files/amazon.xml");
-			parser2.createXML("files/amazon2.xml");
+			parser1.createXML("files/amazon2.xml");
+			parser2.createXML("files/amazon3.xml");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

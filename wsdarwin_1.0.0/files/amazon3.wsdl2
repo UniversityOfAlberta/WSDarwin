@@ -1,0 +1,81 @@
+<description xmlns="http://www.w3.org/ns/wsdl"
+             targetNamespace="http://ec2.amazonaws.com/doc/2006-06-26/"
+             xmlns:wsoap="http://www.w3.org/ns/wsdl/soap"
+             xmlns:tns="http://ec2.amazonaws.com/doc/2006-06-26/"
+             xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <types>
+    <xs:schema elementFormDefault="qualified" targetNamespace="http://ec2.amazonaws.com/doc/2006-06-26/" xmlns:tns="http://ec2.amazonaws.com/doc/2006-06-26/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  
+  <!-- RegisterImage request definitions -->
+  
+  <xs:element name="RegisterImage" type="tns:RegisterImageType"/>
+
+  <xs:complexType name="RegisterImageType">
+    <xs:sequence>
+      <xs:element name="imageName" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- RegisterImage response definitions -->
+
+  <xs:element name="RegisterImageResponse" type="tns:RegisterImageResponseType"/>
+  <xs:complexType name="RegisterImageResponseType">
+    <xs:sequence>
+      <xs:element name="imageId" type="xs:string"/>
+      <xs:element name="registrationDate" type="xs:date"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- DeregisterImage request definitions -->
+
+  <xs:element name="DeregisterImage" type="tns:DeregisterImageType"/>
+
+  <xs:complexType name="DeregisterImageType">
+    <xs:sequence>
+      <xs:element name="imageId" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- DeregisterImage response definitions -->
+
+  <xs:element name="DeregisterImageResponse" type="tns:DeregisterImageResponseType"/>
+
+  <xs:complexType name="DeregisterImageResponseType">
+    <xs:sequence>
+      <xs:element name="return" type="xs:boolean"/>
+      <xs:element name="imageLocation" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>
+  </types>
+  <interface name="AmazonEC2PortType">
+    <operation name="RegisterImage"
+               pattern="http://www.w3.org/ns/wsdl/in-out">
+      <input messageLabel="In" element="tns:RegisterImage"/>
+      <output messageLabel="Out" element="tns:RegisterImageResponse"/>
+    </operation>
+    <operation name="DeregisterImageByID"
+               pattern="http://www.w3.org/ns/wsdl/in-out">
+      <input messageLabel="In" element="tns:DeregisterImage"/>
+      <output messageLabel="Out" element="tns:DeregisterImageResponse"/>
+    </operation>
+  </interface>
+  <binding name="AmazonEC2Binding"
+           interface="tns:AmazonEC2PortType"
+           type="http://www.w3.org/ns/wsdl/soap"
+           wsoap:version="1.1"
+           wsoap:protocol="http://www.w3.org/2006/01/soap11/bindings/HTTP">
+    <operation ref="tns:RegisterImage" wsoap:action="RegisterImage">
+    </operation>
+    <operation ref="tns:DeregisterImageByID" wsoap:action="DeregisterImage">
+    </operation>
+  </binding>
+  <service name="AmazonEC2"
+           interface="tns:AmazonEC2PortType">
+    <endpoint name="AmazonEC2Port"
+              binding="tns:AmazonEC2Binding"
+              address="https://ec2.amazonaws.com/">
+    </endpoint>
+  </service>
+</description>
