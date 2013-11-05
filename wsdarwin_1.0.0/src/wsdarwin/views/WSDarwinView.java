@@ -10,11 +10,14 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.part.*;
 import org.eclipse.ui.wizards.IWizardDescriptor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.junit.JUnitCore;
+import org.eclipse.jdt.junit.launcher.JUnitLaunchShortcut;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -29,30 +32,30 @@ import org.eclipse.swt.SWT;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.junit.runner.Result;
 
 import wsdarwin.clientadaptation.ClientAdaptationRefactoring;
+import wsdarwin.comparison.delta.AddDelta;
 import wsdarwin.comparison.delta.ChangeDelta;
+import wsdarwin.comparison.delta.DeleteDelta;
 import wsdarwin.comparison.delta.Delta;
 import wsdarwin.model.Operation;
 import wsdarwin.wizards.MyRefactoringWizard;
 import wsdarwin.wizards.NewClientAdapterWizard;
 
-
 /**
- * This sample class demonstrates how to plug-in a new
- * workbench view. The view shows data obtained from the
- * model. The sample creates a dummy model on the fly,
- * but a real implementation would connect to the model
- * available either in this or another plug-in (e.g. the workspace).
- * The view is connected to the model using a content provider.
+ * This sample class demonstrates how to plug-in a new workbench view. The view
+ * shows data obtained from the model. The sample creates a dummy model on the
+ * fly, but a real implementation would connect to the model available either in
+ * this or another plug-in (e.g. the workspace). The view is connected to the
+ * model using a content provider.
  * <p>
- * The view uses a label provider to define how model
- * objects should be presented in the view. Each
- * view can present the same model objects using
- * different labels and icons, if needed. Alternatively,
- * a single label provider can be shared between views
- * in order to ensure that objects of the same type are
- * presented in the same way everywhere.
+ * The view uses a label provider to define how model objects should be
+ * presented in the view. Each view can present the same model objects using
+ * different labels and icons, if needed. Alternatively, a single label provider
+ * can be shared between views in order to ensure that objects of the same type
+ * are presented in the same way everywhere.
  * <p>
  */
 
@@ -66,6 +69,7 @@ public class WSDarwinView extends ViewPart {
 	private TreeViewer viewer;
 	private Action compareInterfaces;
 	private Action adaptClient;
+	private Action runTests;
 	private Action doubleClickAction;
 	private Delta[] diffTable;
 	private String oldWSDL;
@@ -159,7 +163,49 @@ public class WSDarwinView extends ViewPart {
 
 		@Override
 		public String getColumnText(Object o, int i) {
-			return "";
+			switch (i) {
+			case 0:
+				return o.getClass().getSimpleName();
+			case 1:
+				if (o instanceof AddDelta) {
+					return ((AddDelta) o).getTarget().getClass()
+							.getSimpleName();
+				} else {
+					return ((Delta) o).getSource().getClass().getSimpleName();
+				}
+			case 2:
+				if (o instanceof AddDelta) {
+					return "";
+				} else {
+					return ((Delta) o).getSource().toString();
+				}
+			case 3:
+				if (o instanceof DeleteDelta) {
+					return "";
+				} else {
+					return ((Delta) o).getTarget().toString();
+				}
+			case 4:
+				if (o instanceof ChangeDelta) {
+					return ((ChangeDelta) o).getChangedAttribute().toString();
+				} else {
+					return "";
+				}
+			case 5:
+				if (o instanceof ChangeDelta) {
+					return ((ChangeDelta) o).getOldValue().toString();
+				} else {
+					return "";
+				}
+			case 6:
+				if (o instanceof ChangeDelta) {
+					return ((ChangeDelta) o).getNewValue().toString();
+				} else {
+					return "";
+				}
+			}
+
+			return null;
 		}
 	}
 
@@ -189,13 +235,17 @@ public class WSDarwinView extends ViewPart {
 		layout.addColumnData(new ColumnWeightData(40, true));
 		layout.addColumnData(new ColumnWeightData(40, true));
 		layout.addColumnData(new ColumnWeightData(40, true));
+		layout.addColumnData(new ColumnWeightData(40, true));
+		layout.addColumnData(new ColumnWeightData(40, true));
 		viewer.getTree().setLayout(layout);
 		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
-		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("File");
-		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Operation");
-		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Complex Type");
-		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Change Source");
-		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Change Target");
+		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Delta Type");
+		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Element Type");
+		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Source Element");
+		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Target Element");
+		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Changed Attribute");
+		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("Old Value");
+		new TreeColumn(viewer.getTree(), SWT.LEFT).setText("New Value");
 		viewer.expandAll();
 
 		for (int i = 0, n = viewer.getTree().getColumnCount(); i < n; i++) {
@@ -232,6 +282,7 @@ public class WSDarwinView extends ViewPart {
 	private void fillContextMenu(IMenuManager manager) {
 		manager.add(compareInterfaces);
 		manager.add(adaptClient);
+		manager.add(runTests);
 		manager.add(new Separator());
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
@@ -240,6 +291,7 @@ public class WSDarwinView extends ViewPart {
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(compareInterfaces);
 		manager.add(adaptClient);
+		manager.add(runTests);
 		manager.add(new Separator());
 	}
 
@@ -248,7 +300,7 @@ public class WSDarwinView extends ViewPart {
 			public void run() {
 				IWizardDescriptor descriptor = PlatformUI.getWorkbench()
 						.getNewWizardRegistry()
-						.findWizard("wsca2.wizards.NewClientAdapterWizard");
+						.findWizard("wsdarwin.wizards.NewClientAdapterWizard");
 				try {
 					IWizard wizard = descriptor.createWizard();
 					NewClientAdapterWizard ncaw = null;
@@ -278,7 +330,7 @@ public class WSDarwinView extends ViewPart {
 					newWSDL = ncaw.getNewWSDL();
 					oldStub = ncaw.getOldStub();
 					newStub = ncaw.getNewStub();
-					// viewer.refresh();
+					viewer.refresh();
 					// viewer.setContentProvider(new ViewContentProvider());
 				} catch (CoreException e) {
 					// TODO Auto-generated catch block
@@ -289,22 +341,24 @@ public class WSDarwinView extends ViewPart {
 		};
 		compareInterfaces.setText("diff");
 		compareInterfaces.setToolTipText("WSDL Diff");
-		compareInterfaces.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
+		compareInterfaces.setImageDescriptor(PlatformUI.getWorkbench()
+				.getSharedImages()
 				.getImageDescriptor(ISharedImages.IMG_OBJS_TASK_TSK));
 
 		adaptClient = new Action() {
 			public void run() {
 				diffTable[0].printDelta(0);
 				CompilationUnit oldCompilationUnit = parseAST(oldStub);
-				Map<String, Delta> changedOperationNames = getChangedOperations();
+				Map<String, Delta> changedOperationNames = new HashMap<String, Delta>();
+				changedOperationNames = getChangedOperations(changedOperationNames, diffTable[0]);
 				Map<MethodDeclaration, Delta> changedMethods = getChangedMethods(
 						changedOperationNames, oldCompilationUnit);
 				CompilationUnit newCompilationUnit = parseAST(newStub);
 
 				ClientAdaptationRefactoring refactoring = new ClientAdaptationRefactoring(
 						oldCompilationUnit, newCompilationUnit,
-						(TypeDeclaration)oldCompilationUnit.types().get(0),
-						(TypeDeclaration)newCompilationUnit.types().get(0),
+						(TypeDeclaration) oldCompilationUnit.types().get(0),
+						(TypeDeclaration) newCompilationUnit.types().get(0),
 						changedMethods);
 				MyRefactoringWizard wizard = new MyRefactoringWizard(
 						refactoring);
@@ -323,6 +377,37 @@ public class WSDarwinView extends ViewPart {
 		adaptClient.setImageDescriptor(PlatformUI.getWorkbench()
 				.getSharedImages()
 				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+		
+		runTests = new Action() {
+			public void run() {
+				try {
+					IType[] tests = JUnitCore.findTestTypes(oldStub.getJavaProject(), null);
+					ICompilationUnit[] compilationUnits = new ICompilationUnit[tests.length];
+					for(int i=0;i<compilationUnits.length;i++) {
+						compilationUnits[i] = tests[i].getCompilationUnit();
+					}
+					StructuredSelection selection = new StructuredSelection(compilationUnits);
+					JUnitLaunchShortcut shortcut = new JUnitLaunchShortcut();
+					shortcut.launch(selection, "run");
+					//Class<?> testClass = this.getClass().getClassLoader().loadClass(tests[0].getFullyQualifiedName()+".class");
+					//org.junit.runner.JUnitCore.main(paths);;
+					//System.out.println(res.toString());
+					
+				} catch (OperationCanceledException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (CoreException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		};
+		runTests.setText("Run Tests");
+		runTests.setToolTipText("Run Tests");
+		runTests.setImageDescriptor(PlatformUI.getWorkbench()
+				.getSharedImages()
+				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+		
 		doubleClickAction = new Action() {
 			public void run() {
 				ISelection selection = viewer.getSelection();
@@ -341,11 +426,10 @@ public class WSDarwinView extends ViewPart {
 		TypeDeclaration typeDeclaration = types.get(0);
 		MethodDeclaration[] methods = typeDeclaration.getMethods();
 		for (int i = 0; i < methods.length; i++) {
-			String name = containsKeyIgnoreCase(changedOperationNames, methods[i].getName()
-					.getIdentifier());
+			String name = containsKeyIgnoreCase(changedOperationNames,
+					methods[i].getName().getIdentifier());
 			if (name != null) {
-				changedMethods.put(methods[i], changedOperationNames
-						.get(name));
+				changedMethods.put(methods[i], changedOperationNames.get(name));
 			}
 		}
 		System.out.println();
@@ -354,8 +438,8 @@ public class WSDarwinView extends ViewPart {
 
 	private String containsKeyIgnoreCase(
 			Map<String, Delta> changedOperationNames, String identifier) {
-		for(String key : changedOperationNames.keySet()) {
-			if(key.equalsIgnoreCase(identifier)) {
+		for (String key : changedOperationNames.keySet()) {
+			if (key.equalsIgnoreCase(identifier)) {
 				return key;
 			}
 		}
@@ -382,7 +466,6 @@ public class WSDarwinView extends ViewPart {
 		viewer.getControl().setFocus();
 	}
 
-
 	private CompilationUnit parseAST(ICompilationUnit iCompilationUnit) {
 		// ASTInformationGenerator.setCurrentITypeRoot(iCompilationUnit);
 		IFile iFile = (IFile) iCompilationUnit.getResource();
@@ -393,13 +476,15 @@ public class WSDarwinView extends ViewPart {
 		return (CompilationUnit) parser.createAST(null);
 	}
 
-	private Map<String, Delta> getChangedOperations() {
-		Map<String, Delta> changedOperationNames = new HashMap<String, Delta>();
-		for (Delta delta : diffTable[0].getDeltas()) {
-			if (delta instanceof ChangeDelta
-					&& delta.getSource() instanceof Operation) {
-				changedOperationNames.put(
-						((Operation) delta.getSource()).getName(), delta);
+	private Map<String, Delta> getChangedOperations(
+			Map<String, Delta> changedOperationNames, Delta delta) {
+		if (delta.getSource() instanceof Operation) {
+			changedOperationNames.put(
+					((Operation) delta.getSource()).getName(), delta);
+		} else if (!delta.getDeltas().isEmpty()) {
+			for (Delta deltaChild : delta.getDeltas()) {
+				changedOperationNames.putAll(getChangedOperations(
+						changedOperationNames, deltaChild));
 			}
 		}
 		return changedOperationNames;

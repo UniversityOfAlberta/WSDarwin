@@ -122,8 +122,8 @@ public class ComplexType implements IType {
 						&& typesDeleted.get(nameDeleted) instanceof PrimitiveType) {
 					if (((IType)typesAdded.get(nameAdded)).getName()
 							.equals(((IType)typesDeleted.get(nameDeleted)).getName())) {
-						deltas.add(typesAdded.get(nameAdded).diff(
-								typesDeleted.get(nameDeleted)));
+						deltas.add(typesDeleted.get(nameDeleted).diff(
+								typesAdded.get(nameAdded)));
 						typesNotAdded.add(nameAdded);
 						typesNotDeleted.add(nameDeleted);
 					}

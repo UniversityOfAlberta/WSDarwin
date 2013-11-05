@@ -1,7 +1,6 @@
 package wsdarwin.wizards;
 
 
-import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -20,7 +19,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.ui.dialogs.ResourceSelectionDialog;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 

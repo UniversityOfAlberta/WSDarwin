@@ -23,6 +23,7 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 
 import wsdarwin.comparison.delta.Delta;
+import wsdarwin.parsers.WSDL2Parser;
 import wsdarwin.parsers.WSDLParser;
 
 /**

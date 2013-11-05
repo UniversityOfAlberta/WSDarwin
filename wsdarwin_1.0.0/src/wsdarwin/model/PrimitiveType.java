@@ -6,20 +6,28 @@ import wsdarwin.comparison.delta.ChangeDelta;
 import wsdarwin.comparison.delta.Delta;
 import wsdarwin.comparison.delta.MatchDelta;
 
-public enum PrimitiveType implements IType {
+public class PrimitiveType implements IType {
 	
-	STRING,
+	/*STRING,
 	INT,
 	DOUBLE,
 	FLOAT,
 	LONG,
 	DATE,
 	BOOLEAN,
-	URL;
+	URL;*/
 	
+	private String name;
 	private String variableName;
 	private Object value;
 	
+	
+	
+	public PrimitiveType(String name, String variableName) {
+		super();
+		this.name = name;
+		this.variableName = variableName;
+	}
 	@Override
 	public boolean equalsAfterRename(Object o) {
 		if(o instanceof PrimitiveType && value != null && ((PrimitiveType)o).value != null) {
@@ -44,7 +52,7 @@ public enum PrimitiveType implements IType {
 	}
 	@Override
 	public String getName() {
-		return this.name();
+		return this.name;
 	}
 	@Override
 	public String getVariableName() {
@@ -65,10 +73,14 @@ public enum PrimitiveType implements IType {
 			return null;
 		}
 		if(!type.getName().equals(this.getName())) {
-			return new ChangeDelta(this, type, "name", this.getName(), type.getName());
+			return new ChangeDelta(this, type, "type", this.getName(), type.getName());
+		}
+		if(!((PrimitiveType)type).getVariableName().equals(this.variableName)) {
+			return new ChangeDelta(this, type, "variableName", this.getVariableName(), ((PrimitiveType)type).getVariableName());
 		}
 		return new MatchDelta(this, type);
 	}
+	
 	@Override
 	public HashMap<String, WSElement> getChildren() {
 		return new HashMap<String, WSElement>();
@@ -76,8 +88,20 @@ public enum PrimitiveType implements IType {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return variableName+":"+this.name();
+		return variableName+":"+this.name;
 	}
-
 	
+	public boolean equals(Object o) {
+		if(this == o) {
+			return true;
+		}
+		if(o instanceof PrimitiveType) {
+			PrimitiveType type = (PrimitiveType)o;
+			return type.getName().equals(this.getName()) && type.getVariableName().equals(this.getVariableName());
+			
+		}
+		else {
+			return false;
+		}
+	}
 }

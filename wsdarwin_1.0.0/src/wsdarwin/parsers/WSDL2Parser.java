@@ -1,11 +1,8 @@
 package wsdarwin.parsers;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -16,41 +13,32 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
 import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xml.serialize.*;
 
-import wsdarwin.comparison.delta.AddDelta;
-import wsdarwin.comparison.delta.ChangeDelta;
-import wsdarwin.comparison.delta.DeleteDelta;
 import wsdarwin.comparison.delta.Delta;
-import wsdarwin.comparison.delta.MatchDelta;
 import wsdarwin.model.ComplexType;
+import wsdarwin.model.PrimitiveType;
 import wsdarwin.model.IService;
 import wsdarwin.model.IType;
 import wsdarwin.model.Interface;
 import wsdarwin.model.Operation;
 import wsdarwin.model.SimpleType;
-import wsdarwin.model.PrimitiveType;
 import wsdarwin.model.WSElement;
 import wsdarwin.util.DeltaUtil;
 
-public class WSDLParser {
+public class WSDL2Parser {
 
 	private Document document;
 	private IService service;
-	//private HashMap<String, IType> types;
-	
-	public WSDLParser(File file) {
-		//types = new HashMap<String, IType>();
+
+	public WSDL2Parser(File file) {
 		parseFile(file);
 	}
 
 	public IService getService() {
 		return service;
-	}
-
-	public void setService(IService service) {
-		this.service = service;
 	}
 
 	public void parseFile(File file) {
@@ -60,7 +48,7 @@ public class WSDLParser {
 			document = dbf.newDocumentBuilder().parse(file);
 
 			NodeList definitionsList = document
-					.getElementsByTagNameNS("*", "definitions");
+					.getElementsByTagName("description");
 			Node definitions = definitionsList.item(0);
 
 			service = new IService(definitions.getAttributes()
@@ -78,14 +66,14 @@ public class WSDLParser {
 
 	private HashMap<String, WSElement> getServiceInterfaces() {
 		HashMap<String, WSElement> serviceInterfaces = new HashMap<String, WSElement>();
-		NodeList interfaceList = document.getElementsByTagNameNS("*", "portType");
+		NodeList interfaceList = document.getElementsByTagName("interface");
 		for (int i = 0; i < interfaceList.getLength(); i++) {
 			Interface serviceInterface = new Interface(interfaceList.item(i).getAttributes()
 					.getNamedItem("name").getNodeValue(),
-					getServicePortForPortType(
+					getServiceEndpointForInterface(
 							interfaceList.item(i).getAttributes()
 									.getNamedItem("name").getNodeValue())
-							.getAttributes().getNamedItem("location")
+							.getAttributes().getNamedItem("address")
 							.getNodeValue());
 			HashMap<String, WSElement> operations = new HashMap<String, WSElement>();
 			operations = getInterfaceOperations(interfaceList.item(i));
@@ -98,14 +86,15 @@ public class WSDLParser {
 
 	private HashMap<String, WSElement> getInterfaceOperations(Node interfaceNode) {
 		HashMap<String, WSElement> operations = new HashMap<String, WSElement>();
-		NodeList operationList = document.getElementsByTagNameNS("*", "operation");
-		for (int i = 0; i < operationList.getLength(); i++) {
-			if (equalsIgnoreNamespace(operationList.item(i).getParentNode().getNodeName(),
-					"portType")) {
-				Node operationNode = operationList.item(i);
+		NodeList interfaceChildren = interfaceNode.getChildNodes();
+		for (int i = 0; i < interfaceChildren.getLength(); i++) {
+			if (equalsIgnoreNamespace(interfaceChildren.item(i).getNodeName(),
+					"operation")) {
+				Node operationNode = interfaceChildren.item(i);
 				Operation operation = new Operation(operationNode
 						.getAttributes().getNamedItem("name").getNodeValue(),"",
-						"",
+						operationNode.getAttributes().getNamedItem("pattern")
+								.getNodeValue(),
 						getInputTypeOfOperation(operationNode),
 						getOutputTypeOfOperation(operationNode));
 				operations.put(operation.getName(), operation);
@@ -114,35 +103,17 @@ public class WSDLParser {
 		return operations;
 	}
 
-	private Node getServicePortForPortType(String interfaceName) {
-		NodeList bindingList = document.getElementsByTagNameNS("*", "binding");
-		String bindingName = "";
-		for(int i=0; i<bindingList.getLength(); i++) {
-			if (equalsIgnoreNamespace(bindingList.item(i).getParentNode().getNodeName(), "definitions") && equalsIgnoreNamespace(bindingList.item(i).getAttributes()
-					.getNamedItem("type").getNodeValue(),
-					interfaceName)) {
-				bindingName = bindingList.item(i).getAttributes()
-						.getNamedItem("name").getNodeValue();
-			}
-		}
-		NodeList serviceList = document.getElementsByTagNameNS("*", "service");
+	private Node getServiceEndpointForInterface(String interfaceName) {
+		NodeList serviceList = document.getElementsByTagName("service");
 		for (int i = 0; i < serviceList.getLength(); i++) {
 			if (equalsIgnoreNamespace(serviceList.item(i).getAttributes()
-					.getNamedItem("name").getNodeValue(),
-					interfaceName)) {
-			NodeList portList = document.getElementsByTagNameNS("*", "port");
-			
-				for (int k = 0; k < portList.getLength(); k++) {
-					if (equalsIgnoreNamespace(portList.item(k).getParentNode().getNodeName(), "service") && equalsIgnoreNamespace(portList.item(k).getAttributes()
-							.getNamedItem("binding").getNodeValue(),
-							bindingName)) {
-						Node portNode = portList.item(k);
-						NodeList addressList = document.getElementsByTagNameNS("*", "address");
-						for (int j = 0; j < addressList.getLength(); j++) {
-							if (equalsIgnoreNamespace(addressList.item(j).getParentNode().getNodeName(), "port")) {
-								return addressList.item(j);
-							}
-						}
+					.getNamedItem("interface").getNodeValue(), interfaceName)) {
+				Node serviceNode = serviceList.item(i);
+				NodeList serviceChildren = serviceNode.getChildNodes();
+				for (int j = 0; j < serviceChildren.getLength(); j++) {
+					if (equalsIgnoreNamespace(serviceChildren.item(j)
+							.getNodeName(), "endpoint")) {
+						return serviceChildren.item(j);
 					}
 				}
 			}
@@ -161,10 +132,10 @@ public class WSDLParser {
 	}
 
 	private Node getInputOfOperation(Node operation) {
-		NodeList inputList = document.getElementsByTagNameNS("*", "input");
-		for (int i = 0; i < inputList.getLength(); i++) {
-			Node child = inputList.item(i);
-			if (equalsIgnoreNamespace(child.getParentNode().getNodeName(), "operation") && child.getParentNode().equals(operation)) {
+		NodeList children = operation.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node child = children.item(i);
+			if (equalsIgnoreNamespace(child.getNodeName(), "input")) {
 				return child;
 			}
 		}
@@ -172,10 +143,10 @@ public class WSDLParser {
 	}
 
 	private Node getOutputOfOperation(Node operation) {
-		NodeList outputList = document.getElementsByTagNameNS("*", "output");
-		for (int i = 0; i < outputList.getLength(); i++) {
-			Node child = outputList.item(i);
-			if (equalsIgnoreNamespace(child.getParentNode().getNodeName(), "operation") && child.getParentNode().equals(operation)) {
+		NodeList children = operation.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node child = children.item(i);
+			if (equalsIgnoreNamespace(child.getNodeName(), "output")) {
 				return child;
 			}
 		}
@@ -184,18 +155,15 @@ public class WSDLParser {
 
 	private IType getInputTypeOfOperation(Node operation) {
 		Node input = getInputOfOperation(operation);
-		Node messageAttribute = input.getAttributes().getNamedItem("message");
-		Node message = getMessageFromAttribute(messageAttribute.getNodeValue());
-		String messageElement = getMessageElement(message);
-		Node element = getElementFromMessage(messageElement);
+		String elementName = input.getAttributes().getNamedItem("element")
+				.getNodeValue();
+		Node element = getElementNodeFromOperationElement(elementName);
 		Node type;
-		String elementName = "";
-		if (element != null) {
+		if (element != null && !element.hasChildNodes()) {
 			String elementType = getElementType(element);
-			elementName = getElementName(element);
 			type = getTypeFromElement(elementType);
 		} else {
-			type = getTypeFromElement(messageElement);
+			type = getTypeFromElement(elementName);
 		}
 		IType iType;
 		if (type != null) {
@@ -222,15 +190,19 @@ public class WSDLParser {
 						for (int k = 0; k < sequenceChildren.getLength(); k++) {
 							if (equalsIgnoreNamespace(sequenceChildren.item(k)
 									.getNodeName(), "element")) {
-								iType.addElement(sequenceChildren.item(k)
-										.getAttributes().getNamedItem("name")
-										.getNodeValue(),
+								iType.addElement(
+										sequenceChildren.item(k)
+												.getAttributes()
+												.getNamedItem("name")
+												.getNodeValue(),
 										getITypeFromElement(sequenceChildren
 												.item(k).getAttributes()
 												.getNamedItem("type")
-												.getNodeValue(), sequenceChildren.item(k)
-												.getAttributes().getNamedItem("name")
-												.getNodeValue()));
+												.getNodeValue(),
+												sequenceChildren.item(k)
+														.getAttributes()
+														.getNamedItem("name")
+														.getNodeValue()));
 							}
 						}
 					}
@@ -241,19 +213,16 @@ public class WSDLParser {
 	}
 
 	private IType getOutputTypeOfOperation(Node operation) {
-		Node input = getOutputOfOperation(operation);
-		Node messageAttribute = input.getAttributes().getNamedItem("message");
-		Node message = getMessageFromAttribute(messageAttribute.getNodeValue());
-		String messageElement = getMessageElement(message);
-		Node element = getElementFromMessage(messageElement);
+		Node output = getOutputOfOperation(operation);
+		String elementName = output.getAttributes().getNamedItem("element")
+				.getNodeValue();
+		Node element = getElementNodeFromOperationElement(elementName);
 		Node type;
-		String elementName = "";
 		if (element != null) {
 			String elementType = getElementType(element);
-			elementName = getElementName(element);
 			type = getTypeFromElement(elementType);
 		} else {
-			type = getTypeFromElement(messageElement);
+			type = getTypeFromElement(elementName);
 		}
 		IType iType;
 		if (type != null) {
@@ -267,15 +236,8 @@ public class WSDLParser {
 	private IType getIType(Node type, String variableName) {
 		IType iType = null;
 		if (equalsIgnoreNamespace(type.getNodeName(), "complexType")) {
-			//if (!types.containsKey(type.getAttributes().getNamedItem("name")
-			//		.getNodeValue())) {
-				iType = new ComplexType(type.getAttributes()
-						.getNamedItem("name").getNodeValue(), variableName);
-			//} else {
-			//	iType = types.get(type.getAttributes().getNamedItem("name")
-			//			.getNodeValue());
-			//}
-			//types.put(iType.getName(), iType);
+			iType = new ComplexType(type.getAttributes().getNamedItem("name")
+					.getNodeValue(), variableName);
 			NodeList children = type.getChildNodes();
 			for (int i = 0; i < children.getLength(); i++) {
 				if (equalsIgnoreNamespace(children.item(i).getNodeName(),
@@ -285,13 +247,16 @@ public class WSDLParser {
 					for (int j = 0; j < sequenceChildren.getLength(); j++) {
 						if (equalsIgnoreNamespace(sequenceChildren.item(j)
 								.getNodeName(), "element")) {
-							iType.addElement(sequenceChildren.item(j)
-									.getAttributes().getNamedItem("name")
-									.getNodeValue(),
-									getITypeFromElement(getElementType(sequenceChildren
-											.item(j)), sequenceChildren.item(j)
-											.getAttributes().getNamedItem("name")
-											.getNodeValue()));
+							iType.addElement(
+									sequenceChildren.item(j).getAttributes()
+											.getNamedItem("name")
+											.getNodeValue(),
+									getITypeFromElement(
+											getElementType(sequenceChildren
+													.item(j)), sequenceChildren
+													.item(j).getAttributes()
+													.getNamedItem("name")
+													.getNodeValue()));
 						}
 					}
 				} else if (equalsIgnoreNamespace(
@@ -323,17 +288,19 @@ public class WSDLParser {
 																.getNamedItem(
 																		"name")
 																.getNodeValue(),
-														getITypeFromElement(sequenceChildren
-																.item(j)
-																.getAttributes()
-																.getNamedItem(
-																		"type")
-																.getNodeValue(), sequenceChildren
-																.item(j)
-																.getAttributes()
-																.getNamedItem(
-																		"name")
-																.getNodeValue()));
+														getITypeFromElement(
+																sequenceChildren
+																		.item(j)
+																		.getAttributes()
+																		.getNamedItem(
+																				"type")
+																		.getNodeValue(),
+																sequenceChildren
+																		.item(j)
+																		.getAttributes()
+																		.getNamedItem(
+																				"name")
+																		.getNodeValue()));
 											} else if (sequenceChildren.item(j)
 													.getAttributes()
 													.getNamedItem("ref") != null) {
@@ -344,17 +311,19 @@ public class WSDLParser {
 																.getNamedItem(
 																		"ref")
 																.getNodeValue(),
-														getITypeFromElement(sequenceChildren
-																.item(j)
-																.getAttributes()
-																.getNamedItem(
-																		"ref")
-																.getNodeValue(), sequenceChildren
-																.item(j)
-																.getAttributes()
-																.getNamedItem(
-																		"name")
-																.getNodeValue()));
+														getITypeFromElement(
+																sequenceChildren
+																		.item(j)
+																		.getAttributes()
+																		.getNamedItem(
+																				"ref")
+																		.getNodeValue(),
+																sequenceChildren
+																		.item(j)
+																		.getAttributes()
+																		.getNamedItem(
+																				"name")
+																		.getNodeValue()));
 											}
 										}
 									}
@@ -365,15 +334,8 @@ public class WSDLParser {
 				}
 			}
 		} else if (equalsIgnoreNamespace(type.getNodeName(), "simpleType")) {
-			//if (!types.containsKey(type.getAttributes().getNamedItem("name")
-			//		.getNodeValue())) {
-				iType = new SimpleType(type.getAttributes()
-						.getNamedItem("name").getNodeValue(), variableName);
-			//} else {
-			//	iType = types.get(type.getAttributes().getNamedItem("name")
-			//			.getNodeValue());
-			//}
-			//types.put(iType.getName(), iType);
+			iType = new SimpleType(type.getAttributes().getNamedItem("name")
+					.getNodeValue(), variableName);
 			NodeList children = type.getChildNodes();
 			for (int i = 0; i < children.getLength(); i++) {
 				if (equalsIgnoreNamespace(children.item(i).getNodeName(),
@@ -386,9 +348,9 @@ public class WSDLParser {
 					for (int j = 0; j < restrictionChildren.getLength(); j++) {
 						if (equalsIgnoreNamespace(restrictionChildren.item(j)
 								.getNodeName(), "enumeration")) {
-							((SimpleType) iType).addOption(restrictionChildren.item(j)
-									.getAttributes().getNamedItem("value")
-									.getNodeValue());
+							((SimpleType) iType).addOption(restrictionChildren
+									.item(j).getAttributes()
+									.getNamedItem("value").getNodeValue());
 						}
 					}
 				}
@@ -400,17 +362,11 @@ public class WSDLParser {
 	private IType getITypeFromElement(String elementType, String name) {
 		IType iType = null;
 		if (elementType.startsWith("xs:") || elementType.startsWith("xsd:")) {
-			//if (!types.containsKey(elementType.substring(elementType
-			//		.indexOf(':') + 1))) {
 			iType = new PrimitiveType(elementType.substring(elementType
 					.indexOf(':') + 1).toUpperCase(), name);
-			//	types.put(iType.toString(), iType);
-			//} else {
-			//	iType = types.get(elementType.substring(elementType
-			//			.indexOf(':') + 1));
-			//}
 		} else if (elementType.startsWith("tns:") || !elementType.contains(":")
-				|| elementType.startsWith("ns:") || elementType.startsWith("ax21:")) {
+				|| elementType.startsWith("ns:")
+				|| elementType.startsWith("ax21:")) {
 			iType = getIType(getTypeFromElement(elementType), name);
 		} else {
 			iType = new PrimitiveType(elementType.toUpperCase(), name);
@@ -447,7 +403,7 @@ public class WSDLParser {
 			return getNestedElementType(element);
 		}
 	}
-	
+
 	private String getElementName(Node element) {
 		if (element.getAttributes().getNamedItem("name") != null) {
 			return element.getAttributes().getNamedItem("name").getNodeValue();
@@ -458,22 +414,25 @@ public class WSDLParser {
 
 	private String getNestedElementType(Node element) {
 		String elementType = "";
-		if ((equalsIgnoreNamespace(element.getNodeName(), "element")
-				&& ((element.getAttributes().getNamedItem("type") != null) || (element
-						.getAttributes().getNamedItem("ref") != null))) || equalsIgnoreNamespace(element.getNodeName(), "simpleType")) {
+		if ((equalsIgnoreNamespace(element.getNodeName(), "element") && ((element
+				.getAttributes().getNamedItem("type") != null) || (element
+				.getAttributes().getNamedItem("ref") != null)))
+				|| equalsIgnoreNamespace(element.getNodeName(), "simpleType")) {
 			if (element.getAttributes().getNamedItem("type") != null) {
 				elementType = element.getAttributes().getNamedItem("type")
 						.getNodeValue();
 			} else if (element.getAttributes().getNamedItem("ref") != null) {
-				Node elementRef = getElementFromMessage(element.getAttributes()
-						.getNamedItem("ref").getNodeValue());
+				Node elementRef = getElementNodeFromOperationElement(element
+						.getAttributes().getNamedItem("ref").getNodeValue());
 				elementType = getNestedElementType(elementRef);
-			}
-			else if (equalsIgnoreNamespace(element.getNodeName(), "simpleType")) {
+			} else if (equalsIgnoreNamespace(element.getNodeName(),
+					"simpleType")) {
 				NodeList children = element.getChildNodes();
-				for (int i = 0; i <children.getLength(); i++) {
-					if(equalsIgnoreNamespace(children.item(i).getNodeName(), "restriction")) {
-						elementType = children.item(i).getAttributes().getNamedItem("base").getNodeValue();
+				for (int i = 0; i < children.getLength(); i++) {
+					if (equalsIgnoreNamespace(children.item(i).getNodeName(),
+							"restriction")) {
+						elementType = children.item(i).getAttributes()
+								.getNamedItem("base").getNodeValue();
 					}
 				}
 			}
@@ -489,24 +448,13 @@ public class WSDLParser {
 		return elementType;
 	}
 
-	private String getMessageElement(Node message) {
-		NodeList children = message.getChildNodes();
-		for (int i = 0; i < children.getLength(); i++) {
-			if (equalsIgnoreNamespace(children.item(i).getNodeName(), "part")) {
-				return children.item(i).getAttributes().getNamedItem("element")
-						.getNodeValue();
-			}
-		}
-		return null;
-	}
-
-	private Node getElementFromMessage(String message) {
-		NodeList elements = document.getElementsByTagNameNS("*", "element");
+	private Node getElementNodeFromOperationElement(String elementName) {
+		NodeList elements = document.getElementsByTagNameNS("*","element");
 		for (int i = 0; i < elements.getLength(); i++) {
 			if (equalsIgnoreNamespace(elements.item(i).getParentNode()
 					.getNodeName(), "schema")) {
 				if (equalsIgnoreNamespace(elements.item(i).getAttributes()
-						.getNamedItem("name").getNodeValue(), message)) {
+						.getNamedItem("name").getNodeValue(), elementName)) {
 					return elements.item(i);
 				}
 			}
@@ -514,42 +462,39 @@ public class WSDLParser {
 		return null;
 	}
 
-	private Node getMessageFromAttribute(String nodeValue) {
-		NodeList messages = document.getElementsByTagNameNS("*", "message");
-		for (int i = 0; i < messages.getLength(); i++) {
-			if (equalsIgnoreNamespace(messages.item(i).getAttributes()
-					.getNamedItem("name").getNodeValue(), nodeValue)) {
-				return messages.item(i);
-			}
-		}
-		return null;
-	}
-
-	/*public void createXML(String filename) throws IOException {
+	public void createXML(String filename) throws IOException {
 		// Document (Xerces implementation only).
 		Document xmldoc = new DocumentImpl();
 		// Root element.
-		Element root = xmldoc.createElement("operations");
-		for (Operation operation : operations.values()) {
-			// Child i.
-			Element operationElement = xmldoc
-					.createElementNS(null, "operation");
-			operationElement.setAttributeNS(null, "name", operation.getName());
-			Element input = xmldoc.createElementNS(null, "inputType");
-			// input.setAttributeNS(null, "name",
-			// operation.getInput().getName());
-			Element type = getTypeElement(operation.getRequest().getName(),
-					operation.getRequest(), xmldoc);
-			input.appendChild(type);
-			Element output = xmldoc.createElementNS(null, "outputType");
-			// output.setAttributeNS(null, "name",
-			// operation.getOutput().getName());
-			type = getTypeElement(operation.getResponse().getName(),
-					operation.getResponse(), xmldoc);
-			output.appendChild(type);
-			operationElement.appendChild(input);
-			operationElement.appendChild(output);
-			root.appendChild(operationElement);
+		Element root = xmldoc.createElement("service");
+		root.setAttributeNS(null, "targetNamespace", service.getTargetNamespace());
+		for (WSElement child : service.getChildren().values()) {
+			Interface serviceInterface = (Interface)child;
+			Element interfaceElement = xmldoc.createElementNS(null, "interface");
+			interfaceElement.setAttributeNS(null, "name", serviceInterface.getName());
+			interfaceElement.setAttributeNS(null, "address", serviceInterface.getAddress());
+			root.appendChild(interfaceElement);
+			for (WSElement interfaceChild : serviceInterface.getChildren().values()) {
+				Operation operation = (Operation)interfaceChild;
+				// Child i.
+				Element operationElement = xmldoc.createElementNS(null,
+						"operation");
+				operationElement.setAttributeNS(null, "name",
+						operation.getName());
+				Element input = xmldoc.createElementNS(null, "inputType");
+				Element type = getTypeElement(operation.getRequest().getName(),
+						operation.getRequest(), xmldoc);
+				input.appendChild(type);
+				Element output = xmldoc.createElementNS(null, "outputType");
+				// output.setAttributeNS(null, "name",
+				// operation.getOutput().getName());
+				type = getTypeElement(operation.getResponse().getName(),
+						operation.getResponse(), xmldoc);
+				output.appendChild(type);
+				operationElement.appendChild(input);
+				operationElement.appendChild(output);
+				interfaceElement.appendChild(operationElement);
+			}
 		}
 		xmldoc.appendChild(root);
 		FileOutputStream fos = new FileOutputStream(filename);
@@ -562,7 +507,7 @@ public class WSDLParser {
 		serializer.asDOMSerializer();
 		serializer.serialize(xmldoc.getDocumentElement());
 		fos.close();
-	}*/
+	}
 
 	private Element getTypeElement(String name, IType type, Document xmldoc) {
 		if (type instanceof ComplexType) {
@@ -583,18 +528,16 @@ public class WSDLParser {
 			primitiveType.setAttributeNS(null, "name", name);
 			primitiveType.setAttributeNS(null, "type", type.getName());
 			return primitiveType;
-		}
-		else if (type instanceof SimpleType) {
-			Element simpleType = xmldoc.createElementNS(null,
-					"simpleType");
+		} else if (type instanceof SimpleType) {
+			Element simpleType = xmldoc.createElementNS(null, "simpleType");
 			simpleType.setAttributeNS(null, "name", name);
-			Element restriction = xmldoc.createElementNS(null,
-			"restriction");
-			restriction.setAttributeNS(null, "base", ((SimpleType) type).getBase().getName());
+			Element restriction = xmldoc.createElementNS(null, "restriction");
+			restriction.setAttributeNS(null, "base",
+					((SimpleType) type).getBase().getName());
 			simpleType.appendChild(restriction);
 			for (String enumeration : ((SimpleType) type).getOptions()) {
 				Element nestedTypeElement = xmldoc.createElementNS(null,
-				"enumeration");
+						"enumeration");
 				nestedTypeElement.setAttributeNS(null, "value", enumeration);
 				restriction.appendChild(nestedTypeElement);
 			}
@@ -603,104 +546,48 @@ public class WSDLParser {
 		return null;
 	}
 
-	/*public String diff(WSDLParser parser) {
-		String diff = "";
-		HashMap<String, Operation> operationsAdded = new HashMap<String, Operation>();
-		HashMap<String, Operation> operationsDeleted = new HashMap<String, Operation>();
-		HashMap<String, Operation> operationsIncluded = new HashMap<String , Operation>();
-		for(String name : this.operations.keySet()) {
-			operationsIncluded.put(name, this.operations.get(name));
-		}
-		for(String name : this.operations.keySet()) {
-			if(!parser.getOperations().containsKey(name)) {
-				operationsDeleted.put(name, this.operations.get(name));
-				operationsIncluded.remove(name);
-				diff += "operation deleted(" + this.operations.get(name)
-				+ ")\n";
-			}
-		}
-		for(String name : parser.getOperations().keySet()) {
-			if(!this.operations.containsKey(name)) {
-				operationsAdded.put(name, parser.getOperations().get(name));
-				operationsIncluded.remove(name);
-				diff += "operation added(" + parser.operations.get(name)
-				+ ")\n";
-			}
-		}
-		for (String name : operationsIncluded.keySet()) {
-			if (!this.getOperations().get(name)
-					.equals(parser.getOperations().get(name))) {
-				diff += "(t1):"
-						+ this.getOperations().get(name)
-						+ " = (t2):"
-						+ parser.getOperations().get(name)
-						+ "\n("
-						+ this.getOperations().get(name)
-								.diff(parser.getOperations().get(name)) + ")\n";
-			}
-		}
-		for (String name : this.operations.keySet()) {
-			if (!parser.getOperations().containsKey(name)) {
-				diff += "operation deleted(" + this.operations.get(name)
-						+ ")\n";
-			}
-		}
-		for (String name : parser.operations.keySet()) {
-			if (!this.getOperations().containsKey(name)) {
-				diff += "operation added(" + parser.operations.get(name)
-						+ ")\n";
-			}
-		}
-		return diff;
-	}*/
+	/*
+	 * public String diff(WSDL2Parser parser) { String diff = ""; HashMap<String,
+	 * Operation> operationsAdded = new HashMap<String, Operation>();
+	 * HashMap<String, Operation> operationsDeleted = new HashMap<String,
+	 * Operation>(); HashMap<String, Operation> operationsIncluded = new
+	 * HashMap<String , Operation>(); for(String name :
+	 * this.operations.keySet()) { operationsIncluded.put(name,
+	 * this.operations.get(name)); } for(String name : this.operations.keySet())
+	 * { if(!parser.getOperations().containsKey(name)) {
+	 * operationsDeleted.put(name, this.operations.get(name));
+	 * operationsIncluded.remove(name); diff += "operation deleted(" +
+	 * this.operations.get(name) + ")\n"; } } for(String name :
+	 * parser.getOperations().keySet()) { if(!this.operations.containsKey(name))
+	 * { operationsAdded.put(name, parser.getOperations().get(name));
+	 * operationsIncluded.remove(name); diff += "operation added(" +
+	 * parser.operations.get(name) + ")\n"; } } for (String name :
+	 * operationsIncluded.keySet()) { if (!this.getOperations().get(name)
+	 * .equals(parser.getOperations().get(name))) { diff += "(t1):" +
+	 * this.getOperations().get(name) + " = (t2):" +
+	 * parser.getOperations().get(name) + "\n(" + this.getOperations().get(name)
+	 * .diff(parser.getOperations().get(name)) + ")\n"; } } for (String name :
+	 * this.operations.keySet()) { if
+	 * (!parser.getOperations().containsKey(name)) { diff +=
+	 * "operation deleted(" + this.operations.get(name) + ")\n"; } } for (String
+	 * name : parser.operations.keySet()) { if
+	 * (!this.getOperations().containsKey(name)) { diff += "operation added(" +
+	 * parser.operations.get(name) + ")\n"; } } return diff; }
+	 */
 
 	public static void main(String[] args) {
-		File dir = new File("hiltonExpVa/wsdlFiles");
-		File[] files = dir.listFiles();
-
-		for (int i = 0; i < 1; i++) {
-			//try {
-			System.out.println("Diff " + i + " started");
-				/*BufferedWriter out = new BufferedWriter(new FileWriter(
-						new File("FedexRate/results/diff" + (i + 1) + "-"
-								+ (i + 2) + ".txt")));*/
-				WSDLParser parser1 = new WSDLParser(new File("hiltonExpVa/wsdlFiles/HiltonServicesV1.wsdl"));
-				WSDLParser parser2 = new WSDLParser(new File("hiltonExpVa/wsdlFiles/HiltonServicesV2.wsdl"));
-				/*try {
-					parser1.createXML("FedexRate/lightWSDLFiles/"
-							+ files[i].getName());
-					parser2.createXML("FedexRate/lightWSDLFiles/"
-							+ files[i + 1].getName());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}*/
-				//out.write(parser1.diff(parser2));
-				Delta delta = parser1.getService().diff(parser2.getService());
-				
-				DeltaUtil.findMoveDeltas(delta);
-				delta.printDelta(0);
-				System.out.println("Diff " + i + " finished");
-				//out.close();
-			/*} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}*/
+		WSDL2Parser parser1 = new WSDL2Parser(new File("files/amazon2.wsdl2"));
+		WSDL2Parser parser2 = new WSDL2Parser(new File("files/amazon3.wsdl2"));
+		Delta delta = parser1.getService().diff(parser2.getService());
+		DeltaUtil.findMoveDeltas(delta);
+		delta.printDelta(0);
+		try {
+			parser1.createXML("files/amazon2.xml");
+			parser2.createXML("files/amazon3.xml");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		System.out.println("Finished!!");
-
-		/*
-		 * for (int i = 0; i < parser1.getOperations().size(); i++) {
-		 * System.out.println("(t1):" + parser1.getOperations().get(i) +
-		 * " = (t2):" + parser2.getOperations().get(i) + "\n(" +
-		 * parser1.getOperations().get(i) .diff(parser2.getOperations().get(i))
-		 * + ")"); }
-		 */
-		// parser.parseFile("files/BingSearch_2.0.wsdl");
-		// parser.parseFile("files/PackageMovementInformationService_v2.wsdl");
-		// parser.parseFile("files/PayPalSvc_2.4.wsdl");
-		// parser.parseFile("files/RateService_v1.wsdl");
-		// parser.parseFile("files/TrackService_v1.wsdl");
 	}
 
 }

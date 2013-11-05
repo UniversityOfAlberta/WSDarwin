@@ -3,15 +3,87 @@
 <plugin>
 
    <extension
+         point="org.eclipse.ui.commands">
+      <category
+            name="WSDarwin"
+            id="wsdarwin">
+      </category>
+      <command
+            name="WSDarwin Command"
+            categoryId="wsdarwin"
+            id="wsdarwin.commands.WSDarwinCommand">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            commandId="wsdarwin.commands.WSDarwinCommand"
+            class="wsdarwin.handlers.WSDarwinHandler">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="wsdarwin.commands.WSDarwinCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               label="WSDarwin"
+               mnemonic="M"
+               id="wsdarwin.menus.WSDarwin">
+            <command
+                  commandId="wsdarwin.commands.WSDarwinCommand"
+                  id="wsdarwin.menus.WSDarwinCommand"
+                  label="WSDarwin"
+                  mnemonic="S">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="wsdarwin.toolbars.WSDarwin"
+               label="WSDarwin">
+            <command
+                  commandId="wsdarwin_1.0.0.commands.sampleCommand"
+                  icon="icons/sample.gif"
+                  tooltip="Say hello world"
+                  id="wsdarwin_1.0.0.toolbars.sampleCommand">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="WSDarwin Wizards"
+            id="wsdarwin">
+      </category>
+      <wizard
+            name="New Client Adapter Wizard"
+            icon="icons/sample.gif"
+            category="wsdarwin"
+            class="wsdarwin.wizards.NewClientAdapterWizard"
+            id="wsdarwin.wizards.NewClientAdapterWizard">
+      </wizard>
+   </extension>
+   <extension
          point="org.eclipse.ui.views">
       <category
             name="WSDarwin"
-            id="wsdarwin_1.0.0">
+            id="wsdarwin">
       </category>
       <view
-            name="WSDarwin View"
+            name="WSDarwin"
             icon="icons/sample.gif"
-            category="wsdarwin_1.0.0"
+            category="wsdarwin"
             class="wsdarwin.views.WSDarwinView"
             id="wsdarwin.views.WSDarwinView">
       </view>
@@ -33,6 +105,36 @@
       <contexts
             file="contexts.xml">
       </contexts>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            class="org.eclipse.jdt.junit.launcher.JUnitLaunchShortcut"
+            id="wsdarwin.junitShortcut"
+            label="JUnitShortcut.label"
+            modes="run">
+            <contextualLaunch>
+          <enablement>
+             <with variable="selection">
+                <count value="1"/>
+                <iterate>
+                   <adapt type="org.eclipse.jdt.core.IJavaElement">
+                      <test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
+                      <test property="org.eclipse.jdt.core.isInJavaProject"/>
+                      <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
+                   </adapt>
+                </iterate>
+             </with>
+          </enablement>
+       </contextualLaunch>
+       <configurationType
+             id="org.eclipse.jdt.junit.launchconfig">
+       </configurationType>
+       <description
+             description="%RunJUnitLaunchShortcut.description"
+             mode="run">
+       </description>
+      </shortcut>
    </extension>
 
 </plugin>

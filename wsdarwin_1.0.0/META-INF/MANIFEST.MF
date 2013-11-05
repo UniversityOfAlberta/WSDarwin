@@ -1,22 +1,21 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: WSDarwin
-Bundle-SymbolicName: wsdarwin_1.0.0; singleton:=true
+Bundle-SymbolicName: wsdarwin_1.0.0;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Activator: wsdarwin.Activator
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
-Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: org.apache.xerces.dom;version="2.9.0",
- org.apache.xml.serialize;version="2.9.0",
- org.eclipse.core.internal.resources,
+ org.eclipse.core.runtime,
  org.eclipse.core.resources,
- org.eclipse.jdt.core,
- org.eclipse.jdt.core.dom,
- org.eclipse.jdt.core.dom.rewrite,
- org.eclipse.jdt.core.refactoring,
- org.eclipse.ltk.core.refactoring,
- org.eclipse.ltk.ui.refactoring,
- org.eclipse.text.edits,
- org.eclipse.ui.dialogs
+ org.eclipse.ui.ide,
+ org.eclipse.jdt.core;bundle-version="3.9.1",
+ org.apache.xerces;bundle-version="2.9.0",
+ org.eclipse.ltk.core.refactoring;bundle-version="3.6.100",
+ org.eclipse.ltk.ui.refactoring;bundle-version="3.7.100",
+ org.eclipse.jdt.junit;bundle-version="3.7.200",
+ org.eclipse.debug.ui;bundle-version="3.9.0",
+ org.junit;bundle-version="4.11.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.jdt.core.refactoring,
+ org.eclipse.text.edits
