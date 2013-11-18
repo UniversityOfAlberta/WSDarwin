@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://ws.apache.org/axis2" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ax21="http://ws.apache.org/axis2/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://ws.apache.org/axis2">
+    <wsdl:documentation>
+		Please Type your service description here
+	</wsdl:documentation>
+    <wsdl:types>
+        <xs:schema xmlns:ax22="http://ws.apache.org/axis2/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://ws.apache.org/axis2">
+            <xs:import namespace="http://ws.apache.org/axis2/xsd"/>
+            <xs:element name="add">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="additionArgument" nillable="true" type="ax21:AdditionArgument"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax21:AdditionResponse"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="divide">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="divisionArgument" nillable="true" type="ax21:DivisionArgument"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="divideResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax21:DivisionResponse"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="subtract">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="subtractionArgument" nillable="true" type="ax21:SubtractionArgument"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="subtractResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax21:SubtractionResponse"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="multiply">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="multiplicationArgument" nillable="true" type="ax21:MultiplicationArgument"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="multiplyResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax21:MultiplicationResponse"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="power">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="powerArgument" nillable="true" type="ax21:PowerArgument"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="powerResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax21:PowerResponse"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://ws.apache.org/axis2/xsd">
+            <xs:complexType name="AdditionArgument">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="a1" type="xs:double"/>
+                    <xs:element minOccurs="0" name="a2" type="xs:double"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="AdditionResponse">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="message" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="result" type="xs:double"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="DivisionArgument">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="d1" type="xs:double"/>
+                    <xs:element minOccurs="0" name="d2" type="xs:double"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="DivisionResponse">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="message" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="result" type="xs:double"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="SubtractionArgument">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="s1" type="xs:double"/>
+                    <xs:element minOccurs="0" name="s2" type="xs:double"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="SubtractionResponse">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="message" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="result" type="xs:double"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="MultiplicationArgument">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="m1" type="xs:double"/>
+                    <xs:element minOccurs="0" name="m2" type="xs:double"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="MultiplicationResponse">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="message" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="result" type="xs:double"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="PowerArgument">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="base" type="xs:double"/>
+                    <xs:element minOccurs="0" name="exponent" type="xs:double"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="PowerResponse">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="message" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="result" type="xs:double"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="addRequest">
+        <wsdl:part name="parameters" element="ns:add"/>
+    </wsdl:message>
+    <wsdl:message name="addResponse">
+        <wsdl:part name="parameters" element="ns:addResponse"/>
+    </wsdl:message>
+    <wsdl:message name="divideRequest">
+        <wsdl:part name="parameters" element="ns:divide"/>
+    </wsdl:message>
+    <wsdl:message name="divideResponse">
+        <wsdl:part name="parameters" element="ns:divideResponse"/>
+    </wsdl:message>
+    <wsdl:message name="powerRequest">
+        <wsdl:part name="parameters" element="ns:power"/>
+    </wsdl:message>
+    <wsdl:message name="powerResponse">
+        <wsdl:part name="parameters" element="ns:powerResponse"/>
+    </wsdl:message>
+    <wsdl:message name="multiplyRequest">
+        <wsdl:part name="parameters" element="ns:multiply"/>
+    </wsdl:message>
+    <wsdl:message name="multiplyResponse">
+        <wsdl:part name="parameters" element="ns:multiplyResponse"/>
+    </wsdl:message>
+    <wsdl:message name="subtractRequest">
+        <wsdl:part name="parameters" element="ns:subtract"/>
+    </wsdl:message>
+    <wsdl:message name="subtractResponse">
+        <wsdl:part name="parameters" element="ns:subtractResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="CalculatorServicePortType">
+        <wsdl:operation name="add">
+            <wsdl:input message="ns:addRequest" wsaw:Action="urn:add"/>
+            <wsdl:output message="ns:addResponse" wsaw:Action="urn:addResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="divide">
+            <wsdl:input message="ns:divideRequest" wsaw:Action="urn:divide"/>
+            <wsdl:output message="ns:divideResponse" wsaw:Action="urn:divideResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="power">
+            <wsdl:input message="ns:powerRequest" wsaw:Action="urn:power"/>
+            <wsdl:output message="ns:powerResponse" wsaw:Action="urn:powerResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="multiply">
+            <wsdl:input message="ns:multiplyRequest" wsaw:Action="urn:multiply"/>
+            <wsdl:output message="ns:multiplyResponse" wsaw:Action="urn:multiplyResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="subtract">
+            <wsdl:input message="ns:subtractRequest" wsaw:Action="urn:subtract"/>
+            <wsdl:output message="ns:subtractResponse" wsaw:Action="urn:subtractResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="CalculatorServiceSoap11Binding" type="ns:CalculatorServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="add">
+            <soap:operation soapAction="urn:add" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="divide">
+            <soap:operation soapAction="urn:divide" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="power">
+            <soap:operation soapAction="urn:power" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="multiply">
+            <soap:operation soapAction="urn:multiply" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="subtract">
+            <soap:operation soapAction="urn:subtract" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="CalculatorServiceSoap12Binding" type="ns:CalculatorServicePortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="add">
+            <soap12:operation soapAction="urn:add" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="divide">
+            <soap12:operation soapAction="urn:divide" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="power">
+            <soap12:operation soapAction="urn:power" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="multiply">
+            <soap12:operation soapAction="urn:multiply" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="subtract">
+            <soap12:operation soapAction="urn:subtract" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="CalculatorServiceHttpBinding" type="ns:CalculatorServicePortType">
+        <http:binding verb="POST"/>
+        <wsdl:operation name="add">
+            <http:operation location="add"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="divide">
+            <http:operation location="divide"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="power">
+            <http:operation location="power"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="multiply">
+            <http:operation location="multiply"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="subtract">
+            <http:operation location="subtract"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="CalculatorService">
+        <wsdl:port name="CalculatorServiceHttpSoap11Endpoint" binding="ns:CalculatorServiceSoap11Binding">
+            <soap:address location="http://localhost:8080/Calculator/services/CalculatorService.CalculatorServiceHttpSoap11Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="CalculatorServiceHttpSoap12Endpoint" binding="ns:CalculatorServiceSoap12Binding">
+            <soap12:address location="http://localhost:8080/Calculator/services/CalculatorService.CalculatorServiceHttpSoap12Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="CalculatorServiceHttpEndpoint" binding="ns:CalculatorServiceHttpBinding">
+            <http:address location="http://localhost:8080/Calculator/services/CalculatorService.CalculatorServiceHttpEndpoint/"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
