@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 public class HumaniseCamelCase {
     //----------------------------------------------------------------------- Static Properties and Constants
 
-    private static final String CAMEL_CASE_PATTERN = "([A-Z]|[a-z])[a-z]*";
+    private static final String CAMEL_CASE_PATTERN = "([A-Z]|[a-z])(([a-z])*\\d*)*";
 
     //----------------------------------------------------------------------- Instance Properties
 

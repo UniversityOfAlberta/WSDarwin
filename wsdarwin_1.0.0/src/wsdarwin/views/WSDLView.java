@@ -1,5 +1,7 @@
 package wsdarwin.views;
 
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +9,7 @@ import java.util.Map;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.*;
 import org.eclipse.ui.wizards.IWizardDescriptor;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -18,6 +21,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.junit.launcher.JUnitLaunchShortcut;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -32,6 +36,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.junit.runner.Result;
 
@@ -41,6 +46,8 @@ import wsdarwin.comparison.delta.ChangeDelta;
 import wsdarwin.comparison.delta.DeleteDelta;
 import wsdarwin.comparison.delta.Delta;
 import wsdarwin.model.Operation;
+import wsdarwin.parsers.WADLParser;
+import wsdarwin.parsers.WSDLParser;
 import wsdarwin.wizards.MyRefactoringWizard;
 import wsdarwin.wizards.NewClientAdapterWizard;
 
@@ -59,12 +66,12 @@ import wsdarwin.wizards.NewClientAdapterWizard;
  * <p>
  */
 
-public class WSDarwinView extends ViewPart {
+public class WSDLView extends ViewPart {
 
 	/**
 	 * The ID of the view as specified by the extension.
 	 */
-	public static final String ID = "wsdarwin.views.WSDarwinView";
+	public static final String ID = "wsdarwin.views.WSDLView";
 
 	private TreeViewer viewer;
 	private Action compareInterfaces;
@@ -215,7 +222,7 @@ public class WSDarwinView extends ViewPart {
 	/**
 	 * The constructor.
 	 */
-	public WSDarwinView() {
+	public WSDLView() {
 	}
 
 	/**
@@ -266,7 +273,7 @@ public class WSDarwinView extends ViewPart {
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
-				WSDarwinView.this.fillContextMenu(manager);
+				WSDLView.this.fillContextMenu(manager);
 			}
 		});
 		Menu menu = menuMgr.createContextMenu(viewer.getControl());
@@ -325,11 +332,41 @@ public class WSDarwinView extends ViewPart {
 							.getShell(), wizard);
 					wd.setTitle(wizard.getWindowTitle());
 					wd.open();
-					diffTable = new Delta[] { ncaw.getDiff() };
 					oldWSDL = ncaw.getOldWSDL();
 					newWSDL = ncaw.getNewWSDL();
 					oldStub = ncaw.getOldStub();
 					newStub = ncaw.getNewStub();
+					IRunnableWithProgress op = new IRunnableWithProgress() {
+						public void run(IProgressMonitor monitor)
+								throws InvocationTargetException {
+							try {
+								monitor.beginTask("Producing diff", 1);
+								WSDLParser parser1 = new WSDLParser(new File(
+										oldWSDL));
+								WSDLParser parser2 = new WSDLParser(new File(
+										newWSDL));
+								Delta delta = parser1.getService().diff(
+										parser2.getService());
+								diffTable = new Delta[] { delta };
+								monitor.worked(1);
+							} finally {
+								monitor.done();
+							}
+						}
+					};
+					try {
+						PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+								.run(true, false, op);
+					} catch (InterruptedException e) {
+						MessageDialog.openError(PlatformUI.getWorkbench()
+								.getActiveWorkbenchWindow().getShell(),
+								"Error", e.getMessage());
+					} catch (InvocationTargetException e) {
+						Throwable realException = e.getTargetException();
+						MessageDialog.openError(PlatformUI.getWorkbench()
+								.getActiveWorkbenchWindow().getShell(),
+								"Error", realException.getMessage());
+					}
 					viewer.refresh();
 					// viewer.setContentProvider(new ViewContentProvider());
 				} catch (CoreException e) {
@@ -343,14 +380,15 @@ public class WSDarwinView extends ViewPart {
 		compareInterfaces.setToolTipText("WSDL Diff");
 		compareInterfaces.setImageDescriptor(PlatformUI.getWorkbench()
 				.getSharedImages()
-				.getImageDescriptor(ISharedImages.IMG_OBJS_TASK_TSK));
+				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
 
 		adaptClient = new Action() {
 			public void run() {
 				diffTable[0].printDelta(0);
 				CompilationUnit oldCompilationUnit = parseAST(oldStub);
 				Map<String, Delta> changedOperationNames = new HashMap<String, Delta>();
-				changedOperationNames = getChangedOperations(changedOperationNames, diffTable[0]);
+				changedOperationNames = getChangedOperations(
+						changedOperationNames, diffTable[0]);
 				Map<MethodDeclaration, Delta> changedMethods = getChangedMethods(
 						changedOperationNames, oldCompilationUnit);
 				CompilationUnit newCompilationUnit = parseAST(newStub);
@@ -367,6 +405,14 @@ public class WSDarwinView extends ViewPart {
 				try {
 					String titleForFailedChecks = ""; //$NON-NLS-1$ 
 					op.run(getSite().getShell(), titleForFailedChecks);
+					IWorkbenchPage page = PlatformUI.getWorkbench()
+							.getActiveWorkbenchWindow().getActivePage();
+
+					try {
+						IDE.openEditor(page, (IFile) oldStub.getResource());
+					} catch (PartInitException e) {
+						// Put your exception handler here if you wish to
+					}
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -376,23 +422,26 @@ public class WSDarwinView extends ViewPart {
 		adaptClient.setToolTipText("Adapt Client");
 		adaptClient.setImageDescriptor(PlatformUI.getWorkbench()
 				.getSharedImages()
-				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-		
+				.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
+
 		runTests = new Action() {
 			public void run() {
 				try {
-					IType[] tests = JUnitCore.findTestTypes(oldStub.getJavaProject(), null);
+					IType[] tests = JUnitCore.findTestTypes(
+							oldStub.getJavaProject(), null);
 					ICompilationUnit[] compilationUnits = new ICompilationUnit[tests.length];
-					for(int i=0;i<compilationUnits.length;i++) {
+					for (int i = 0; i < compilationUnits.length; i++) {
 						compilationUnits[i] = tests[i].getCompilationUnit();
 					}
-					StructuredSelection selection = new StructuredSelection(compilationUnits);
+					StructuredSelection selection = new StructuredSelection(
+							compilationUnits);
 					JUnitLaunchShortcut shortcut = new JUnitLaunchShortcut();
 					shortcut.launch(selection, "run");
-					//Class<?> testClass = this.getClass().getClassLoader().loadClass(tests[0].getFullyQualifiedName()+".class");
-					//org.junit.runner.JUnitCore.main(paths);;
-					//System.out.println(res.toString());
-					
+					// Class<?> testClass =
+					// this.getClass().getClassLoader().loadClass(tests[0].getFullyQualifiedName()+".class");
+					// org.junit.runner.JUnitCore.main(paths);;
+					// System.out.println(res.toString());
+
 				} catch (OperationCanceledException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -404,10 +453,9 @@ public class WSDarwinView extends ViewPart {
 		};
 		runTests.setText("Run Tests");
 		runTests.setToolTipText("Run Tests");
-		runTests.setImageDescriptor(PlatformUI.getWorkbench()
-				.getSharedImages()
-				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-		
+		runTests.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
+				.getImageDescriptor(ISharedImages.IMG_OBJS_WARN_TSK));
+
 		doubleClickAction = new Action() {
 			public void run() {
 				ISelection selection = viewer.getSelection();

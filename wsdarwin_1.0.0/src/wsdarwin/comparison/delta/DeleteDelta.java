@@ -12,7 +12,9 @@ public class DeleteDelta extends Delta {
 
 	private void deleteChildren() {
 		for(WSElement child : source.getChildren().values()) {
-			this.deltas.add(new DeleteDelta(child, null));
+			DeleteDelta childDelta = new DeleteDelta(child, null);
+			childDelta.setParent(this);
+			this.deltas.add(childDelta);
 		}
 	}
 

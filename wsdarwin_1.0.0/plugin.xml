@@ -9,25 +9,40 @@
             id="wsdarwin">
       </category>
       <command
-            name="WSDarwin Command"
+            name="WSDL Command"
             categoryId="wsdarwin"
-            id="wsdarwin.commands.WSDarwinCommand">
+            id="wsdarwin.commands.WSDLCommand">
+      </command>
+      <command
+            categoryId="wsdarwin"
+            id="wsdarwin.commands.WADLCommand"
+            name="WADL Command">
       </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            commandId="wsdarwin.commands.WSDarwinCommand"
-            class="wsdarwin.handlers.WSDarwinHandler">
+            commandId="wsdarwin.commands.WSDLCommand"
+            class="wsdarwin.handlers.WSDLHandler">
+      </handler>
+      <handler
+            class="wsdarwin.handlers.WADLHandler"
+            commandId="wsdarwin.commands.WADLCommand">
       </handler>
    </extension>
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="wsdarwin.commands.WSDarwinCommand"
+            commandId="wsdarwin.commands.WSDLCommand"
             contextId="org.eclipse.ui.contexts.window"
             sequence="M1+6"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+      <key
+            commandId="wsdarwin.commands.WADLCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+7">
       </key>
    </extension>
    <extension
@@ -39,25 +54,18 @@
                mnemonic="M"
                id="wsdarwin.menus.WSDarwin">
             <command
-                  commandId="wsdarwin.commands.WSDarwinCommand"
-                  id="wsdarwin.menus.WSDarwinCommand"
-                  label="WSDarwin"
+                  commandId="wsdarwin.commands.WSDLCommand"
+                  id="wsdarwin.menus.WSDLCommand"
+                  label="WSDL View"
                   mnemonic="S">
             </command>
-         </menu>
-      </menuContribution>
-      <menuContribution
-            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
-         <toolbar
-               id="wsdarwin.toolbars.WSDarwin"
-               label="WSDarwin">
             <command
-                  commandId="wsdarwin_1.0.0.commands.sampleCommand"
-                  icon="icons/sample.gif"
-                  tooltip="Say hello world"
-                  id="wsdarwin_1.0.0.toolbars.sampleCommand">
+                  commandId="wsdarwin.commands.WADLCommand"
+                  id="wsdarwin.menus.WADLCommand"
+                  label="WADL View"
+                  mnemonic="A">
             </command>
-         </toolbar>
+         </menu>
       </menuContribution>
    </extension>
    <extension
@@ -68,7 +76,6 @@
       </category>
       <wizard
             name="New Client Adapter Wizard"
-            icon="icons/sample.gif"
             category="wsdarwin"
             class="wsdarwin.wizards.NewClientAdapterWizard"
             id="wsdarwin.wizards.NewClientAdapterWizard">
@@ -81,11 +88,16 @@
             id="wsdarwin">
       </category>
       <view
-            name="WSDarwin"
-            icon="icons/sample.gif"
+            name="WSDL View"
             category="wsdarwin"
-            class="wsdarwin.views.WSDarwinView"
-            id="wsdarwin.views.WSDarwinView">
+            class="wsdarwin.views.WSDLView"
+            id="wsdarwin.views.WSDLView">
+      </view>
+      <view
+            class="wsdarwin.views.WADLView"
+            id="wsdarwin.views.WADLView"
+            name="WADL View"
+            restorable="true">
       </view>
    </extension>
    <extension

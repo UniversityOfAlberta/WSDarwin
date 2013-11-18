@@ -48,8 +48,8 @@ public class DiffInputPage extends WizardPage {
 	 */
 	public DiffInputPage() {
 		super("wizardPage");
-		setTitle("Multi-page Editor File");
-		setDescription("This wizard creates a new file with *.mpe extension that can be opened by a multi-page editor.");
+		setTitle("WSDarwin Comparison input");
+		setDescription("Please provide two versions of the service interface for comparison and the corresponding client proxies for adaptation.");
 		
 	}
 
@@ -63,7 +63,7 @@ public class DiffInputPage extends WizardPage {
 		layout.numColumns = 3;
 		layout.verticalSpacing = 9;
 		Label label = new Label(clientContainer, SWT.NULL);
-		label.setText("&Old WSDL:");
+		label.setText("&Old Service Interface:");
 		
 		oldWSDL = new Text(clientContainer, SWT.BORDER | SWT.SINGLE);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
@@ -89,7 +89,7 @@ public class DiffInputPage extends WizardPage {
 			}
 		});
 		label = new Label(clientContainer, SWT.NULL);
-		label.setText("&New WSDL:");
+		label.setText("&New Service Interface:");
 		
 		newWSDL = new Text(clientContainer, SWT.BORDER | SWT.SINGLE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
@@ -114,7 +114,7 @@ public class DiffInputPage extends WizardPage {
 			}
 		});
 		label = new Label(clientContainer, SWT.NULL);
-		label.setText("&Old Stub:");
+		label.setText("&Old Client Proxy:");
 		
 		oldStub = new Text(clientContainer, SWT.BORDER | SWT.SINGLE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
@@ -139,7 +139,7 @@ public class DiffInputPage extends WizardPage {
 			}
 		});
 		label = new Label(clientContainer, SWT.NULL);
-		label.setText("&New Stub:");
+		label.setText("&New Client Proxy:");
 		
 		newStub = new Text(clientContainer, SWT.BORDER | SWT.SINGLE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);

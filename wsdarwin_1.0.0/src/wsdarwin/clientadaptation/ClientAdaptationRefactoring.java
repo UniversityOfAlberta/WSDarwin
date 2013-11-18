@@ -304,7 +304,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 				.getAST());
 		AST contextAST = method.getAST();
 
-		copyValues(
+		copyValuesInput(
 				sourceRewriter,
 				delta.getDeltas().get(0),
 				contextAST,
@@ -313,7 +313,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 						.getSource()).getName(), oldTypeDeclaration),
 				findTypeDeclaration(((ComplexType) delta.getDeltas().get(0)
 						.getTarget()).getName(), newTypeDeclaration),
-				contextAST.newMethodInvocation(), true);
+				contextAST.newMethodInvocation());
 
 		try {
 			TextEdit sourceEdit = sourceRewriter.rewriteAST();
@@ -333,7 +333,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 				.getAST());
 		AST contextAST = method.getAST();
 
-		copyValues(
+		copyValuesOutput(
 				sourceRewriter,
 				delta.getDeltas().get(1),
 				contextAST,
@@ -342,7 +342,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 						.getSource()).getName(), oldTypeDeclaration),
 				findTypeDeclaration(((ComplexType) delta.getDeltas().get(1)
 						.getTarget()).getName(), newTypeDeclaration),
-				contextAST.newMethodInvocation(), false);
+				contextAST.newMethodInvocation());
 
 		try {
 			TextEdit sourceEdit = sourceRewriter.rewriteAST();
@@ -357,19 +357,14 @@ public class ClientAdaptationRefactoring extends Refactoring {
 
 	}
 
-	private void copyValues(ASTRewrite sourceRewriter, Delta delta,
+	private void copyValuesInput(ASTRewrite sourceRewriter, Delta delta,
 			AST contextAST, MethodDeclaration method,
 			TypeDeclaration oldTypeDec, TypeDeclaration newTypeDec,
-			Expression getterMethodInvocation, boolean isInput) {
+			Expression getterMethodInvocation) {
 		WSElement source = delta.getSource();
 		WSElement target = delta.getTarget();
-		String oldInputName = "";
-		if (isInput) {
-			oldInputName = ((SingleVariableDeclaration) method.parameters()
-					.get(0)).getName().getIdentifier();
-		} else {
-			oldInputName = NEW_RESPONSE_NAME;
-		}
+		String oldInputName = ((SingleVariableDeclaration) method.parameters()
+				.get(0)).getName().getIdentifier();
 		if (source != null) {
 			if (target != null) {
 				if (source instanceof PrimitiveType) {
@@ -383,14 +378,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 							getterMethodInvocation, null);
 
 					SimpleName getterMethodName = null;
-					TypeDeclaration myTypeDeclaration = null;
-					if (isInput) {
-						myTypeDeclaration = oldTypeDec;
-					} else {
-						myTypeDeclaration = newTypeDec;
-					}
-					for (MethodDeclaration aMethod : myTypeDeclaration
-							.getMethods()) {
+					for (MethodDeclaration aMethod : oldTypeDec.getMethods()) {
 						SimpleName field = ASTParserUtility.isGetter(aMethod);
 						if (field != null) {
 							if ((field.resolveTypeBinding().getName()
@@ -401,7 +389,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 													"local" + newType.getName()) || field
 									.resolveTypeBinding().getName()
 									.startsWith(newType.getName()))
-									|| similarTo(field.getIdentifier(),
+									&& similarTo(field.getIdentifier(),
 											newType.getVariableName())) {
 								getterMethodName = aMethod.getName();
 								break;
@@ -418,16 +406,9 @@ public class ClientAdaptationRefactoring extends Refactoring {
 					sourceRewriter.set(getterInvocation,
 							MethodInvocation.NAME_PROPERTY, getterMethodName,
 							null);
-
-					if (isInput) {
-						createSetterForParentComplexObject(sourceRewriter,
-								delta, contextAST, method, oldTypeDec, newType,
-								getterInvocation, isInput);
-					} else {
-						createSetterForParentComplexObject(sourceRewriter,
-								delta, contextAST, method, oldTypeDec, type,
-								getterInvocation, isInput);
-					}
+					createSetterForParentComplexObject(sourceRewriter, delta,
+							contextAST, method, newTypeDec, newType,
+							getterInvocation, true);
 
 				} else if (source instanceof ComplexType) {
 					// TODO: determine if newType is an array
@@ -467,49 +448,24 @@ public class ClientAdaptationRefactoring extends Refactoring {
 						}
 
 					} else {
-						if (isInput) {
-							newTypeName = NEW_REQUEST_NAME;
-						} else {
-							newTypeName = OLD_RESPONSE_NAME;
-						}
+						newTypeName = NEW_REQUEST_NAME;
 					}
 					String qualifiedTypeName = null;
 					String modifiedNewTypeName = null;
-					if (isInput) {
-						this.createInstance(
-								method,
-								sourceRewriter,
-								contextAST,
-								this.findTypeDeclaration(
-										newType.getVariableName(),
-										newTypeDeclaration).resolveBinding()
-										.getQualifiedName(), newTypeName,
-								isArray);
-						modifiedNewTypeName = newType.getName().substring(0, 1)
-								.toLowerCase()
-								+ newType.getName().substring(1,
-										newType.getName().length());
-						qualifiedTypeName = findTypeDeclaration(
-								newType.getName(), newTypeDeclaration)
-								.resolveBinding().getQualifiedName();
-					} else {
-						this.createInstance(
-								method,
-								sourceRewriter,
-								contextAST,
-								this.findTypeDeclaration(
-										type.getVariableName(),
-										oldTypeDeclaration).resolveBinding()
-										.getQualifiedName(), newTypeName,
-								isArray);
-						modifiedNewTypeName = type.getName().substring(0, 1)
-								.toLowerCase()
-								+ type.getName().substring(1,
-										type.getName().length());
-						qualifiedTypeName = findTypeDeclaration(type.getName(),
-								oldTypeDeclaration).resolveBinding()
-								.getQualifiedName();
-					}
+					this.createInstance(
+							method,
+							sourceRewriter,
+							contextAST,
+							this.findTypeDeclaration(newType.getVariableName(),
+									newTypeDeclaration).resolveBinding()
+									.getQualifiedName(), newTypeName, isArray);
+					modifiedNewTypeName = newType.getName().substring(0, 1)
+							.toLowerCase()
+							+ newType.getName().substring(1,
+									newType.getName().length());
+					qualifiedTypeName = findTypeDeclaration(newType.getName(),
+							newTypeDeclaration).resolveBinding()
+							.getQualifiedName();
 
 					createInstance(method, sourceRewriter, contextAST,
 							qualifiedTypeName, modifiedNewTypeName, isArray);
@@ -519,7 +475,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 						this.createSetterForParentComplexObject(sourceRewriter,
 								delta, contextAST, method, oldTypeDec, newType,
 								contextAST.newSimpleName(modifiedNewTypeName),
-								isInput);
+								true);
 					}
 
 					Expression newExpression = null;
@@ -552,15 +508,287 @@ public class ClientAdaptationRefactoring extends Refactoring {
 								getterMethodName, null);
 
 					} else {
-						newExpression = contextAST.newMethodInvocation();
-						sourceRewriter.set(newExpression,
-								MethodInvocation.EXPRESSION_PROPERTY,
-								contextAST.newSimpleName(oldInputName), null);
+						
 
 						SimpleName getterMethodName = null;
 						TypeDeclaration typeDec = findTypeDeclaration(
 								type.getVariableName(), oldTypeDeclaration);
 						for (MethodDeclaration aMethod : typeDec.getMethods()) {
+							SimpleName field = ASTParserUtility
+									.isGetter(aMethod);
+							if (field != null) {
+								if ((field.resolveTypeBinding().getName()
+										.equalsIgnoreCase(newType.getName()) || field
+										.resolveTypeBinding().getName()
+										.startsWith(newType.getName()))
+										&& (similarTo(field.getIdentifier(),
+												newType.getVariableName()) || similarTo(
+												field.getIdentifier(),
+												newType.getName()))) {
+									getterMethodName = aMethod.getName();
+									break;
+								}
+							}
+						}
+
+						if (getterMethodName != null) {
+							newExpression = contextAST.newMethodInvocation();
+							sourceRewriter.set(newExpression,
+									MethodInvocation.EXPRESSION_PROPERTY,
+									contextAST.newSimpleName(oldInputName), null);
+							sourceRewriter.set(newExpression,
+									MethodInvocation.NAME_PROPERTY,
+									getterMethodName, null);
+						}
+						else {
+							newExpression = contextAST.newSimpleName(oldInputName);
+						}
+
+					}
+
+					for (Delta child : delta.getDeltas()) {
+						copyValuesInput(
+								sourceRewriter,
+								child,
+								contextAST,
+								method,
+								findTypeDeclaration(type.getName(),
+										oldTypeDeclaration),
+								findTypeDeclaration(newType.getName(),
+										newTypeDeclaration), newExpression);
+					}
+					this.createSetterForParentComplexObject(
+							sourceRewriter,
+							delta,
+							contextAST,
+							method,
+							this.findTypeDeclaration(newType.getVariableName(),
+									newTypeDeclaration),
+							new ComplexType(newType.getName(), newType
+									.getVariableName()), contextAST
+									.newSimpleName(modifiedNewTypeName), true);
+
+				}
+			}
+		} else {
+			if (target instanceof PrimitiveType) {
+
+				PrimitiveType newType = (PrimitiveType) target;
+				TypeDeclaration parentType = null;
+				if (delta.getParent().getTarget() instanceof ComplexType) {
+					parentType = findTypeDeclaration(((ComplexType) delta
+							.getParent().getTarget()).getName(),
+							newTypeDeclaration);
+				}
+				Expression defaultValue = getDefaultValueForArgument(method,
+						newType, parentType, contextAST);
+				this.createSetterForParentComplexObject(sourceRewriter, delta,
+						contextAST, method, oldTypeDec, newType, defaultValue,
+						true);
+
+			} else if (target instanceof ComplexType) {
+				// find parent until parent = typeDeclaration and invoke
+				// getters
+				// in chain
+				// MethodInvocation getterChain = createGetterChain();
+				ComplexType type = (ComplexType) source;
+				ComplexType newType = (ComplexType) target;
+				String newTypeName;
+				if (delta.getParent().getTarget() instanceof ComplexType) {
+					newTypeName = newType.getName();
+				} else {
+					newTypeName = NEW_REQUEST_NAME;
+				}
+				String modifiedNewTypeName = newTypeName.substring(0, 1)
+						.toLowerCase()
+						+ newTypeName.substring(1, newTypeName.length());
+				String qualifiedTypeName = findTypeDeclaration(
+						newType.getName(), newTypeDeclaration).resolveBinding()
+						.getQualifiedName();
+
+				createInstance(method, sourceRewriter, contextAST,
+						qualifiedTypeName, modifiedNewTypeName, false);
+
+				Expression newExpression = contextAST.newMethodInvocation();
+				if (delta.getParent().getSource() instanceof ComplexType) {
+					sourceRewriter.set(newExpression,
+							MethodInvocation.EXPRESSION_PROPERTY,
+							getterMethodInvocation, null);
+					SimpleName getterMethodName = null;
+					for (MethodDeclaration aMethod : oldTypeDec.getMethods()) {
+						SimpleName field = ASTParserUtility.isGetter(aMethod);
+						if (field != null) {
+							if (field.resolveTypeBinding().getName()
+									.equalsIgnoreCase(newType.getName())) {
+								getterMethodName = aMethod.getName();
+								break;
+							}
+						}
+					}
+
+					sourceRewriter.set(newExpression,
+							MethodInvocation.NAME_PROPERTY, getterMethodName,
+							null);
+				} else {
+					newExpression = contextAST.newSimpleName(oldInputName);
+				}
+
+				for (Delta child : delta.getDeltas()) {
+					copyValuesInput(
+							sourceRewriter,
+							child,
+							contextAST,
+							method,
+							findTypeDeclaration(type.getName(),
+									oldTypeDeclaration),
+							findTypeDeclaration(newType.getName(),
+									newTypeDeclaration), newExpression);
+				}
+				/*
+				 * if (!newType.getName().equalsIgnoreCase(
+				 * typeDeclaration.getName().getIdentifier())) {
+				 * TypeDeclaration[] types = newTypeDeclaration.getTypes(); for
+				 * (int i = 0; i < types.length; i++) { if (types[i] .getName()
+				 * .getIdentifier() .equalsIgnoreCase( typeDeclaration.getName()
+				 * .getIdentifier())) {
+				 * 
+				 * } } }
+				 */
+			}
+		}
+	}
+
+	private void copyValuesOutput(ASTRewrite sourceRewriter, Delta delta,
+			AST contextAST, MethodDeclaration method,
+			TypeDeclaration oldTypeDec, TypeDeclaration newTypeDec,
+			Expression getterMethodInvocation) {
+		WSElement source = delta.getSource();
+		WSElement target = delta.getTarget();
+		String oldInputName = NEW_RESPONSE_NAME;
+		if (source != null) {
+			if (target != null) {
+				if (source instanceof PrimitiveType) {
+					PrimitiveType type = (PrimitiveType) source;
+					PrimitiveType newType = (PrimitiveType) target;
+
+					MethodInvocation getterInvocation = contextAST
+							.newMethodInvocation();
+					sourceRewriter.set(getterInvocation,
+							MethodInvocation.EXPRESSION_PROPERTY,
+							getterMethodInvocation, null);
+
+					SimpleName getterMethodName = null;
+					for (MethodDeclaration aMethod : newTypeDec.getMethods()) {
+						SimpleName field = ASTParserUtility.isGetter(aMethod);
+						if (field != null) {
+							if ((field.resolveTypeBinding().getName()
+									.equalsIgnoreCase(newType.getName())
+									|| field.resolveTypeBinding()
+											.getName()
+											.equalsIgnoreCase(
+													"local" + newType.getName()) || field
+									.resolveTypeBinding().getName()
+									.startsWith(newType.getName()))
+									&& similarTo(field.getIdentifier(),
+											newType.getVariableName())) {
+								getterMethodName = aMethod.getName();
+								break;
+							}
+						}
+					}
+
+					/*
+					 * String modifiedVariableName =
+					 * newType.getVariableName().substring(0, 1) .toUpperCase()
+					 * + newType.getVariableName().substring(1,
+					 * newType.getVariableName().length());
+					 */
+					sourceRewriter.set(getterInvocation,
+							MethodInvocation.NAME_PROPERTY, getterMethodName,
+							null);
+					createSetterForParentComplexObject(sourceRewriter, delta,
+							contextAST, method, oldTypeDec, type,
+							getterInvocation, false);
+
+				} else if (source instanceof ComplexType) {
+					// TODO: determine if newType is an array
+					ComplexType type = (ComplexType) source;
+					ComplexType newType = (ComplexType) target;
+					String newTypeName;
+					boolean setterNeeded = false;
+					boolean isArray = false;
+					if (delta.getParent().getSource() instanceof ComplexType) {
+						newTypeName = newType.getName();
+						setterNeeded = true;
+						TypeDeclaration parentTypeDeclaration = findTypeDeclaration(
+								((ComplexType) delta.getParent().getSource())
+										.getName(),
+								oldTypeDeclaration);
+						for (FieldDeclaration field : parentTypeDeclaration
+								.getFields()) {
+							if ((field.getType().resolveBinding().getName()
+									.equalsIgnoreCase(newType.getName()) || field
+									.getType().resolveBinding().getName()
+									.startsWith(newType.getName()))) {
+								for (Object fragment : field.fragments()) {
+									VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) fragment;
+									if (similarTo(variableDeclarationFragment
+											.getName().getIdentifier(),
+											newType.getVariableName())) {
+										if (variableDeclarationFragment
+												.resolveBinding().getType()
+												.isArray()) {
+											isArray = true;
+										}
+									}
+									break;
+								}
+							}
+							break;
+						}
+
+					} else {
+						newTypeName = OLD_RESPONSE_NAME;
+					}
+					String qualifiedTypeName = null;
+					String modifiedNewTypeName = null;
+					this.createInstance(
+							method,
+							sourceRewriter,
+							contextAST,
+							this.findTypeDeclaration(type.getVariableName(),
+									oldTypeDeclaration).resolveBinding()
+									.getQualifiedName(), newTypeName, isArray);
+					modifiedNewTypeName = type.getName().substring(0, 1)
+							.toLowerCase()
+							+ type.getName().substring(1,
+									type.getName().length());
+					qualifiedTypeName = findTypeDeclaration(type.getName(),
+							oldTypeDeclaration).resolveBinding()
+							.getQualifiedName();
+
+					if (!type.getName().equals(type.getVariableName())) {
+						createInstance(method, sourceRewriter, contextAST,
+								qualifiedTypeName, modifiedNewTypeName, isArray);
+					}
+					if (setterNeeded) {
+
+						this.createSetterForParentComplexObject(sourceRewriter,
+								delta, contextAST, method, oldTypeDec, newType,
+								contextAST.newSimpleName(modifiedNewTypeName),
+								false);
+					}
+
+					Expression newExpression = null;
+					if (delta.getParent().getSource() instanceof ComplexType) {
+						newExpression = contextAST.newMethodInvocation();
+						sourceRewriter.set(newExpression,
+								MethodInvocation.EXPRESSION_PROPERTY,
+								getterMethodInvocation, null);
+
+						SimpleName getterMethodName = null;
+						for (MethodDeclaration aMethod : oldTypeDec
+								.getMethods()) {
 							SimpleName field = ASTParserUtility
 									.isGetter(aMethod);
 							if (field != null) {
@@ -580,101 +808,41 @@ public class ClientAdaptationRefactoring extends Refactoring {
 								MethodInvocation.NAME_PROPERTY,
 								getterMethodName, null);
 
-					}
-
-					for (Delta child : delta.getDeltas()) {
-						copyValues(
-								sourceRewriter,
-								child,
-								contextAST,
-								method,
-								findTypeDeclaration(type.getName(),
-										oldTypeDeclaration),
-								findTypeDeclaration(newType.getName(),
-										newTypeDeclaration), newExpression,
-								isInput);
-					}
-					this.createSetterForParentComplexObject(
-							sourceRewriter,
-							delta,
-							contextAST,
-							method,
-							this.findTypeDeclaration(newType.getVariableName(),
-									newTypeDeclaration),
-							new ComplexType(newType.getName(), newType
-									.getVariableName()), contextAST
-									.newSimpleName(modifiedNewTypeName),
-							isInput);
-				}
-			}
-		} else {
-			if (isInput) {
-				if (target instanceof PrimitiveType) {
-
-					PrimitiveType newType = (PrimitiveType) target;
-					TypeDeclaration parentType = null;
-					if (delta.getParent().getTarget() instanceof ComplexType) {
-						parentType = findTypeDeclaration(((ComplexType) delta
-								.getParent().getTarget()).getName(),
-								newTypeDeclaration);
-					}
-					Expression defaultValue = getDefaultValueForArgument(
-							method, newType, parentType, contextAST);
-					this.createSetterForParentComplexObject(sourceRewriter,
-							delta, contextAST, method, oldTypeDec, newType,
-							defaultValue, isInput);
-
-				} else if (target instanceof ComplexType) {
-					// find parent until parent = typeDeclaration and invoke
-					// getters
-					// in chain
-					// MethodInvocation getterChain = createGetterChain();
-					ComplexType type = (ComplexType) source;
-					ComplexType newType = (ComplexType) target;
-					String newTypeName;
-					if (delta.getParent().getTarget() instanceof ComplexType) {
-						newTypeName = newType.getName();
 					} else {
-						newTypeName = NEW_REQUEST_NAME;
-					}
-					String modifiedNewTypeName = newTypeName.substring(0, 1)
-							.toLowerCase()
-							+ newTypeName.substring(1, newTypeName.length());
-					String qualifiedTypeName = findTypeDeclaration(
-							newType.getName(), newTypeDeclaration)
-							.resolveBinding().getQualifiedName();
+						
 
-					createInstance(method, sourceRewriter, contextAST,
-							qualifiedTypeName, modifiedNewTypeName, false);
-
-					Expression newExpression = contextAST.newMethodInvocation();
-					if (delta.getParent().getSource() instanceof ComplexType) {
-						sourceRewriter.set(newExpression,
-								MethodInvocation.EXPRESSION_PROPERTY,
-								getterMethodInvocation, null);
 						SimpleName getterMethodName = null;
-						for (MethodDeclaration aMethod : oldTypeDec
-								.getMethods()) {
+						TypeDeclaration typeDec = findTypeDeclaration(
+								newType.getVariableName(), newTypeDeclaration);
+						for (MethodDeclaration aMethod : typeDec.getMethods()) {
 							SimpleName field = ASTParserUtility
 									.isGetter(aMethod);
 							if (field != null) {
 								if (field.resolveTypeBinding().getName()
-										.equalsIgnoreCase(newType.getName())) {
+										.equalsIgnoreCase(newType.getName()) || field
+										.resolveTypeBinding().getName()
+										.startsWith(newType.getName())) {
 									getterMethodName = aMethod.getName();
 									break;
 								}
 							}
 						}
+						
+						if (getterMethodName != null) {
+							newExpression = contextAST.newMethodInvocation();
+							sourceRewriter.set(newExpression,
+									MethodInvocation.EXPRESSION_PROPERTY,
+									contextAST.newSimpleName(oldInputName),
+									null);
+							sourceRewriter.set(newExpression,
+									MethodInvocation.NAME_PROPERTY,
+									getterMethodName, null);
+						}
 
-						sourceRewriter.set(newExpression,
-								MethodInvocation.NAME_PROPERTY,
-								getterMethodName, null);
-					} else {
-						newExpression = contextAST.newSimpleName(oldInputName);
 					}
 
 					for (Delta child : delta.getDeltas()) {
-						copyValues(
+						copyValuesOutput(
 								sourceRewriter,
 								child,
 								contextAST,
@@ -682,22 +850,23 @@ public class ClientAdaptationRefactoring extends Refactoring {
 								findTypeDeclaration(type.getName(),
 										oldTypeDeclaration),
 								findTypeDeclaration(newType.getName(),
-										newTypeDeclaration), newExpression,
-								isInput);
+										newTypeDeclaration), newExpression);
 					}
 					/*
-					 * if (!newType.getName().equalsIgnoreCase(
-					 * typeDeclaration.getName().getIdentifier())) {
-					 * TypeDeclaration[] types = newTypeDeclaration.getTypes();
-					 * for (int i = 0; i < types.length; i++) { if (types[i]
-					 * .getName() .getIdentifier() .equalsIgnoreCase(
-					 * typeDeclaration.getName() .getIdentifier())) {
-					 * 
-					 * } } }
+					 * TypeDeclaration typeDec = null; IType aType = null; if
+					 * (isInput) { typeDec = newTypeDeclaration; aType =
+					 * newType; this.createSetterForParentComplexObject(
+					 * sourceRewriter, delta, contextAST, method,
+					 * this.findTypeDeclaration( aType.getVariableName(),
+					 * typeDec), new ComplexType(aType.getName(), aType
+					 * .getVariableName()), contextAST
+					 * .newSimpleName(modifiedNewTypeName), isInput); } else {
+					 * typeDec = oldTypeDeclaration; aType = type; }
 					 */
+
 				}
 			}
-		}
+		} 
 	}
 
 	private void createSetterForParentComplexObject(ASTRewrite sourceRewriter,
@@ -716,12 +885,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 									parentTypeDeclaration.getName()
 											.getIdentifier().length());
 		} else if (delta.getParent().getTarget() instanceof ComplexType
-				&& parentTypeDeclaration
-						.resolveBinding()
-						.getName()
-						.equalsIgnoreCase(
-								((ComplexType) delta.getParent().getTarget())
-										.getName())) {
+				&& parentTypeDeclaration.resolveBinding().getName().equalsIgnoreCase(((ComplexType) delta.getParent().getTarget()).getName())) {
 			modifiedParentTypeName = parentTypeDeclaration.getName()
 					.getIdentifier().substring(0, 1).toLowerCase()
 					+ parentTypeDeclaration
@@ -773,8 +937,9 @@ public class ClientAdaptationRefactoring extends Refactoring {
 						.equalsIgnoreCase(typeToBeSet.getName()) || setField
 						.resolveTypeBinding().getName()
 						.startsWith(typeToBeSet.getName()))
-						&& similarTo(setField.getIdentifier(),
-								typeToBeSet.getVariableName())) {
+						&& (similarTo(setField.getIdentifier(),
+								typeToBeSet.getVariableName()) || similarTo(
+								setField.getIdentifier(), typeToBeSet.getName()))) {
 					setterMethodName = aMethod.getName();
 					break;
 				}

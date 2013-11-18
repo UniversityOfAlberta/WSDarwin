@@ -12,7 +12,9 @@ public class AddDelta extends Delta {
 
 	private void addChildren() {
 		for(WSElement child : target.getChildren().values()) {
-			this.deltas.add(new AddDelta(null, child));
+			AddDelta childDelta = new AddDelta(null, child);
+			childDelta.setParent(this);
+			this.deltas.add(childDelta);
 		}
 		
 	}

@@ -91,7 +91,7 @@ public class NewClientAdapterWizard extends Wizard implements IWorkbenchWizard{
 		newWSDL = page.getNewWSDL();
 		oldStub = page.getOldStubFile();
 		newStub = page.getNewStubFile();
-		IRunnableWithProgress op = new IRunnableWithProgress() {
+		/*IRunnableWithProgress op = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
 					doFinish(oldWSDL, newWSDL, monitor);
@@ -101,8 +101,8 @@ public class NewClientAdapterWizard extends Wizard implements IWorkbenchWizard{
 					monitor.done();
 				}
 			}
-		};
-		try {
+		};*/
+		/*try {
 			getContainer().run(true, false, op);
 		} catch (InterruptedException e) {
 			return false;
@@ -110,7 +110,7 @@ public class NewClientAdapterWizard extends Wizard implements IWorkbenchWizard{
 			Throwable realException = e.getTargetException();
 			MessageDialog.openError(getShell(), "Error", realException.getMessage());
 			return false;
-		}
+		}*/
 		return true;
 	}
 	

@@ -36,7 +36,7 @@ public class DeltaUtil {
 		for (DeleteDelta deleteDelta : deleteDeltas) {
 			for (AddDelta addDelta : addDeltas) {
 				WSElement commonAncestor = hasCommonAncestor(
-						deleteDelta.getParent(), addDelta.getParent());
+						deleteDelta.getParent(), addDelta);
 				if (deleteDelta.getSource().equals(addDelta.getTarget())
 						&& commonAncestor != null) {
 					if (!indices.contains(addDeltas.indexOf(addDelta))) {
@@ -161,6 +161,9 @@ public class DeltaUtil {
 							delta2.getParent());
 				}
 			}
+		}
+		if(delta2.getSource() == null) {
+			commonAncestor = hasCommonAncestor(delta1, delta2.getParent());
 		}
 		if (commonAncestor == null) {
 			if (delta1.getParent() != null
