@@ -341,10 +341,8 @@ public class WSDLView extends ViewPart {
 								throws InvocationTargetException {
 							try {
 								monitor.beginTask("Producing diff", 1);
-								WSDLParser parser1 = new WSDLParser(new File(
-										oldWSDL));
-								WSDLParser parser2 = new WSDLParser(new File(
-										newWSDL));
+								WSDLParser parser1 = new WSDLParser(oldWSDL);
+								WSDLParser parser2 = new WSDLParser(newWSDL);
 								Delta delta = parser1.getService().diff(
 										parser2.getService());
 								diffTable = new Delta[] { delta };

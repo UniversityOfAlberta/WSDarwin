@@ -18,7 +18,9 @@ public class IService implements WSElement {
 	private String targetNamespace;
 	private HashMap<String, WSElement> interfaces;
 	
-	
+	public IService() {
+		
+	}
 		
 	public IService(String targetNamespace) {
 		this.targetNamespace = targetNamespace;
@@ -30,6 +32,10 @@ public class IService implements WSElement {
 
 	public void setTargetNamespace(String targetNamespace) {
 		this.targetNamespace = targetNamespace;
+	}
+
+	public HashMap<String, WSElement> getInterfaces() {
+		return interfaces;
 	}
 
 	public void setInterfaces(HashMap<String, WSElement> interfaces) {

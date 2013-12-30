@@ -2,6 +2,9 @@ package wsdarwin.comparison.delta;
 
 import java.util.ArrayList;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import wsdarwin.model.IType;
 import wsdarwin.model.WSElement;
 
@@ -132,5 +135,7 @@ public abstract class Delta {
 	}
 
 	public abstract void printDelta(int level);
+	
+	public abstract Element createXMLElement(Document document, Element parent);
 
 }

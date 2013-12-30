@@ -2,6 +2,9 @@ package wsdarwin.comparison.delta;
 
 import java.util.List;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import wsdarwin.model.WSElement;
 import wsdarwin.util.DeltaUtil;
 
@@ -42,6 +45,12 @@ public class MoveAndChangeDelta extends Delta {
 	
 	public String toString() {
 		return "MoveAndChange\t"+this.getSource().toString() + "\t" + move.getOldParent().toString() + " ->" + move.getNewParent().toString()+"\t@"+change.getChangedAttribute()+"\t"+change.getOldValue()+" -> "+change.getNewValue();
+	}
+
+	@Override
+	public Element createXMLElement(Document document, Element parent) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

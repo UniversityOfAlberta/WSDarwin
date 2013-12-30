@@ -127,8 +127,8 @@ public class NewClientAdapterWizard extends Wizard implements IWorkbenchWizard{
 		throws CoreException {
 		// create a sample file
 		monitor.beginTask("Producing diff", 1);
-		WSDLParser parser1 = new WSDLParser(new File(oldWSDL));
-		WSDLParser parser2 = new WSDLParser(new File(newWSDL));
+		WSDLParser parser1 = new WSDLParser(oldWSDL);
+		WSDLParser parser2 = new WSDLParser(newWSDL);
 		setDiff(parser1.getService().diff(parser2.getService()));
 		monitor.worked(1);
 	}

@@ -18,6 +18,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xml.serialize.*;
+import org.eclipse.core.internal.resources.Folder;
+
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wsdarwin.comparison.delta.AddDelta;
 import wsdarwin.comparison.delta.ChangeDelta;
@@ -38,12 +43,14 @@ public class WSDLParser {
 
 	private Document document;
 	private IService service;
+	private String filename;
 
 	// private HashMap<String, IType> types;
 
-	public WSDLParser(File file) {
+	public WSDLParser(String filename) {
 		// types = new HashMap<String, IType>();
-		parseFile(file);
+		this.filename = filename;
+		parseFile(new File(filename));
 	}
 
 	public IService getService() {
@@ -63,6 +70,12 @@ public class WSDLParser {
 			NodeList definitionsList = document.getElementsByTagNameNS("*",
 					"definitions");
 			Node definitions = definitionsList.item(0);
+			
+			int typeCount = 0;
+			typeCount += document.getElementsByTagNameNS("*","complexType").getLength();
+			typeCount += document.getElementsByTagNameNS("*","simpleType").getLength();
+			
+			System.out.print("Types: "+ typeCount+"\t");
 
 			service = new IService(definitions.getAttributes()
 					.getNamedItem("targetNamespace").getNodeValue());
@@ -195,7 +208,7 @@ public class WSDLParser {
 		String messageElement = getMessageElement(message);
 		Node element = getElementFromMessage(messageElement);
 		Node elementTypeElement = null;
-		if(element != null) {
+		if (element != null) {
 			elementTypeElement = getElementTypeFromElement(element);
 		}
 		Node type;
@@ -205,8 +218,7 @@ public class WSDLParser {
 				String elementType = getElementType(element);
 				elementName = getElementName(element);
 				type = getTypeFromElement(elementType);
-			}
-			else {
+			} else {
 				String elementType = getElementType(elementTypeElement);
 				elementName = getElementName(element);
 				type = getTypeFromElement(elementType);
@@ -268,7 +280,7 @@ public class WSDLParser {
 		String messageElement = getMessageElement(message);
 		Node element = getElementFromMessage(messageElement);
 		Node elementTypeElement = null;
-		if(element != null) {
+		if (element != null) {
 			elementTypeElement = getElementTypeFromElement(element);
 		}
 		Node type;
@@ -278,8 +290,7 @@ public class WSDLParser {
 				String elementType = getElementType(element);
 				elementName = getElementName(element);
 				type = getTypeFromElement(elementType);
-			}
-			else {
+			} else {
 				String elementType = getElementType(elementTypeElement);
 				elementName = getElementName(element);
 				type = getTypeFromElement(elementType);
@@ -542,18 +553,23 @@ public class WSDLParser {
 		}
 		return null;
 	}
-	
+
 	private Node getElementTypeFromElement(Node element) {
-		if(element.hasChildNodes()) {
+		if (element.hasChildNodes()) {
 			NodeList elementChildren = element.getChildNodes();
-			for(int i=0; i<elementChildren.getLength(); i++) {
-				if(equalsIgnoreNamespace(elementChildren.item(i).getNodeName(), "complexType")) {
-					NodeList typeChildren = elementChildren.item(i).getChildNodes();
-					for(int j=0; j<typeChildren.getLength(); j++) {
-						if(equalsIgnoreNamespace(typeChildren.item(j).getNodeName(), "sequence")) {
-							NodeList sequenceChildren = typeChildren.item(j).getChildNodes();
-							for(int k=0; k<sequenceChildren.getLength(); k++) {
-								if(equalsIgnoreNamespace(sequenceChildren.item(k).getNodeName(),"element")) {
+			for (int i = 0; i < elementChildren.getLength(); i++) {
+				if (equalsIgnoreNamespace(
+						elementChildren.item(i).getNodeName(), "complexType")) {
+					NodeList typeChildren = elementChildren.item(i)
+							.getChildNodes();
+					for (int j = 0; j < typeChildren.getLength(); j++) {
+						if (equalsIgnoreNamespace(typeChildren.item(j)
+								.getNodeName(), "sequence")) {
+							NodeList sequenceChildren = typeChildren.item(j)
+									.getChildNodes();
+							for (int k = 0; k < sequenceChildren.getLength(); k++) {
+								if (equalsIgnoreNamespace(sequenceChildren
+										.item(k).getNodeName(), "element")) {
 									return sequenceChildren.item(k);
 								}
 							}
@@ -590,31 +606,24 @@ public class WSDLParser {
 		return null;
 	}
 
-	/*
-	 * public void createXML(String filename) throws IOException { // Document
-	 * (Xerces implementation only). Document xmldoc = new DocumentImpl(); //
-	 * Root element. Element root = xmldoc.createElement("operations"); for
-	 * (Operation operation : operations.values()) { // Child i. Element
-	 * operationElement = xmldoc .createElementNS(null, "operation");
-	 * operationElement.setAttributeNS(null, "name", operation.getName());
-	 * Element input = xmldoc.createElementNS(null, "inputType"); //
-	 * input.setAttributeNS(null, "name", // operation.getInput().getName());
-	 * Element type = getTypeElement(operation.getRequest().getName(),
-	 * operation.getRequest(), xmldoc); input.appendChild(type); Element output
-	 * = xmldoc.createElementNS(null, "outputType"); //
-	 * output.setAttributeNS(null, "name", // operation.getOutput().getName());
-	 * type = getTypeElement(operation.getResponse().getName(),
-	 * operation.getResponse(), xmldoc); output.appendChild(type);
-	 * operationElement.appendChild(input);
-	 * operationElement.appendChild(output); root.appendChild(operationElement);
-	 * } xmldoc.appendChild(root); FileOutputStream fos = new
-	 * FileOutputStream(filename); // XERCES 1 or 2 additionnal classes.
-	 * OutputFormat of = new OutputFormat("XML", "ISO-8859-1", true);
-	 * of.setIndent(1); of.setIndenting(true); XMLSerializer serializer = new
-	 * XMLSerializer(fos, of); // As a DOM Serializer
-	 * serializer.asDOMSerializer();
-	 * serializer.serialize(xmldoc.getDocumentElement()); fos.close(); }
-	 */
+	public static void createXML(String filename, Delta delta) throws IOException {
+		// Document (Xerces implementation only).
+		Document xmldoc = new DocumentImpl();
+		// Root element.
+		Element root = delta.createXMLElement(xmldoc, null);
+		xmldoc.appendChild(root);
+		FileOutputStream fos = new FileOutputStream(filename); // XERCES 1 or 2
+																// additionnal
+																// classes.
+		OutputFormat of = new OutputFormat("XML", "ISO-8859-1", true);
+		of.setIndent(1);
+		of.setIndenting(true);
+		XMLSerializer serializer = new XMLSerializer(fos, of); // As a DOM
+																// Serializer
+		serializer.asDOMSerializer();
+		serializer.serialize(xmldoc.getDocumentElement());
+		fos.close();
+	}
 
 	private Element getTypeElement(String name, IType type, Document xmldoc) {
 		if (type instanceof ComplexType) {
@@ -683,10 +692,54 @@ public class WSDLParser {
 	 */
 
 	public static void main(String[] args) {
+		File folder = new File("files/amazonEC2");
+		File[] files = folder.listFiles();
+		ArrayList<IService> services = new ArrayList<IService>();
+		//for(int i=0; i<files.length; i++) {
+			long currentTime = System.currentTimeMillis();
+			System.out.print("Parsing 2010 \t");
+			IService service1 = new WSDLParser("files/amazonEC2/2009-11-30.ec2.wsdl").getService();
+			services.add(service1);
+			IService service2 = new WSDLParser("files/amazonEC2/2013-02-01.ec2.wsdl").getService();
+			services.add(service2);
+			/*int operationCount = 0;
+			for(WSElement serviceInterface : service.getChildren().values()) {
+				
+				operationCount += ((Interface)serviceInterface).getChildren().size();
+			}*/
+			
+			//System.out.println("Operations: "+operationCount);
+			/*ObjectMapper mapper = new ObjectMapper();
+			try {
+				mapper.writeValue(new File("files/json/service"+i+".json"), service);
+			} catch (JsonGenerationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
+			//System.out.println(System.currentTimeMillis()-currentTime);
+		//}
+		for(int i=0; i<services.size()-1; i++) {
+				currentTime = System.currentTimeMillis();
+				System.out.print("Diff 2010\t");
+				//ObjectMapper mapper = new ObjectMapper();
+				try {
+					//IService service1 = mapper.readValue(new File("files/json/service"+i+".json"), IService.class);
+					//IService service2 = mapper.readValue(new File("files/json/service"+(i+1)+".json"), IService.class);
+					Delta delta = services.get(i).diff(services.get(i+1));
+					WSDLParser.createXML("files/output/diffALL.xml", delta);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println(System.currentTimeMillis()-currentTime);
+		}
 		
-			WSDLParser parser1 = new WSDLParser(new File(
-					"files/calculator3.wsdl"));
-			parser1.getService().diff(parser1.getService()).printDelta(0);
 	}
 
 }

@@ -3,6 +3,9 @@ package wsdarwin.comparison.delta;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import wsdarwin.model.WSElement;
 import wsdarwin.util.DeltaUtil;
 
@@ -89,6 +92,26 @@ public class ChangeDelta extends Delta{
 			deltaText  += "\t@" +this.getChangedAttribute()+"\t"+this.getOldValue()+" -> "+this.getNewValue();
 		}
 		return deltaText;
+	}
+
+	@Override
+	public Element createXMLElement(Document document, Element parent) {
+		Element deltaElement = document.createElement("ChangeDelta");
+		deltaElement.setAttribute("type", target.getClass().getSimpleName());
+		deltaElement.setAttribute("source", source.toString());
+		deltaElement.setAttribute("target", target.toString());
+		for(int i=0; i<changedAttribute.size(); i++) {
+			deltaElement.setAttribute("changedAttribute", changedAttribute.get(i));
+			deltaElement.setAttribute("oldValue", oldValue.get(i));
+			deltaElement.setAttribute("newValue", newValue.get(i));
+		}
+		for(Delta delta : deltas) {
+			delta.createXMLElement(document, deltaElement);
+		}
+		if (parent != null) {
+			parent.appendChild(deltaElement);
+		}
+		return deltaElement;
 	}
 
 }

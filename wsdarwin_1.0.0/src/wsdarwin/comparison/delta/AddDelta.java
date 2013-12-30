@@ -1,5 +1,8 @@
 package wsdarwin.comparison.delta;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import wsdarwin.model.WSElement;
 import wsdarwin.util.DeltaUtil;
 
@@ -36,5 +39,21 @@ public class AddDelta extends Delta {
 	public String toString() {
 		return "Add\t\t -> "+this.getTarget().toString();
 	}
+
+	@Override
+	public Element createXMLElement(Document document, Element parent) {
+		Element deltaElement = document.createElement("AddDelta");
+		deltaElement.setAttribute("type", target.getClass().getSimpleName());
+		deltaElement.setAttribute("target", target.toString());
+		for(Delta delta : deltas) {
+			delta.createXMLElement(document, deltaElement);
+		}
+		if (parent != null) {
+			parent.appendChild(deltaElement);
+		}
+		return deltaElement;
+	}
+	
+	
 
 }
