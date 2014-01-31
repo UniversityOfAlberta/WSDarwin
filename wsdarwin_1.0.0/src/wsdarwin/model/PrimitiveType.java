@@ -25,7 +25,15 @@ public class PrimitiveType implements IType {
 	
 	public PrimitiveType(String name, String variableName) {
 		super();
-		this.name = name;
+		if (name.equalsIgnoreCase("DATETIME")) {
+			this.name = "Calendar";
+		}
+		else if(name.equalsIgnoreCase("integer")) {
+			this.name = "BigInteger";
+		}
+		else {
+			this.name = name;
+		}
 		this.variableName = variableName;
 	}
 	@Override
@@ -103,5 +111,15 @@ public class PrimitiveType implements IType {
 		else {
 			return false;
 		}
+	}
+	@Override
+	public int getNumberOfTypes() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public int getNesting() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

@@ -166,6 +166,20 @@ public class IService implements WSElement {
 		return this.targetNamespace;
 	}
 	
+	public int getNumberOfTypes() {
+		int typeCount = 0;
+		for(WSElement serviceInterface : interfaces.values()) {
+			typeCount += ((Interface)serviceInterface).getNumberOfTypes();
+		}
+		return typeCount;
+ 	}
 	
+	public double getAverageNestingPerOperation() {
+		double averageNesting = 0;
+		for(WSElement serviceInterface : interfaces.values()) {
+			averageNesting += ((Interface)serviceInterface).getAverageNestingPerOperation();
+		}
+		return averageNesting/(double)interfaces.size();
+	}
 
 }

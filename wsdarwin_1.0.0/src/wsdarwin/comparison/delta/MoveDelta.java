@@ -10,7 +10,18 @@ public class MoveDelta extends Delta {
 	
 	private WSElement oldParent;
 	private WSElement newParent;
+	private AddDelta addDelta;
+	private DeleteDelta deleteDelta;
 
+	public MoveDelta(WSElement source, WSElement target,
+			WSElement oldParent, WSElement newParent, AddDelta addDelta, DeleteDelta deleteDelta) {
+		super(source, target);
+		this.oldParent = oldParent;
+		this.newParent = newParent;
+		this.addDelta = addDelta;
+		this.deleteDelta = deleteDelta;
+	}
+	
 	public MoveDelta(WSElement source, WSElement target,
 			WSElement oldParent, WSElement newParent) {
 		super(source, target);

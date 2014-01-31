@@ -176,6 +176,22 @@ public class Interface implements WSElement {
 		// TODO Auto-generated method stub
 		return name;
 	}
+
+	public int getNumberOfTypes() {
+		int typeCount = 0;
+		for(WSElement operation : operations.values()) {
+			typeCount += ((Operation)operation).getNumberOfTypes();
+		}
+		return typeCount;
+	}
+
+	public double getAverageNestingPerOperation() {
+		double averageNesting = 0;
+		for(WSElement operation : operations.values()) {
+			averageNesting += ((Operation)operation).getNesting();
+		}
+		return averageNesting/(double)operations.size();
+	}
 	
 	
 

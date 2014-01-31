@@ -174,5 +174,18 @@ public class Operation implements WSElement {
 		return children;
 	}
 
+	public int getNumberOfTypes() {
+		int typeCount = 0;
+		typeCount += request.getNumberOfTypes();
+		typeCount += response.getNumberOfTypes();
+		return typeCount;
+	}
+
+	public double getNesting() {
+		double nesting1 = request.getNesting();
+		double nesting2 = request.getNesting();
+		return Math.max(nesting1, nesting2);
+	}
+
 	
 }

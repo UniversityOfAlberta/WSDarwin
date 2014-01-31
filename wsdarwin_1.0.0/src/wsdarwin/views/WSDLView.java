@@ -45,9 +45,11 @@ import wsdarwin.comparison.delta.AddDelta;
 import wsdarwin.comparison.delta.ChangeDelta;
 import wsdarwin.comparison.delta.DeleteDelta;
 import wsdarwin.comparison.delta.Delta;
+import wsdarwin.model.Interface;
 import wsdarwin.model.Operation;
 import wsdarwin.parsers.WADLParser;
 import wsdarwin.parsers.WSDLParser;
+import wsdarwin.util.DeltaUtil;
 import wsdarwin.wizards.MyRefactoringWizard;
 import wsdarwin.wizards.NewClientAdapterWizard;
 
@@ -345,6 +347,7 @@ public class WSDLView extends ViewPart {
 								WSDLParser parser2 = new WSDLParser(newWSDL);
 								Delta delta = parser1.getService().diff(
 										parser2.getService());
+								//DeltaUtil.findMoveDeltas(delta);
 								diffTable = new Delta[] { delta };
 								monitor.worked(1);
 							} finally {
@@ -382,7 +385,8 @@ public class WSDLView extends ViewPart {
 
 		adaptClient = new Action() {
 			public void run() {
-				diffTable[0].printDelta(0);
+				long start = System.currentTimeMillis();
+				//diffTable[0].printDelta(0);
 				CompilationUnit oldCompilationUnit = parseAST(oldStub);
 				Map<String, Delta> changedOperationNames = new HashMap<String, Delta>();
 				changedOperationNames = getChangedOperations(
@@ -390,6 +394,8 @@ public class WSDLView extends ViewPart {
 				Map<MethodDeclaration, Delta> changedMethods = getChangedMethods(
 						changedOperationNames, oldCompilationUnit);
 				CompilationUnit newCompilationUnit = parseAST(newStub);
+				System.out.println("Parse AST: "+(System.currentTimeMillis()-start));
+				
 
 				ClientAdaptationRefactoring refactoring = new ClientAdaptationRefactoring(
 						oldCompilationUnit, newCompilationUnit,
@@ -405,9 +411,11 @@ public class WSDLView extends ViewPart {
 					op.run(getSite().getShell(), titleForFailedChecks);
 					IWorkbenchPage page = PlatformUI.getWorkbench()
 							.getActiveWorkbenchWindow().getActivePage();
+					
 
 					try {
 						IDE.openEditor(page, (IFile) oldStub.getResource());
+						//System.out.println(System.currentTimeMillis()-start);
 					} catch (PartInitException e) {
 						// Put your exception handler here if you wish to
 					}

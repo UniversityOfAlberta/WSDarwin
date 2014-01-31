@@ -159,6 +159,16 @@ public class SimpleType implements IType {
 		// TODO Auto-generated method stub
 		return elementName+":"+base.getName();
 	}
+	@Override
+	public int getNumberOfTypes() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public int getNesting() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
 	
 }

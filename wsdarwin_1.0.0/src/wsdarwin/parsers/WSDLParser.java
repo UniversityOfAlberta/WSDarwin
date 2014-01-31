@@ -44,12 +44,20 @@ public class WSDLParser {
 	private Document document;
 	private IService service;
 	private String filename;
+	private HashMap<String, Node> operationNodes;
+	private HashMap<String, Node> messageNodes;
+	private HashMap<String, Node> elementNodes;
+	private HashMap<String, Node> typeNodes;
 
 	// private HashMap<String, IType> types;
 
 	public WSDLParser(String filename) {
 		// types = new HashMap<String, IType>();
 		this.filename = filename;
+		this.operationNodes = new HashMap<String, Node>();
+		this.messageNodes = new HashMap<String, Node>();
+		this.elementNodes = new HashMap<String, Node>();
+		this.typeNodes = new HashMap<String, Node>();
 		parseFile(new File(filename));
 	}
 
@@ -60,27 +68,74 @@ public class WSDLParser {
 	public void setService(IService service) {
 		this.service = service;
 	}
+	
+	private void initDocument() {
+		NodeList operations = document.getElementsByTagNameNS("*", "operation");
+		for (int i = 0; i < operations.getLength(); i++) {
+			if (equalsIgnoreNamespace(operations.item(i).getParentNode()
+					.getNodeName(), "portType")) {
+				Node operationNode = operations.item(i);
+				operationNodes.put(operationNode
+						.getAttributes().getNamedItem("name").getNodeValue(), operationNode);
+			}
+		}
+		
+		NodeList messages = document.getElementsByTagNameNS("*", "message");
+		for(int i=0; i<messages.getLength(); i++) {
+			Node messageNode = messages.item(i);
+			messageNodes.put(messageNode.getAttributes().getNamedItem("name").getNodeValue(), messageNode);
+		}
+		
+		NodeList elements = document.getElementsByTagNameNS("*", "element");
+		for(int i=0; i<elements.getLength(); i++) {
+			if (equalsIgnoreNamespace(elements.item(i).getParentNode()
+					.getNodeName(), "schema")) {
+				Node elementNode = elements.item(i);
+				elementNodes.put(elementNode.getAttributes().getNamedItem("name").getNodeValue(), elementNode);
+			}
+		}
+		
+		NodeList complexTypes = document.getElementsByTagNameNS("*", "complexType");
+		for(int i=0; i<complexTypes.getLength(); i++) {
+			Node typeNode = complexTypes.item(i);
+			typeNodes.put(typeNode.getAttributes().getNamedItem("name").getNodeValue(), typeNode);
+		}
+		
+		NodeList simpleTypes = document.getElementsByTagNameNS("*", "simpleType");
+		for(int i=0; i<simpleTypes.getLength(); i++) {
+			Node typeNode = simpleTypes.item(i);
+			typeNodes.put(typeNode.getAttributes().getNamedItem("name").getNodeValue(), typeNode);
+		}
+	}
 
 	public void parseFile(File file) {
 		try {
+			long current = System.currentTimeMillis();
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setNamespaceAware(true);
 			document = dbf.newDocumentBuilder().parse(file);
-
+			initDocument();
 			NodeList definitionsList = document.getElementsByTagNameNS("*",
 					"definitions");
 			Node definitions = definitionsList.item(0);
-			
-			int typeCount = 0;
-			typeCount += document.getElementsByTagNameNS("*","complexType").getLength();
-			typeCount += document.getElementsByTagNameNS("*","simpleType").getLength();
-			
-			System.out.print("Types: "+ typeCount+"\t");
 
 			service = new IService(definitions.getAttributes()
 					.getNamedItem("targetNamespace").getNodeValue());
+			
 
 			service.setInterfaces(getServiceInterfaces());
+			long time = System.currentTimeMillis()-current;
+			int typeCount = service.getNumberOfTypes();
+			double averageNesting = service.getAverageNestingPerOperation();
+			
+			System.out.print("Types: "+ typeCount+"\t");
+			
+			int opCount = document.getElementsByTagNameNS("*","operation").getLength()/3;
+			
+			System.out.print("Operations: "+ opCount+"\t");
+			System.out.print("ANPO: "+ averageNesting+"\t");
+
+			System.out.print(time+"ms\t");
 		} catch (SAXException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -113,12 +168,10 @@ public class WSDLParser {
 
 	private HashMap<String, WSElement> getInterfaceOperations(Node interfaceNode) {
 		HashMap<String, WSElement> operations = new HashMap<String, WSElement>();
-		NodeList operationList = document.getElementsByTagNameNS("*",
-				"operation");
-		for (int i = 0; i < operationList.getLength(); i++) {
-			if (equalsIgnoreNamespace(operationList.item(i).getParentNode()
-					.getNodeName(), "portType")) {
-				Node operationNode = operationList.item(i);
+		//NodeList operationList = document.getElementsByTagNameNS("*",
+		//		"operation");
+		for (Node operationNode : operationNodes.values()) {
+			if (operationNode.getParentNode().equals(interfaceNode)) {
 				Operation operation = new Operation(operationNode
 						.getAttributes().getNamedItem("name").getNodeValue(),
 						"", "", getInputTypeOfOperation(operationNode),
@@ -200,13 +253,17 @@ public class WSDLParser {
 		}
 		return null;
 	}
+	
+	private String clearNamespace(String text) {
+		return text.substring(text.indexOf(':')+1, text.length());
+	}
 
 	private IType getInputTypeOfOperation(Node operation) {
 		Node input = getInputOfOperation(operation);
 		Node messageAttribute = input.getAttributes().getNamedItem("message");
-		Node message = getMessageFromAttribute(messageAttribute.getNodeValue());
+		Node message = messageNodes.get(clearNamespace(messageAttribute.getNodeValue()));
 		String messageElement = getMessageElement(message);
-		Node element = getElementFromMessage(messageElement);
+		Node element = elementNodes.get(clearNamespace(messageElement));
 		Node elementTypeElement = null;
 		if (element != null) {
 			elementTypeElement = getElementTypeFromElement(element);
@@ -217,14 +274,14 @@ public class WSDLParser {
 			if (elementTypeElement == null) {
 				String elementType = getElementType(element);
 				elementName = getElementName(element);
-				type = getTypeFromElement(elementType);
+				type = typeNodes.get(clearNamespace(elementType));
 			} else {
 				String elementType = getElementType(elementTypeElement);
 				elementName = getElementName(element);
-				type = getTypeFromElement(elementType);
+				type = typeNodes.get(clearNamespace(elementType));
 			}
 		} else {
-			type = getTypeFromElement(messageElement);
+			type = typeNodes.get(clearNamespace(messageElement));
 		}
 		IType iType = null;
 		if (type != null) {
@@ -276,9 +333,9 @@ public class WSDLParser {
 	private IType getOutputTypeOfOperation(Node operation) {
 		Node input = getOutputOfOperation(operation);
 		Node messageAttribute = input.getAttributes().getNamedItem("message");
-		Node message = getMessageFromAttribute(messageAttribute.getNodeValue());
+		Node message = messageNodes.get(clearNamespace(messageAttribute.getNodeValue()));
 		String messageElement = getMessageElement(message);
-		Node element = getElementFromMessage(messageElement);
+		Node element = elementNodes.get(clearNamespace(messageElement));
 		Node elementTypeElement = null;
 		if (element != null) {
 			elementTypeElement = getElementTypeFromElement(element);
@@ -289,14 +346,14 @@ public class WSDLParser {
 			if (elementTypeElement == null) {
 				String elementType = getElementType(element);
 				elementName = getElementName(element);
-				type = getTypeFromElement(elementType);
+				type = typeNodes.get(clearNamespace(elementType));
 			} else {
 				String elementType = getElementType(elementTypeElement);
 				elementName = getElementName(element);
-				type = getTypeFromElement(elementType);
+				type = typeNodes.get(clearNamespace(elementType));
 			}
 		} else {
-			type = getTypeFromElement(messageElement);
+			type = typeNodes.get(clearNamespace(messageElement));
 		}
 		IType iType = null;
 		if (type != null) {
@@ -695,13 +752,11 @@ public class WSDLParser {
 		File folder = new File("files/amazonEC2");
 		File[] files = folder.listFiles();
 		ArrayList<IService> services = new ArrayList<IService>();
-		//for(int i=0; i<files.length; i++) {
+		for(int i=0; i<files.length; i++) {
 			long currentTime = System.currentTimeMillis();
-			System.out.print("Parsing 2010 \t");
-			IService service1 = new WSDLParser("files/amazonEC2/2009-11-30.ec2.wsdl").getService();
+			System.out.print("Parsing "+i+" \t");
+			IService service1 = new WSDLParser(files[i].getPath()).getService();
 			services.add(service1);
-			IService service2 = new WSDLParser("files/amazonEC2/2013-02-01.ec2.wsdl").getService();
-			services.add(service2);
 			/*int operationCount = 0;
 			for(WSElement serviceInterface : service.getChildren().values()) {
 				
@@ -722,24 +777,61 @@ public class WSDLParser {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}*/
-			//System.out.println(System.currentTimeMillis()-currentTime);
-		//}
+			System.out.println(System.currentTimeMillis()-currentTime);
+		}
 		for(int i=0; i<services.size()-1; i++) {
-				currentTime = System.currentTimeMillis();
-				System.out.print("Diff 2010\t");
+				
+				System.out.print("Diff "+i+"-"+(i+1)+"\t");
 				//ObjectMapper mapper = new ObjectMapper();
 				try {
 					//IService service1 = mapper.readValue(new File("files/json/service"+i+".json"), IService.class);
 					//IService service2 = mapper.readValue(new File("files/json/service"+(i+1)+".json"), IService.class);
+					long currentTime = System.currentTimeMillis();
 					Delta delta = services.get(i).diff(services.get(i+1));
-					WSDLParser.createXML("files/output/diffALL.xml", delta);
+					DeltaUtil.findMoveDeltas(delta);
+					long time = System.currentTimeMillis()-currentTime;
+					int changedOpCount = countOperationDeltasByType("ChangeDelta", delta);
+					int addedOpCount = countOperationDeltasByType("AddDelta", delta);
+					int deletedOpCount = countOperationDeltasByType("DeleteDelta", delta);
+					int movedOpCount = countOperationDeltasByType("MoveDelta", delta);
+					System.out.print("Operations changed: "+changedOpCount+" added: "+addedOpCount+" deleted: "+deletedOpCount+" moved: "+movedOpCount+"\t");
+					int changedTypeCount = countTypeDeltasByType("ChangeDelta", delta);
+					int addedTypeCount = countTypeDeltasByType("AddDelta", delta);
+					int deletedTypeCount = countTypeDeltasByType("DeleteDelta", delta);
+					int movedTypeCount = countTypeDeltasByType("MoveDelta", delta);
+					System.out.print("Types changed: "+changedTypeCount+" added: "+addedTypeCount+" deleted: "+deletedTypeCount+" moved: "+movedTypeCount+"\t");
+					WSDLParser.createXML("files/output/diff"+i+"-"+(i+1)+".xml", delta);
+					System.out.println(time+"ms");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				System.out.println(System.currentTimeMillis()-currentTime);
+				
 		}
 		
 	}
+	
+	private static int countOperationDeltasByType(String deltaType, Delta delta) {
+		int counter = 0;
+		if(delta.getElement() instanceof Operation && delta.getClass().getSimpleName().equals(deltaType)) {
+			counter++;
+		}
+		for(Delta child : delta.getDeltas()) {
+			counter += countOperationDeltasByType(deltaType, child);
+		}
+		return counter;
+	}
+	
+	private static int countTypeDeltasByType(String deltaType, Delta delta) {
+		int counter = 0;
+		if(delta.getElement() instanceof IType && delta.getClass().getSimpleName().equals(deltaType)) {
+			counter++;
+		}
+		for(Delta child : delta.getDeltas()) {
+			counter += countTypeDeltasByType(deltaType, child);
+		}
+		return counter;
+	}
+
 
 }

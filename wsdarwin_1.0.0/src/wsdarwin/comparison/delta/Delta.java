@@ -133,6 +133,15 @@ public abstract class Delta {
 		}
 		return typeDelta;
 	}
+	
+	public WSElement getElement() {
+		if(source != null) {
+			return source;
+		}
+		else {
+			return target;
+		}
+	}
 
 	public abstract void printDelta(int level);
 	

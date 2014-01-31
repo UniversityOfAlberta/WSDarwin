@@ -17,6 +17,15 @@ public class DeltaUtil {
 		}
 		return true;
 	}
+	
+	private static boolean containsOnlyMoveDeltas(ArrayList<Delta> deltas) {
+		for (Delta delta : deltas) {
+			if (!(delta instanceof MoveDelta)) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 	public static String indent(int level) {
 		String indent = "";
@@ -88,11 +97,13 @@ public class DeltaUtil {
 				Delta addParent = moveDeltaMap.get(deleteDelta).getParent();
 				MoveDelta moveDelta = new MoveDelta(deleteDelta.getSource(),
 						moveDeltaMap.get(deleteDelta).getTarget(),
-						deleteParent.getSource(), addParent.getTarget());
+						deleteParent.getSource(), addParent.getTarget(), moveDeltaMap.get(deleteDelta), deleteDelta);
 				deleteParent.getDeltas().set(
 						deleteParent.getDeltas().indexOf(deleteDelta),
 						moveDelta);
-				addParent.getDeltas().remove(addDeltas);
+				addParent.getDeltas().set(addParent.getDeltas().indexOf(moveDeltaMap.get(deleteDelta)), moveDelta);
+				moveDelta.setParent(deleteParent);
+				//addParent.getDeltas().remove(addDeltas);
 			}
 		}
 		if (!moveAndChangeDeltaMap.isEmpty()) {
@@ -149,14 +160,28 @@ public class DeltaUtil {
 		 */
 	}
 
+	/*private static void replaceDeleteWithMoveDelta(
+			HashMap<DeleteDelta, AddDelta> moveDeltaMap, Delta deleteDelta) {
+		Delta deleteParent = deleteDelta.getParent();
+		if(containsOnlyMoveDeltas(deleteDelta.getDeltas())) {
+			MoveDelta moveDelta = new MoveDelta(deleteDelta.getSource(), ((MoveDelta)deleteDelta.getDeltas().get(0)).getTarget(), null, null);
+			moveDelta.setParent(deleteParent);
+			deleteParent.getDeltas().set(
+					deleteParent.getDeltas().indexOf(deleteDelta),
+					moveDelta);
+		}
+		if(containsOnlyMoveDeltas(deleteParent.getDeltas()) ) {
+			replaceDeleteWithMoveDelta(moveDeltaMap, deleteParent);
+		}
+	}*/
+
 	private static WSElement hasCommonAncestor(Delta delta1, Delta delta2) {
 		WSElement commonAncestor = null;
-		if (delta1.getSource() != null && delta2.getSource() != null) {
+		if (delta1.getSource() != null && delta2.getSource() != null && !(delta2.getParent().getSource() instanceof IService)) {
 			if (delta1.getSource().equals(delta2.getSource())) {
 				commonAncestor = delta1.getSource();
 			} else {
-				if (delta2.getParent() != null
-						&& !(delta2.getParent().getSource() instanceof IService)) {
+				if (delta2.getParent() != null) {
 					commonAncestor = hasCommonAncestor(delta1,
 							delta2.getParent());
 				}

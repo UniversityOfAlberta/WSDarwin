@@ -1,6 +1,7 @@
 package wsdarwin.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import wsdarwin.comparison.delta.AddDelta;
@@ -113,21 +114,24 @@ public class ComplexType implements IType {
 							.get(nameAdded)
 							.getChildren()
 							.equals(typesDeleted.get(nameDeleted).getChildren())) {
-						deltas.add(typesAdded.get(nameAdded).diff(
-								typesDeleted.get(nameDeleted)));
-						typesNotAdded.add(nameAdded);
-						typesNotDeleted.add(nameDeleted);
-					}
-				} else if (typesAdded.get(nameAdded) instanceof PrimitiveType
-						&& typesDeleted.get(nameDeleted) instanceof PrimitiveType) {
-					if (((IType)typesAdded.get(nameAdded)).getName()
-							.equals(((IType)typesDeleted.get(nameDeleted)).getName())) {
 						deltas.add(typesDeleted.get(nameDeleted).diff(
 								typesAdded.get(nameAdded)));
 						typesNotAdded.add(nameAdded);
 						typesNotDeleted.add(nameDeleted);
 					}
-				}
+				} 
+				/*else if (typesAdded.get(nameAdded) instanceof PrimitiveType
+						&& typesDeleted.get(nameDeleted) instanceof PrimitiveType) {
+					if (((IType)typesAdded.get(nameAdded)).getName()
+							.equals(((IType)typesDeleted.get(nameDeleted)).getName())) {
+						deltas.add(typesDeleted.get(nameDeleted).diff(
+								typesAdded.get(nameAdded)));
+						if (typesNotAdded.contains(nameAdded) || typesNotDeleted.contains(nameDeleted)) {
+							typesNotAdded.add(nameAdded);
+							typesNotDeleted.add(nameDeleted);
+						}
+					}
+				}*/
 			}
 		}
 		for (String notAdded : typesNotAdded) {
@@ -190,6 +194,36 @@ public class ComplexType implements IType {
 	public String toString() {
 		// TODO Auto-generated method stub
 		return name+":"+elementName;
+	}
+
+	@Override
+	public int getNumberOfTypes() {
+		int typeCount = 1;
+		for(WSElement element : elements.values()) {
+			if(element instanceof ComplexType) {
+				typeCount += ((ComplexType)element).getNumberOfTypes();
+			}
+			else if(element instanceof SimpleType || element instanceof PrimitiveType) {
+				typeCount++;
+			}
+		}
+		return typeCount;
+	}
+
+	@Override
+	public int getNesting() {
+		ArrayList<Integer> nestings = new ArrayList<Integer>();
+		for(WSElement element : elements.values()) {
+			if(element instanceof ComplexType) {
+				nestings.add(((ComplexType)element).getNesting());
+			}
+		}
+		if (!nestings.isEmpty()) {
+			return Collections.max(nestings) + 1;
+		}
+		else {
+			return 1;
+		}
 	}
 	
 	
