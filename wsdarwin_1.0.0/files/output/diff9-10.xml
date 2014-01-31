@@ -1,0 +1,958 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<ChangeDelta changedAttribute="targetNamespace"
+    newValue="http://ec2.amazonaws.com/doc/2009-03-01/"
+    oldValue="http://ec2.amazonaws.com/doc/2008-12-01/"
+    source="http://ec2.amazonaws.com/doc/2008-12-01/"
+    target="http://ec2.amazonaws.com/doc/2009-03-01/" type="IService">
+    <ChangeDelta changedAttribute="" newValue="" oldValue=""
+        source="AmazonEC2PortType" target="AmazonEC2PortType" type="Interface">
+        <AddDelta target="DescribeReservedInstancesOfferings" type="Operation">
+            <AddDelta
+                target="DescribeReservedInstancesOfferingsType:DescribeReservedInstancesOfferings" type="ComplexType">
+                <AddDelta target="instanceType:STRING" type="PrimitiveType"/>
+                <AddDelta target="productDescription:STRING" type="PrimitiveType"/>
+                <AddDelta target="availabilityZone:STRING" type="PrimitiveType"/>
+                <AddDelta
+                    target="DescribeReservedInstancesOfferingsSetType:reservedInstancesOfferingsSet" type="ComplexType">
+                    <AddDelta
+                        target="DescribeReservedInstancesOfferingsSetItemType:item" type="ComplexType">
+                        <AddDelta
+                            target="reservedInstancesOfferingId:STRING" type="PrimitiveType"/>
+                    </AddDelta>
+                </AddDelta>
+            </AddDelta>
+            <AddDelta
+                target="DescribeReservedInstancesOfferingsResponseType:DescribeReservedInstancesOfferingsResponse" type="ComplexType">
+                <AddDelta target="requestId:STRING" type="PrimitiveType"/>
+                <AddDelta
+                    target="DescribeReservedInstancesOfferingsResponseSetType:reservedInstancesOfferingsSet" type="ComplexType">
+                    <AddDelta
+                        target="DescribeReservedInstancesOfferingsResponseSetItemType:item" type="ComplexType">
+                        <AddDelta target="instanceType:STRING" type="PrimitiveType"/>
+                        <AddDelta target="duration:LONG" type="PrimitiveType"/>
+                        <AddDelta target="fixedPrice:DOUBLE" type="PrimitiveType"/>
+                        <AddDelta target="productDescription:STRING" type="PrimitiveType"/>
+                        <AddDelta target="usagePrice:DOUBLE" type="PrimitiveType"/>
+                        <AddDelta target="availabilityZone:STRING" type="PrimitiveType"/>
+                        <AddDelta
+                            target="reservedInstancesOfferingId:STRING" type="PrimitiveType"/>
+                    </AddDelta>
+                </AddDelta>
+            </AddDelta>
+        </AddDelta>
+        <AddDelta target="DescribeReservedInstances" type="Operation">
+            <AddDelta
+                target="DescribeReservedInstancesResponseType:DescribeReservedInstancesResponse" type="ComplexType">
+                <AddDelta target="requestId:STRING" type="PrimitiveType"/>
+                <AddDelta
+                    target="DescribeReservedInstancesResponseSetType:reservedInstancesSet" type="ComplexType">
+                    <AddDelta
+                        target="DescribeReservedInstancesResponseSetItemType:item" type="ComplexType">
+                        <AddDelta target="instanceType:STRING" type="PrimitiveType"/>
+                        <AddDelta target="duration:LONG" type="PrimitiveType"/>
+                        <AddDelta target="fixedPrice:DOUBLE" type="PrimitiveType"/>
+                        <AddDelta target="productDescription:STRING" type="PrimitiveType"/>
+                        <AddDelta target="start:DATETIME" type="PrimitiveType"/>
+                        <AddDelta target="state:STRING" type="PrimitiveType"/>
+                        <AddDelta target="usagePrice:DOUBLE" type="PrimitiveType"/>
+                        <AddDelta target="availabilityZone:STRING" type="PrimitiveType"/>
+                        <AddDelta target="reservedInstancesId:STRING" type="PrimitiveType"/>
+                        <AddDelta target="instanceCount:INTEGER" type="PrimitiveType"/>
+                    </AddDelta>
+                </AddDelta>
+            </AddDelta>
+            <AddDelta
+                target="DescribeReservedInstancesType:DescribeReservedInstances" type="ComplexType">
+                <AddDelta
+                    target="DescribeReservedInstancesSetType:reservedInstancesSet" type="ComplexType">
+                    <AddDelta
+                        target="DescribeReservedInstancesSetItemType:item" type="ComplexType">
+                        <AddDelta target="reservedInstancesId:STRING" type="PrimitiveType"/>
+                    </AddDelta>
+                </AddDelta>
+            </AddDelta>
+        </AddDelta>
+        <AddDelta target="PurchaseReservedInstancesOffering" type="Operation">
+            <AddDelta
+                target="PurchaseReservedInstancesOfferingType:PurchaseReservedInstancesOffering" type="ComplexType">
+                <AddDelta target="instanceCount:INT" type="PrimitiveType"/>
+                <AddDelta target="reservedInstancesOfferingId:STRING" type="PrimitiveType"/>
+            </AddDelta>
+            <AddDelta
+                target="PurchaseReservedInstancesOfferingResponseType:PurchaseReservedInstancesOfferingResponse" type="ComplexType">
+                <AddDelta target="requestId:STRING" type="PrimitiveType"/>
+                <AddDelta target="reservedInstancesId:STRING" type="PrimitiveType"/>
+            </AddDelta>
+        </AddDelta>
+        <MatchDelta source="TerminateInstances" type="Operation">
+            <MatchDelta
+                source="TerminateInstancesType:TerminateInstances" type="ComplexType">
+                <MatchDelta
+                    source="TerminateInstancesInfoType:instancesSet" type="ComplexType">
+                    <MatchDelta source="TerminateInstancesItemType:item" type="ComplexType">
+                        <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+            <MatchDelta
+                source="TerminateInstancesResponseType:TerminateInstancesResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta
+                    source="TerminateInstancesResponseInfoType:instancesSet" type="ComplexType">
+                    <MatchDelta
+                        source="TerminateInstancesResponseItemType:item" type="ComplexType">
+                        <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                        <MatchDelta
+                            source="InstanceStateType:shutdownState" type="ComplexType">
+                            <MatchDelta source="name:STRING" type="PrimitiveType"/>
+                            <MatchDelta source="code:INT" type="PrimitiveType"/>
+                        </MatchDelta>
+                        <MatchDelta
+                            source="InstanceStateType:previousState" type="ComplexType">
+                            <MatchDelta source="name:STRING" type="PrimitiveType"/>
+                            <MatchDelta source="code:INT" type="PrimitiveType"/>
+                        </MatchDelta>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="ResetImageAttribute" type="Operation">
+            <MatchDelta
+                source="ResetImageAttributeType:ResetImageAttribute" type="ComplexType">
+                <MatchDelta source="imageId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="ResetImageAttributeResponseType:ResetImageAttributeResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DetachVolume" type="Operation">
+            <MatchDelta source="DetachVolumeType:DetachVolume" type="ComplexType">
+                <MatchDelta source="volumeId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="device:STRING" type="PrimitiveType"/>
+                <MatchDelta source="force:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="DetachVolumeResponseType:DetachVolumeResponse" type="ComplexType">
+                <MatchDelta source="volumeId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="status:STRING" type="PrimitiveType"/>
+                <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="device:STRING" type="PrimitiveType"/>
+                <MatchDelta source="attachTime:DATETIME" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="ConfirmProductInstance" type="Operation">
+            <MatchDelta
+                source="ConfirmProductInstanceType:ConfirmProductInstance" type="ComplexType">
+                <MatchDelta source="productCode:STRING" type="PrimitiveType"/>
+                <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="ConfirmProductInstanceResponseType:ConfirmProductInstanceResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="ownerId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DisassociateAddress" type="Operation">
+            <MatchDelta
+                source="DisassociateAddressType:DisassociateAddress" type="ComplexType">
+                <MatchDelta source="publicIp:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="DisassociateAddressResponseType:DisassociateAddressResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="RunInstances" type="Operation">
+            <MatchDelta source="RunInstancesType:RunInstances" type="ComplexType">
+                <MatchDelta source="instanceType:STRING" type="PrimitiveType"/>
+                <MatchDelta source="PlacementRequestType:placement" type="ComplexType">
+                    <MatchDelta source="availabilityZone:STRING" type="PrimitiveType"/>
+                </MatchDelta>
+                <MatchDelta source="addressingType:STRING" type="PrimitiveType"/>
+                <MatchDelta source="keyName:STRING" type="PrimitiveType"/>
+                <MatchDelta source="imageId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="ramdiskId:STRING" type="PrimitiveType"/>
+                <MatchDelta
+                    source="BlockDeviceMappingType:blockDeviceMapping" type="ComplexType">
+                    <MatchDelta source="BlockDeviceMappingItemType:item" type="ComplexType">
+                        <MatchDelta source="virtualName:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="deviceName:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="GroupSetType:groupSet" type="ComplexType">
+                    <MatchDelta source="GroupItemType:item" type="ComplexType">
+                        <MatchDelta source="groupId:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="kernelId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="minCount:INT" type="PrimitiveType"/>
+                <MatchDelta source="UserDataType:userData" type="ComplexType">
+                    <MatchDelta source="data:STRING" type="PrimitiveType"/>
+                </MatchDelta>
+                <MatchDelta source="additionalInfo:STRING" type="PrimitiveType"/>
+                <MatchDelta source="maxCount:INT" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="RunInstancesResponseType:RunInstancesResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="ownerId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="GroupSetType:groupSet" type="ComplexType">
+                    <MatchDelta source="GroupItemType:item" type="ComplexType">
+                        <MatchDelta source="groupId:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="requesterId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="reservationId:STRING" type="PrimitiveType"/>
+                <MatchDelta
+                    source="RunningInstancesSetType:instancesSet" type="ComplexType">
+                    <MatchDelta source="RunningInstancesItemType:item" type="ComplexType">
+                        <MatchDelta
+                            source="PlacementResponseType:placement" type="ComplexType">
+                            <MatchDelta source="availabilityZone:STRING" type="PrimitiveType"/>
+                        </MatchDelta>
+                        <MatchDelta source="platform:STRING" type="PrimitiveType"/>
+                        <MatchDelta
+                            source="InstanceStateType:instanceState" type="ComplexType">
+                            <MatchDelta source="name:STRING" type="PrimitiveType"/>
+                            <MatchDelta source="code:INT" type="PrimitiveType"/>
+                        </MatchDelta>
+                        <MatchDelta source="reason:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="kernelId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="privateDnsName:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="dnsName:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="instanceType:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="launchTime:DATETIME" type="PrimitiveType"/>
+                        <MatchDelta source="imageId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="keyName:STRING" type="PrimitiveType"/>
+                        <MatchDelta
+                            source="ProductCodesSetType:productCodes" type="ComplexType">
+                            <MatchDelta
+                                source="ProductCodesSetItemType:item" type="ComplexType">
+                                <MatchDelta source="productCode:STRING" type="PrimitiveType"/>
+                            </MatchDelta>
+                        </MatchDelta>
+                        <MatchDelta source="ramdiskId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="amiLaunchIndex:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DeregisterImage" type="Operation">
+            <MatchDelta source="DeregisterImageType:DeregisterImage" type="ComplexType">
+                <MatchDelta source="imageId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="DeregisterImageResponseType:DeregisterImageResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DeleteKeyPair" type="Operation">
+            <MatchDelta source="DeleteKeyPairType:DeleteKeyPair" type="ComplexType">
+                <MatchDelta source="keyName:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="DeleteKeyPairResponseType:DeleteKeyPairResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="CreateVolume" type="Operation">
+            <MatchDelta source="CreateVolumeType:CreateVolume" type="ComplexType">
+                <MatchDelta source="snapshotId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="availabilityZone:STRING" type="PrimitiveType"/>
+                <MatchDelta source="size:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="CreateVolumeResponseType:CreateVolumeResponse" type="ComplexType">
+                <MatchDelta source="snapshotId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="createTime:DATETIME" type="PrimitiveType"/>
+                <MatchDelta source="volumeId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="status:STRING" type="PrimitiveType"/>
+                <MatchDelta source="availabilityZone:STRING" type="PrimitiveType"/>
+                <MatchDelta source="size:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DescribeKeyPairs" type="Operation">
+            <MatchDelta source="DescribeKeyPairsType:DescribeKeyPairs" type="ComplexType">
+                <MatchDelta source="DescribeKeyPairsInfoType:keySet" type="ComplexType">
+                    <MatchDelta source="DescribeKeyPairsItemType:item" type="ComplexType">
+                        <MatchDelta source="keyName:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+            <MatchDelta
+                source="DescribeKeyPairsResponseType:DescribeKeyPairsResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta
+                    source="DescribeKeyPairsResponseInfoType:keySet" type="ComplexType">
+                    <MatchDelta
+                        source="DescribeKeyPairsResponseItemType:item" type="ComplexType">
+                        <MatchDelta source="keyName:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="keyFingerprint:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DescribeBundleTasks" type="Operation">
+            <MatchDelta
+                source="DescribeBundleTasksType:DescribeBundleTasks" type="ComplexType">
+                <MatchDelta
+                    source="DescribeBundleTasksInfoType:bundlesSet" type="ComplexType">
+                    <MatchDelta
+                        source="DescribeBundleTasksItemType:item" type="ComplexType">
+                        <MatchDelta source="bundleId:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+            <MatchDelta
+                source="DescribeBundleTasksResponseType:DescribeBundleTasksResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta
+                    source="BundleInstanceTasksSetType:bundleInstanceTasksSet" type="ComplexType">
+                    <MatchDelta source="BundleInstanceTaskType:item" type="ComplexType">
+                        <MatchDelta source="startTime:DATETIME" type="PrimitiveType"/>
+                        <MatchDelta source="progress:STRING" type="PrimitiveType"/>
+                        <MatchDelta
+                            source="BundleInstanceTaskErrorType:error" type="ComplexType">
+                            <MatchDelta source="message:STRING" type="PrimitiveType"/>
+                            <MatchDelta source="code:STRING" type="PrimitiveType"/>
+                        </MatchDelta>
+                        <MatchDelta source="updateTime:DATETIME" type="PrimitiveType"/>
+                        <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="bundleId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="state:STRING" type="PrimitiveType"/>
+                        <MatchDelta
+                            source="BundleInstanceTaskStorageType:storage" type="ComplexType">
+                            <MatchDelta
+                                source="BundleInstanceS3StorageType:S3" type="ComplexType">
+                                <MatchDelta source="bucket:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="prefix:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="uploadPolicy:STRING" type="PrimitiveType"/>
+                                <MatchDelta
+                                    source="awsAccessKeyId:STRING" type="PrimitiveType"/>
+                                <MatchDelta
+                                    source="uploadPolicySignature:STRING" type="PrimitiveType"/>
+                            </MatchDelta>
+                        </MatchDelta>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="CancelBundleTask" type="Operation">
+            <MatchDelta source="CancelBundleTaskType:CancelBundleTask" type="ComplexType">
+                <MatchDelta source="bundleId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="CancelBundleTaskResponseType:CancelBundleTaskResponse" type="ComplexType">
+                <MatchDelta
+                    source="BundleInstanceTaskType:bundleInstanceTask" type="ComplexType">
+                    <MatchDelta source="startTime:DATETIME" type="PrimitiveType"/>
+                    <MatchDelta source="progress:STRING" type="PrimitiveType"/>
+                    <MatchDelta
+                        source="BundleInstanceTaskErrorType:error" type="ComplexType">
+                        <MatchDelta source="message:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="code:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                    <MatchDelta source="updateTime:DATETIME" type="PrimitiveType"/>
+                    <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                    <MatchDelta source="bundleId:STRING" type="PrimitiveType"/>
+                    <MatchDelta source="state:STRING" type="PrimitiveType"/>
+                    <MatchDelta
+                        source="BundleInstanceTaskStorageType:storage" type="ComplexType">
+                        <MatchDelta
+                            source="BundleInstanceS3StorageType:S3" type="ComplexType">
+                            <MatchDelta source="bucket:STRING" type="PrimitiveType"/>
+                            <MatchDelta source="prefix:STRING" type="PrimitiveType"/>
+                            <MatchDelta source="uploadPolicy:STRING" type="PrimitiveType"/>
+                            <MatchDelta source="awsAccessKeyId:STRING" type="PrimitiveType"/>
+                            <MatchDelta
+                                source="uploadPolicySignature:STRING" type="PrimitiveType"/>
+                        </MatchDelta>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DescribeRegions" type="Operation">
+            <MatchDelta source="DescribeRegionsType:DescribeRegions" type="ComplexType">
+                <MatchDelta source="DescribeRegionsSetType:regionSet" type="ComplexType">
+                    <MatchDelta source="DescribeRegionsSetItemType:item" type="ComplexType">
+                        <MatchDelta source="regionName:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+            <MatchDelta
+                source="DescribeRegionsResponseType:DescribeRegionsResponse" type="ComplexType">
+                <MatchDelta source="RegionSetType:regionInfo" type="ComplexType">
+                    <MatchDelta source="RegionItemType:item" type="ComplexType">
+                        <MatchDelta source="regionEndpoint:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="regionName:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="AuthorizeSecurityGroupIngress" type="Operation">
+            <MatchDelta
+                source="AuthorizeSecurityGroupIngressType:AuthorizeSecurityGroupIngress" type="ComplexType">
+                <MatchDelta source="groupName:STRING" type="PrimitiveType"/>
+                <MatchDelta source="IpPermissionSetType:ipPermissions" type="ComplexType">
+                    <MatchDelta source="IpPermissionType:item" type="ComplexType">
+                        <MatchDelta source="IpRangeSetType:ipRanges" type="ComplexType">
+                            <MatchDelta source="IpRangeItemType:item" type="ComplexType">
+                                <MatchDelta source="cidrIp:STRING" type="PrimitiveType"/>
+                            </MatchDelta>
+                        </MatchDelta>
+                        <MatchDelta source="fromPort:INT" type="PrimitiveType"/>
+                        <MatchDelta source="ipProtocol:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="toPort:INT" type="PrimitiveType"/>
+                        <MatchDelta
+                            source="UserIdGroupPairSetType:groups" type="ComplexType">
+                            <MatchDelta
+                                source="UserIdGroupPairType:item" type="ComplexType">
+                                <MatchDelta source="groupName:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="userId:STRING" type="PrimitiveType"/>
+                            </MatchDelta>
+                        </MatchDelta>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="userId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="AuthorizeSecurityGroupIngressResponseType:AuthorizeSecurityGroupIngressResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="ModifyImageAttribute" type="Operation">
+            <MatchDelta
+                source="ModifyImageAttributeType:ModifyImageAttribute" type="ComplexType">
+                <MatchDelta source="imageId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="ModifyImageAttributeResponseType:ModifyImageAttributeResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DeleteSecurityGroup" type="Operation">
+            <MatchDelta
+                source="DeleteSecurityGroupType:DeleteSecurityGroup" type="ComplexType">
+                <MatchDelta source="groupName:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="DeleteSecurityGroupResponseType:DeleteSecurityGroupResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DescribeImageAttribute" type="Operation">
+            <MatchDelta
+                source="DescribeImageAttributeType:DescribeImageAttribute" type="ComplexType">
+                <MatchDelta source="imageId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="DescribeImageAttributeResponseType:DescribeImageAttributeResponse" type="ComplexType">
+                <MatchDelta source="imageId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DescribeVolumes" type="Operation">
+            <MatchDelta source="DescribeVolumesType:DescribeVolumes" type="ComplexType">
+                <MatchDelta source="DescribeVolumesSetType:volumeSet" type="ComplexType">
+                    <MatchDelta source="DescribeVolumesSetItemType:item" type="ComplexType">
+                        <MatchDelta source="volumeId:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+            <MatchDelta
+                source="DescribeVolumesResponseType:DescribeVolumesResponse" type="ComplexType">
+                <MatchDelta
+                    source="DescribeVolumesSetResponseType:volumeSet" type="ComplexType">
+                    <MatchDelta
+                        source="DescribeVolumesSetItemResponseType:item" type="ComplexType">
+                        <MatchDelta source="snapshotId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="createTime:DATETIME" type="PrimitiveType"/>
+                        <MatchDelta source="volumeId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="status:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="availabilityZone:STRING" type="PrimitiveType"/>
+                        <MatchDelta
+                            source="AttachmentSetResponseType:attachmentSet" type="ComplexType">
+                            <MatchDelta
+                                source="AttachmentSetItemResponseType:item" type="ComplexType">
+                                <MatchDelta source="volumeId:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="status:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="device:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="attachTime:DATETIME" type="PrimitiveType"/>
+                            </MatchDelta>
+                        </MatchDelta>
+                        <MatchDelta source="size:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="RegisterImage" type="Operation">
+            <MatchDelta source="RegisterImageType:RegisterImage" type="ComplexType">
+                <MatchDelta source="imageLocation:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="RegisterImageResponseType:RegisterImageResponse" type="ComplexType">
+                <MatchDelta source="imageId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DescribeSnapshots" type="Operation">
+            <MatchDelta source="DescribeSnapshotsType:DescribeSnapshots" type="ComplexType">
+                <MatchDelta
+                    source="DescribeSnapshotsSetType:snapshotSet" type="ComplexType">
+                    <MatchDelta
+                        source="DescribeSnapshotsSetItemType:item" type="ComplexType">
+                        <MatchDelta source="snapshotId:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+            <MatchDelta
+                source="DescribeSnapshotsResponseType:DescribeSnapshotsResponse" type="ComplexType">
+                <MatchDelta
+                    source="DescribeSnapshotsSetResponseType:snapshotSet" type="ComplexType">
+                    <MatchDelta
+                        source="DescribeSnapshotsSetItemResponseType:item" type="ComplexType">
+                        <MatchDelta source="snapshotId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="startTime:DATETIME" type="PrimitiveType"/>
+                        <MatchDelta source="progress:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="volumeId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="status:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DeleteVolume" type="Operation">
+            <MatchDelta source="DeleteVolumeType:DeleteVolume" type="ComplexType">
+                <MatchDelta source="volumeId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="DeleteVolumeResponseType:DeleteVolumeResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="CreateSecurityGroup" type="Operation">
+            <MatchDelta
+                source="CreateSecurityGroupType:CreateSecurityGroup" type="ComplexType">
+                <MatchDelta source="groupName:STRING" type="PrimitiveType"/>
+                <MatchDelta source="groupDescription:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="CreateSecurityGroupResponseType:CreateSecurityGroupResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="AllocateAddress" type="Operation">
+            <MatchDelta source="AllocateAddressType:AllocateAddress" type="ComplexType"/>
+            <MatchDelta
+                source="AllocateAddressResponseType:AllocateAddressResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="publicIp:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="RebootInstances" type="Operation">
+            <MatchDelta source="RebootInstancesType:RebootInstances" type="ComplexType">
+                <MatchDelta
+                    source="RebootInstancesInfoType:instancesSet" type="ComplexType">
+                    <MatchDelta source="RebootInstancesItemType:item" type="ComplexType">
+                        <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+            <MatchDelta
+                source="RebootInstancesResponseType:RebootInstancesResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DescribeSecurityGroups" type="Operation">
+            <MatchDelta
+                source="DescribeSecurityGroupsType:DescribeSecurityGroups" type="ComplexType">
+                <MatchDelta
+                    source="DescribeSecurityGroupsSetType:securityGroupSet" type="ComplexType">
+                    <MatchDelta
+                        source="DescribeSecurityGroupsSetItemType:item" type="ComplexType">
+                        <MatchDelta source="groupName:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+            <MatchDelta
+                source="DescribeSecurityGroupsResponseType:DescribeSecurityGroupsResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta
+                    source="SecurityGroupSetType:securityGroupInfo" type="ComplexType">
+                    <MatchDelta source="SecurityGroupItemType:item" type="ComplexType">
+                        <MatchDelta source="groupName:STRING" type="PrimitiveType"/>
+                        <MatchDelta
+                            source="IpPermissionSetType:ipPermissions" type="ComplexType">
+                            <MatchDelta source="IpPermissionType:item" type="ComplexType">
+                                <MatchDelta
+                                    source="IpRangeSetType:ipRanges" type="ComplexType">
+                                    <MatchDelta
+                                    source="IpRangeItemType:item" type="ComplexType">
+                                    <MatchDelta
+                                    source="cidrIp:STRING" type="PrimitiveType"/>
+                                    </MatchDelta>
+                                </MatchDelta>
+                                <MatchDelta source="fromPort:INT" type="PrimitiveType"/>
+                                <MatchDelta source="ipProtocol:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="toPort:INT" type="PrimitiveType"/>
+                                <MatchDelta
+                                    source="UserIdGroupPairSetType:groups" type="ComplexType">
+                                    <MatchDelta
+                                    source="UserIdGroupPairType:item" type="ComplexType">
+                                    <MatchDelta
+                                    source="groupName:STRING" type="PrimitiveType"/>
+                                    <MatchDelta
+                                    source="userId:STRING" type="PrimitiveType"/>
+                                    </MatchDelta>
+                                </MatchDelta>
+                            </MatchDelta>
+                        </MatchDelta>
+                        <MatchDelta source="groupDescription:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="ownerId:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="AttachVolume" type="Operation">
+            <MatchDelta source="AttachVolumeType:AttachVolume" type="ComplexType">
+                <MatchDelta source="volumeId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="device:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="AttachVolumeResponseType:AttachVolumeResponse" type="ComplexType">
+                <MatchDelta source="volumeId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="status:STRING" type="PrimitiveType"/>
+                <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="device:STRING" type="PrimitiveType"/>
+                <MatchDelta source="attachTime:DATETIME" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DescribeImages" type="Operation">
+            <MatchDelta source="DescribeImagesType:DescribeImages" type="ComplexType">
+                <MatchDelta source="DescribeImagesInfoType:imagesSet" type="ComplexType">
+                    <MatchDelta source="DescribeImagesItemType:item" type="ComplexType">
+                        <MatchDelta source="imageId:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta
+                    source="DescribeImagesExecutableBySetType:executableBySet" type="ComplexType">
+                    <MatchDelta
+                        source="DescribeImagesExecutableByType:item" type="ComplexType">
+                        <MatchDelta source="user:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="DescribeImagesOwnersType:ownersSet" type="ComplexType">
+                    <MatchDelta source="DescribeImagesOwnerType:item" type="ComplexType">
+                        <MatchDelta source="owner:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+            <MatchDelta
+                source="DescribeImagesResponseType:DescribeImagesResponse" type="ComplexType">
+                <MatchDelta
+                    source="DescribeImagesResponseInfoType:imagesSet" type="ComplexType">
+                    <MatchDelta
+                        source="DescribeImagesResponseItemType:item" type="ComplexType">
+                        <MatchDelta source="platform:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="imageId:STRING" type="PrimitiveType"/>
+                        <MatchDelta
+                            source="ProductCodesSetType:productCodes" type="ComplexType">
+                            <MatchDelta
+                                source="ProductCodesSetItemType:item" type="ComplexType">
+                                <MatchDelta source="productCode:STRING" type="PrimitiveType"/>
+                            </MatchDelta>
+                        </MatchDelta>
+                        <MatchDelta source="ramdiskId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="imageType:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="imageState:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="imageOwnerId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="kernelId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="isPublic:BOOLEAN" type="PrimitiveType"/>
+                        <MatchDelta source="architecture:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="imageLocation:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="GetConsoleOutput" type="Operation">
+            <MatchDelta source="GetConsoleOutputType:GetConsoleOutput" type="ComplexType">
+                <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="GetConsoleOutputResponseType:GetConsoleOutputResponse" type="ComplexType">
+                <MatchDelta source="timestamp:DATETIME" type="PrimitiveType"/>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="output:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="ReleaseAddress" type="Operation">
+            <MatchDelta source="ReleaseAddressType:ReleaseAddress" type="ComplexType">
+                <MatchDelta source="publicIp:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="ReleaseAddressResponseType:ReleaseAddressResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DescribeAddresses" type="Operation">
+            <MatchDelta source="DescribeAddressesType:DescribeAddresses" type="ComplexType">
+                <MatchDelta
+                    source="DescribeAddressesInfoType:publicIpsSet" type="ComplexType">
+                    <MatchDelta source="DescribeAddressesItemType:item" type="ComplexType">
+                        <MatchDelta source="publicIp:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+            <MatchDelta
+                source="DescribeAddressesResponseType:DescribeAddressesResponse" type="ComplexType">
+                <MatchDelta
+                    source="DescribeAddressesResponseInfoType:addressesSet" type="ComplexType">
+                    <MatchDelta
+                        source="DescribeAddressesResponseItemType:item" type="ComplexType">
+                        <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="publicIp:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DescribeInstances" type="Operation">
+            <MatchDelta source="DescribeInstancesType:DescribeInstances" type="ComplexType">
+                <MatchDelta
+                    source="DescribeInstancesInfoType:instancesSet" type="ComplexType">
+                    <MatchDelta source="DescribeInstancesItemType:item" type="ComplexType">
+                        <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+            <MatchDelta
+                source="DescribeInstancesResponseType:DescribeInstancesResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="ReservationSetType:reservationSet" type="ComplexType">
+                    <MatchDelta source="ReservationInfoType:item" type="ComplexType">
+                        <MatchDelta source="ownerId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="GroupSetType:groupSet" type="ComplexType">
+                            <MatchDelta source="GroupItemType:item" type="ComplexType">
+                                <MatchDelta source="groupId:STRING" type="PrimitiveType"/>
+                            </MatchDelta>
+                        </MatchDelta>
+                        <MatchDelta source="requesterId:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="reservationId:STRING" type="PrimitiveType"/>
+                        <MatchDelta
+                            source="RunningInstancesSetType:instancesSet" type="ComplexType">
+                            <MatchDelta
+                                source="RunningInstancesItemType:item" type="ComplexType">
+                                <MatchDelta
+                                    source="PlacementResponseType:placement" type="ComplexType">
+                                    <MatchDelta
+                                    source="availabilityZone:STRING" type="PrimitiveType"/>
+                                </MatchDelta>
+                                <MatchDelta source="platform:STRING" type="PrimitiveType"/>
+                                <MatchDelta
+                                    source="InstanceStateType:instanceState" type="ComplexType">
+                                    <MatchDelta source="name:STRING" type="PrimitiveType"/>
+                                    <MatchDelta source="code:INT" type="PrimitiveType"/>
+                                </MatchDelta>
+                                <MatchDelta source="reason:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="kernelId:STRING" type="PrimitiveType"/>
+                                <MatchDelta
+                                    source="privateDnsName:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="dnsName:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="instanceType:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="launchTime:DATETIME" type="PrimitiveType"/>
+                                <MatchDelta source="imageId:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="keyName:STRING" type="PrimitiveType"/>
+                                <MatchDelta
+                                    source="ProductCodesSetType:productCodes" type="ComplexType">
+                                    <MatchDelta
+                                    source="ProductCodesSetItemType:item" type="ComplexType">
+                                    <MatchDelta
+                                    source="productCode:STRING" type="PrimitiveType"/>
+                                    </MatchDelta>
+                                </MatchDelta>
+                                <MatchDelta source="ramdiskId:STRING" type="PrimitiveType"/>
+                                <MatchDelta
+                                    source="amiLaunchIndex:STRING" type="PrimitiveType"/>
+                            </MatchDelta>
+                        </MatchDelta>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="BundleInstance" type="Operation">
+            <MatchDelta source="BundleInstanceType:BundleInstance" type="ComplexType">
+                <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                <MatchDelta
+                    source="BundleInstanceTaskStorageType:storage" type="ComplexType">
+                    <MatchDelta source="BundleInstanceS3StorageType:S3" type="ComplexType">
+                        <MatchDelta source="bucket:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="prefix:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="uploadPolicy:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="awsAccessKeyId:STRING" type="PrimitiveType"/>
+                        <MatchDelta
+                            source="uploadPolicySignature:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+            <MatchDelta
+                source="BundleInstanceResponseType:BundleInstanceResponse" type="ComplexType">
+                <MatchDelta
+                    source="BundleInstanceTaskType:bundleInstanceTask" type="ComplexType">
+                    <MatchDelta source="startTime:DATETIME" type="PrimitiveType"/>
+                    <MatchDelta source="progress:STRING" type="PrimitiveType"/>
+                    <MatchDelta
+                        source="BundleInstanceTaskErrorType:error" type="ComplexType">
+                        <MatchDelta source="message:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="code:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                    <MatchDelta source="updateTime:DATETIME" type="PrimitiveType"/>
+                    <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                    <MatchDelta source="bundleId:STRING" type="PrimitiveType"/>
+                    <MatchDelta source="state:STRING" type="PrimitiveType"/>
+                    <MatchDelta
+                        source="BundleInstanceTaskStorageType:storage" type="ComplexType">
+                        <MatchDelta
+                            source="BundleInstanceS3StorageType:S3" type="ComplexType">
+                            <MatchDelta source="bucket:STRING" type="PrimitiveType"/>
+                            <MatchDelta source="prefix:STRING" type="PrimitiveType"/>
+                            <MatchDelta source="uploadPolicy:STRING" type="PrimitiveType"/>
+                            <MatchDelta source="awsAccessKeyId:STRING" type="PrimitiveType"/>
+                            <MatchDelta
+                                source="uploadPolicySignature:STRING" type="PrimitiveType"/>
+                        </MatchDelta>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="AssociateAddress" type="Operation">
+            <MatchDelta source="AssociateAddressType:AssociateAddress" type="ComplexType">
+                <MatchDelta source="instanceId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="publicIp:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="AssociateAddressResponseType:AssociateAddressResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="CreateKeyPair" type="Operation">
+            <MatchDelta source="CreateKeyPairType:CreateKeyPair" type="ComplexType">
+                <MatchDelta source="keyName:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="CreateKeyPairResponseType:CreateKeyPairResponse" type="ComplexType">
+                <MatchDelta source="keyName:STRING" type="PrimitiveType"/>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="keyMaterial:STRING" type="PrimitiveType"/>
+                <MatchDelta source="keyFingerprint:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="RevokeSecurityGroupIngress" type="Operation">
+            <MatchDelta
+                source="RevokeSecurityGroupIngressType:RevokeSecurityGroupIngress" type="ComplexType">
+                <MatchDelta source="groupName:STRING" type="PrimitiveType"/>
+                <MatchDelta source="IpPermissionSetType:ipPermissions" type="ComplexType">
+                    <MatchDelta source="IpPermissionType:item" type="ComplexType">
+                        <MatchDelta source="IpRangeSetType:ipRanges" type="ComplexType">
+                            <MatchDelta source="IpRangeItemType:item" type="ComplexType">
+                                <MatchDelta source="cidrIp:STRING" type="PrimitiveType"/>
+                            </MatchDelta>
+                        </MatchDelta>
+                        <MatchDelta source="fromPort:INT" type="PrimitiveType"/>
+                        <MatchDelta source="ipProtocol:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="toPort:INT" type="PrimitiveType"/>
+                        <MatchDelta
+                            source="UserIdGroupPairSetType:groups" type="ComplexType">
+                            <MatchDelta
+                                source="UserIdGroupPairType:item" type="ComplexType">
+                                <MatchDelta source="groupName:STRING" type="PrimitiveType"/>
+                                <MatchDelta source="userId:STRING" type="PrimitiveType"/>
+                            </MatchDelta>
+                        </MatchDelta>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="userId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="RevokeSecurityGroupIngressResponseType:RevokeSecurityGroupIngressResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DescribeAvailabilityZones" type="Operation">
+            <MatchDelta
+                source="DescribeAvailabilityZonesType:DescribeAvailabilityZones" type="ComplexType">
+                <MatchDelta
+                    source="DescribeAvailabilityZonesSetType:availabilityZoneSet" type="ComplexType">
+                    <MatchDelta
+                        source="DescribeAvailabilityZonesSetItemType:item" type="ComplexType">
+                        <MatchDelta source="zoneName:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+            </MatchDelta>
+            <MatchDelta
+                source="DescribeAvailabilityZonesResponseType:DescribeAvailabilityZonesResponse" type="ComplexType">
+                <MatchDelta
+                    source="AvailabilityZoneSetType:availabilityZoneInfo" type="ComplexType">
+                    <MatchDelta source="AvailabilityZoneItemType:item" type="ComplexType">
+                        <MatchDelta source="zoneState:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="regionName:STRING" type="PrimitiveType"/>
+                        <MatchDelta source="zoneName:STRING" type="PrimitiveType"/>
+                    </MatchDelta>
+                </MatchDelta>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="DeleteSnapshot" type="Operation">
+            <MatchDelta source="DeleteSnapshotType:DeleteSnapshot" type="ComplexType">
+                <MatchDelta source="snapshotId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="DeleteSnapshotResponseType:DeleteSnapshotResponse" type="ComplexType">
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="return:BOOLEAN" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+        <MatchDelta source="CreateSnapshot" type="Operation">
+            <MatchDelta source="CreateSnapshotType:CreateSnapshot" type="ComplexType">
+                <MatchDelta source="volumeId:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+            <MatchDelta
+                source="CreateSnapshotResponseType:CreateSnapshotResponse" type="ComplexType">
+                <MatchDelta source="snapshotId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="startTime:DATETIME" type="PrimitiveType"/>
+                <MatchDelta source="progress:STRING" type="PrimitiveType"/>
+                <MatchDelta source="volumeId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="requestId:STRING" type="PrimitiveType"/>
+                <MatchDelta source="status:STRING" type="PrimitiveType"/>
+            </MatchDelta>
+        </MatchDelta>
+    </ChangeDelta>
+</ChangeDelta>
