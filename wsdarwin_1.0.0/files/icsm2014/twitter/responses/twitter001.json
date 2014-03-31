@@ -1,0 +1,522 @@
+[
+   {
+    "created_at": "Thu May 24 16:50:31 +0000 2012",
+    "id": 205702329821958140,
+    "id_str": "205702329821958145",
+    "text": "@PityridaFrydia ??e ?e? ?a e?pe t?p?ta ?? ? Benny ??a t?? ???? sta ?????t?; #paok #benny #ekloges #cl #AlexisTo... http://t.co/fGgeRoIT",
+    "source": "<a href=\"http://twitterfeed.com\" rel=\"nofollow\">twitterfeed</a>",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": 557957403,
+    "in_reply_to_user_id_str": "557957403",
+    "in_reply_to_screen_name": "PityridaFrydia",
+    "user":  {
+      "id": 506396517,
+      "id_str": "506396517",
+      "name": "PAOK_bot",
+      "screen_name": "PAOKbot",
+      "location": "???? ?a?t??",
+      "description": "?? p?? asp??a??? p?t...",
+      "url": "http://www.paokfc.gr/",
+      "entities":  {
+        "url":  {
+          "urls":  [
+             {
+              "url": "http://www.paokfc.gr/",
+              "expanded_url": null,
+              "indices":  [
+                0,
+                21
+              ]
+            }
+          ]
+        },
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 97,
+      "friends_count": 0,
+      "listed_count": 1,
+      "created_at": "Mon Feb 27 21:00:36 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 4497,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/profile_images/1858527198/____4_normal.jpg",
+      "profile_image_url_https": "https://si0.twimg.com/profile_images/1858527198/____4_normal.jpg",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": false,
+      "following": null,
+      "follow_request_sent": false,
+      "notifications": null
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "paok",
+          "indices":  [
+            77,
+            82
+          ]
+        },
+         {
+          "text": "benny",
+          "indices":  [
+            83,
+            89
+          ]
+        },
+         {
+          "text": "ekloges",
+          "indices":  [
+            90,
+            98
+          ]
+        },
+         {
+          "text": "cl",
+          "indices":  [
+            99,
+            102
+          ]
+        },
+         {
+          "text": "AlexisTo",
+          "indices":  [
+            103,
+            112
+          ]
+        }
+      ],
+      "urls":  [
+         {
+          "url": "http://t.co/fGgeRoIT",
+          "expanded_url": "http://bit.ly/KiCTbo",
+          "display_url": "bit.ly/KiCTbo",
+          "indices":  [
+            116,
+            136
+          ]
+        }
+      ],
+      "user_mentions":  [
+         {
+          "screen_name": "PityridaFrydia",
+          "name": "Pityrida Sta Frydia",
+          "id": 557957403,
+          "id_str": "557957403",
+          "indices":  [
+            0,
+            15
+          ]
+        }
+      ]
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Thu May 24 15:03:37 +0000 2012",
+    "id": 205675424997576700,
+    "id_str": "205675424997576705",
+    "text": "@PityridaFrydia ??e ?e? ?a e?pe t?p?ta ?? ? Benny ??a t?? ???? sta ?????t?; #paok #benny #ekloges #cl #AlexisTouMai",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": 205675087280619520,
+    "in_reply_to_status_id_str": "205675087280619520",
+    "in_reply_to_user_id": 557957403,
+    "in_reply_to_user_id_str": "557957403",
+    "in_reply_to_screen_name": "PityridaFrydia",
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 2,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 89,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "paok",
+          "indices":  [
+            77,
+            82
+          ]
+        },
+         {
+          "text": "benny",
+          "indices":  [
+            83,
+            89
+          ]
+        },
+         {
+          "text": "ekloges",
+          "indices":  [
+            90,
+            98
+          ]
+        },
+         {
+          "text": "cl",
+          "indices":  [
+            99,
+            102
+          ]
+        },
+         {
+          "text": "AlexisTouMai",
+          "indices":  [
+            103,
+            116
+          ]
+        }
+      ],
+      "urls":  [],
+      "user_mentions":  [
+         {
+          "screen_name": "PityridaFrydia",
+          "name": "Pityrida Sta Frydia",
+          "id": 557957403,
+          "id_str": "557957403",
+          "indices":  [
+            0,
+            15
+          ]
+        }
+      ]
+    },
+    "favorited": false,
+    "retweeted": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Fri May 04 20:14:34 +0000 2012",
+    "id": 198505923914899460,
+    "id_str": "198505923914899457",
+    "text": "@PityridaFrydia ???a??st??e ?a? ?a??? ??f?? t?? ????a???! #ekloges #malakes",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": 198505781753163780,
+    "in_reply_to_status_id_str": "198505781753163777",
+    "in_reply_to_user_id": 557957403,
+    "in_reply_to_user_id_str": "557957403",
+    "in_reply_to_screen_name": "PityridaFrydia",
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 2,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 89,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "ekloges",
+          "indices":  [
+            59,
+            67
+          ]
+        },
+         {
+          "text": "malakes",
+          "indices":  [
+            68,
+            76
+          ]
+        }
+      ],
+      "urls":  [],
+      "user_mentions":  [
+         {
+          "screen_name": "PityridaFrydia",
+          "name": "Pityrida Sta Frydia",
+          "id": 557957403,
+          "id_str": "557957403",
+          "indices":  [
+            0,
+            15
+          ]
+        }
+      ]
+    },
+    "favorited": false,
+    "retweeted": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Thu Apr 19 21:55:55 +0000 2012",
+    "id": 193095611560640500,
+    "id_str": "193095611560640512",
+    "text": "@PityridaFrydia ????? a?af????? ?t? ? ????? t?? ????s?? ?ta? epe?d? ????e p??tas? p??ta st?? s????? ?as???? p??? ???e? st? s????? ?a????.",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": 193095107552100350,
+    "in_reply_to_status_id_str": "193095107552100352",
+    "in_reply_to_user_id": 557957403,
+    "in_reply_to_user_id_str": "557957403",
+    "in_reply_to_screen_name": "PityridaFrydia",
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 2,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 89,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [],
+      "urls":  [],
+      "user_mentions":  [
+         {
+          "screen_name": "PityridaFrydia",
+          "name": "Pityrida Sta Frydia",
+          "id": 557957403,
+          "id_str": "557957403",
+          "indices":  [
+            0,
+            15
+          ]
+        }
+      ]
+    },
+    "favorited": false,
+    "retweeted": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Thu Apr 19 21:53:55 +0000 2012",
+    "id": 193095107552100350,
+    "id_str": "193095107552100352",
+    "text": "@PityridaFrydia ???????: ? p?????pa? ?a???? a??????e t?? p??tas? t?? p???d??? t?? ??.?.S e?? ?t?? ep?st?afe? t? ?at?? st?? pap? t??.",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": 193094196347928580,
+    "in_reply_to_status_id_str": "193094196347928577",
+    "in_reply_to_user_id": 557957403,
+    "in_reply_to_user_id_str": "557957403",
+    "in_reply_to_screen_name": "PityridaFrydia",
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 2,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 89,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [],
+      "urls":  [],
+      "user_mentions":  [
+         {
+          "screen_name": "PityridaFrydia",
+          "name": "Pityrida Sta Frydia",
+          "id": 557957403,
+          "id_str": "557957403",
+          "indices":  [
+            0,
+            15
+          ]
+        }
+      ]
+    },
+    "favorited": false,
+    "retweeted": false,
+    "lang": "el"
+  }
+]

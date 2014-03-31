@@ -1,0 +1,13 @@
+{
+  "statuses":  [],
+  "search_metadata":  {
+    "completed_in": 0.028,
+    "max_id": 315958095190822900,
+    "max_id_str": "315958095190822912",
+    "query": "%40wartarkus+until%3A2013-03-26",
+    "refresh_url": "?since_id=315958095190822912&q=%40wartarkus%20until%3A2013-03-26&geocode=37.781157%2C-122.398720%2C1mi&result_type=mixed&include_entities=1",
+    "count": 3,
+    "since_id": 12345,
+    "since_id_str": "12345"
+  }
+}
