@@ -1,6 +1,7 @@
 package wsdarwin.model;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 import wsdarwin.comparison.delta.ChangeDelta;
 import wsdarwin.comparison.delta.Delta;
@@ -71,6 +72,7 @@ public class PrimitiveType implements IType {
 	public void setVariableName(String variableName) {
 		this.variableName = variableName;
 	}
+	
 	@Override
 	public Delta diff(WSElement input) {
 		PrimitiveType type = null;

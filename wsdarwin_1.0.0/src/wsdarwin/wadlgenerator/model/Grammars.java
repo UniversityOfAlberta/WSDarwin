@@ -3,10 +3,12 @@ package wsdarwin.wadlgenerator.model;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import wsdarwin.comparison.delta.Delta;
 import wsdarwin.model.WSElement;
+import wsdarwin.wadlgenerator.model.xsd.XSDFile;
 
 public class Grammars implements WADLElement {
 
@@ -14,26 +16,26 @@ public class Grammars implements WADLElement {
 	/* Grammars can be included inline or by reference. In our case 
 	 * we will only use them by reference, therefore the includeType 
 	 * is not needed. */
-	private HashSet<String> includedGrammars;		// Set of "href"-values of XSD-files
+	private HashSet<XSDFile> includedGrammars;		// Set of "href"-values of XSD-files
 
 
 	public Grammars() {
-		includedGrammars = new HashSet<String>();
+		includedGrammars = new HashSet<XSDFile>();
 	}
 
 	public String getIdentifier() {
 		return includedGrammars.toString();
 	}
 
-	public HashSet<String> getIncludedGrammars() {
+	public HashSet<XSDFile> getIncludedGrammars() {
 		return includedGrammars;
 	}
 
-	public void addIncludedGrammar(String include) {
-		includedGrammars.add(include);
+	public void addIncludedGrammar(XSDFile schema) {
+		includedGrammars.add(schema);
 	}	
 
-	public void addAllIncludedGrammars(Set<String> includes) {
+	public void addAllIncludedGrammars(Set<XSDFile> includes) {
 		includedGrammars.addAll(includes);
 	}
 
@@ -93,9 +95,9 @@ public class Grammars implements WADLElement {
 	@Override
 	public boolean mapElement(WADLElement element) {
 		System.out.println("MAP ELEMENT GRAMMARS");
-		HashSet<String> mapped = new HashSet<String>();
-		HashSet<String> added = new HashSet<String>();
-		HashSet<String> deleted = new HashSet<String>();
+		HashSet<XSDFile> mapped = new HashSet<XSDFile>();
+		HashSet<XSDFile> added = new HashSet<XSDFile>();
+		HashSet<XSDFile> deleted = new HashSet<XSDFile>();
 		mapByID(element, mapped, added, deleted);
 		mapByStructure(element, mapped, added, deleted);
 
@@ -103,25 +105,25 @@ public class Grammars implements WADLElement {
 	}
 	
 	//Does not need to be implemented as include do not have child nodes and thus no structure
-	private void mapByStructure(WADLElement element, HashSet<String> mapped,
-			HashSet<String> added, HashSet<String> deleted) {
+	private void mapByStructure(WADLElement element, HashSet<XSDFile> mapped,
+			HashSet<XSDFile> added, HashSet<XSDFile> deleted) {
 		
 	}
 
-	private void mapByID(WADLElement element, HashSet<String> mapped, HashSet<String> added, HashSet<String> deleted) {
+	private void mapByID(WADLElement element, HashSet<XSDFile> mapped, HashSet<XSDFile> added, HashSet<XSDFile> deleted) {
 		if(element instanceof Grammars){
 			Grammars grammars2 = (Grammars)element;
-			for(String href2 : grammars2.includedGrammars) {
-				if(this.getIncludedGrammars().contains(href2)){
-					mapped.add(href2);
+			for(XSDFile schema : grammars2.includedGrammars) {
+				if(this.getIncludedGrammars().contains(schema)){
+					mapped.add(schema);
 				}else{
-					added.add(href2);
+					added.add(schema);
 				}
 			}
 
-			for(String href2 : this.includedGrammars) {
-				if(!mapped.contains(href2)){
-					deleted.add(href2);
+			for(XSDFile schema : this.includedGrammars) {
+				if(!mapped.contains(schema)){
+					deleted.add(schema);
 				}
 			}
 		}

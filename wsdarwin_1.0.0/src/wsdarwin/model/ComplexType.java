@@ -3,6 +3,7 @@ package wsdarwin.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import wsdarwin.comparison.delta.AddDelta;
 import wsdarwin.comparison.delta.ChangeDelta;
@@ -120,10 +121,10 @@ public class ComplexType implements IType {
 						typesNotDeleted.add(nameDeleted);
 					}
 				} 
-				/*else if (typesAdded.get(nameAdded) instanceof PrimitiveType
-						&& typesDeleted.get(nameDeleted) instanceof PrimitiveType) {
-					if (((IType)typesAdded.get(nameAdded)).getName()
-							.equals(((IType)typesDeleted.get(nameDeleted)).getName())) {
+				/*else if (typesAdded.get(nameAdded) instanceof XSDPrimitiveType
+						&& typesDeleted.get(nameDeleted) instanceof XSDPrimitiveType) {
+					if (((XSDIType)typesAdded.get(nameAdded)).getName()
+							.equals(((XSDIType)typesDeleted.get(nameDeleted)).getName())) {
 						deltas.add(typesDeleted.get(nameDeleted).diff(
 								typesAdded.get(nameAdded)));
 						if (typesNotAdded.contains(nameAdded) || typesNotDeleted.contains(nameDeleted)) {
@@ -225,6 +226,5 @@ public class ComplexType implements IType {
 			return 1;
 		}
 	}
-	
 	
 }

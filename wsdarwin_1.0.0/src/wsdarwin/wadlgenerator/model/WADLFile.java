@@ -26,6 +26,7 @@ import wsdarwin.model.*;
 import wsdarwin.util.DeltaUtil;
 import wsdarwin.util.XMLGenerator;
 import wsdarwin.wadlgenerator.RequestAnalyzer;
+import wsdarwin.wadlgenerator.model.xsd.XSDFile;
 
 public class WADLFile implements WADLElement {
 
@@ -66,7 +67,6 @@ public class WADLFile implements WADLElement {
 		this.resourcesElements = new HashMap<String, Resources>();
 	}
 
-
 	public String getIdentifier() {
 		return wadlFilename;
 	}
@@ -87,8 +87,8 @@ public class WADLFile implements WADLElement {
 		return grammarsElements;
 	}
 
-	public void addGrammarsElement(String includeHref) {
-		grammarsElements.addIncludedGrammar(includeHref);
+	public void addGrammarsElement(XSDFile schema) {
+		grammarsElements.addIncludedGrammar(schema);
 	}
 
 	public HashMap<String, Resources> getResourcesElements() {
@@ -105,7 +105,7 @@ public class WADLFile implements WADLElement {
 		//				+", #resourcesElements="+resourcesElements.size();
 	}
 
-	public void buildWADL(HashSet<String> xsdFilenames, RequestAnalyzer analyzer, String resourceBase, String methodName, int status) {
+	public void buildWADL(HashSet<XSDFile> xsdFilenames, RequestAnalyzer analyzer, String resourceBase, String methodName, int status) {
         grammarsElements.addAllIncludedGrammars(xsdFilenames);
         
         // Create all WADL objects
@@ -140,7 +140,7 @@ public class WADLFile implements WADLElement {
 		HashMap<Resources, HashSet<Resource>> changedResources = new HashMap<Resources, HashSet<Resource>>();
 
 		Grammars grammars = file.getGrammarsElements(); 
-		for(String key : grammars.getIncludedGrammars()) {
+		for(XSDFile key : grammars.getIncludedGrammars()) {
 			if(!this.getGrammarsElements().getIncludedGrammars().contains(key)) {
 				grammarsAdded.addIncludedGrammar(key);
 			}
@@ -420,7 +420,7 @@ public class WADLFile implements WADLElement {
 
 
 	//missing the complete response part because we need to merge it with the readXSD()
-	public void readWADL() throws ParserConfigurationException, SAXException, IOException {
+	/*public void readWADL() throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		DocumentBuilder builder = factory.newDocumentBuilder();
@@ -500,7 +500,7 @@ public class WADLFile implements WADLElement {
 				}
 			}
 		}
-	}
+	}*/
 
 	@Override
 	public boolean mapElement(WADLElement element) {

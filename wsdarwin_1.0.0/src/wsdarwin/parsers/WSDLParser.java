@@ -49,10 +49,10 @@ public class WSDLParser {
 	private HashMap<String, Node> elementNodes;
 	private HashMap<String, Node> typeNodes;
 
-	// private HashMap<String, IType> types;
+	// private HashMap<String, XSDIType> types;
 
 	public WSDLParser(String filename) {
-		// types = new HashMap<String, IType>();
+		// types = new HashMap<String, XSDIType>();
 		this.filename = filename;
 		this.operationNodes = new HashMap<String, Node>();
 		this.messageNodes = new HashMap<String, Node>();

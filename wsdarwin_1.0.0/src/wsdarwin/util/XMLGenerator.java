@@ -12,6 +12,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -21,28 +23,21 @@ import org.w3c.dom.ls.LSSerializer;
 
 import wsdarwin.model.*;
 import wsdarwin.wadlgenerator.model.*;
+import wsdarwin.wadlgenerator.model.xsd.*;
+import wsdarwin.wadlgenerator.model.xsd.XSDComplexType;
+import wsdarwin.wadlgenerator.model.xsd.XSDIType;
+import wsdarwin.wadlgenerator.model.xsd.XSDSimpleType;
 
 public class XMLGenerator {
 
 	public static final String XML_SCHEMA_NAMESPACE = "xs:";
 	public static final String TARGET_SCHEMA_NAMESPACE = "tns:";
 
-	/*public void createXSD(XSDFile xsdFile) throws IOException, ParserConfigurationException {
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setNamespaceAware(true);
-		DocumentBuilder builder = factory.newDocumentBuilder();
-		DOMImplementation domImpl = builder.getDOMImplementation();
-		// Document (Xerces implementation only).
-		Document xmldoc = domImpl.createDocument("http://www.w3.org/2001/XMLSchema", "xs:schema", null);
-		// Root element.
-		//Element root = xmldoc.createElementNS(XML_SCHEMA_NAMESPACE, "schema");
-		//root.setAttribute("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
-		Element root = xmldoc.getDocumentElement();
-		root.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:tns", new File(xsdFile.getFilename()).toURI().toString());
-		root.setAttribute("targetNamespace", new File(xsdFile.getFilename()).toURI().toString());
+	private void createXSD(XSDFile xsdFile, Document xmldoc, Element schemaElement) throws IOException, ParserConfigurationException {
+		
 		ArrayList<String> elementsAndTypes = xsdFile.sortedElementAndTypeNames();
 		HashMap<String, XSDElement> elements = xsdFile.getElements();
-		HashMap<String, IType> types = xsdFile.getTypes();
+		HashMap<String, XSDIType> types = xsdFile.getTypes();
 		for (String name : elementsAndTypes) {
 			if (elements.containsKey(name)) {
 				Element element = xmldoc.createElement(XML_SCHEMA_NAMESPACE+"element");
@@ -59,11 +54,11 @@ public class XMLGenerator {
 					element.setAttribute("minOccurs", ""+elements.get(name).getMinOccurs());
 					element.setAttribute("maxOccurs", ""+elements.get(name).getMaxOccurs());
 				}
-				xmldoc.getDocumentElement().appendChild(element);
+				schemaElement.appendChild(element);
 			}
 			if (types.containsKey(name)) {
-				if (types.get(name) instanceof ComplexType) {
-					ComplexType type = (ComplexType)types.get(name);
+				if (types.get(name) instanceof XSDComplexType) {
+					XSDComplexType type = (XSDComplexType)types.get(name);
 					Element complexType = xmldoc.createElement(XML_SCHEMA_NAMESPACE+"complexType");
 					complexType.setAttribute("name", types.get(name).getName());
 					Element sequence = xmldoc.createElement(XML_SCHEMA_NAMESPACE+"sequence");
@@ -77,8 +72,7 @@ public class XMLGenerator {
 						if (xsdFile.getTypes().containsKey(xsdElement.getType().getName())) {
 							childElement.setAttribute(
 									"type",
-									TARGET_SCHEMA_NAMESPACE
-											+ xsdElement.getType());
+									TARGET_SCHEMA_NAMESPACE+xsdElement.getType().getName());
 							
 						} else {
 							childElement.setAttribute("type", XML_SCHEMA_NAMESPACE+xsdElement
@@ -90,10 +84,10 @@ public class XMLGenerator {
 						}
 						sequence.appendChild(childElement);
 					}
-					xmldoc.getDocumentElement().appendChild(complexType);
+					schemaElement.appendChild(complexType);
 				}
-				else if(types.get(name) instanceof SimpleType) {
-					SimpleType type = (SimpleType)types.get(name);
+				else if(types.get(name) instanceof XSDSimpleType) {
+					XSDSimpleType type = (XSDSimpleType)types.get(name);
 					Element simpleType = xmldoc.createElement(XML_SCHEMA_NAMESPACE+"simpleType");
 					simpleType.setAttribute("name", types.get(name).getName());
 					if(type.getList() != null) {
@@ -101,13 +95,13 @@ public class XMLGenerator {
 						if (xsdFile.getTypes().containsKey(type.getList().getItemType().getName())) {
 							list.setAttribute("itemType",
 									TARGET_SCHEMA_NAMESPACE
-											+ type.getList().getItemType()
+										+type.getList().getItemType()
 													.getName());
 						}
 						else {
 							list.setAttribute("itemType",
 									XML_SCHEMA_NAMESPACE
-											+ type.getList().getItemType()
+											+type.getList().getItemType()
 													.getName());
 						}
 						simpleType.appendChild(list);
@@ -115,7 +109,7 @@ public class XMLGenerator {
 					else if(type.getRestrictionBase() != null) {
 						Element base = xmldoc.createElement(XML_SCHEMA_NAMESPACE+"restriction");
 						base.setAttribute("base", TARGET_SCHEMA_NAMESPACE
-								+ type.getRestrictionBase());
+								+type.getRestrictionBase());
 						simpleType.appendChild(base);
 						for(String enume : type.getEnumerations()) {
 							Element enumeration = xmldoc.createElement(XML_SCHEMA_NAMESPACE+"enumeration");
@@ -123,30 +117,11 @@ public class XMLGenerator {
 							base.appendChild(enumeration);
 						}
 					}
-					xmldoc.getDocumentElement().appendChild(simpleType);
+					schemaElement.appendChild(simpleType);
 				}
 			}
 		}
-		//xmldoc.appendChild(root);
-		
-		 writeXML(domImpl, xmldoc, xsdFile.getFilename());
-		
-		//TransformerFactory transformerFactory = TransformerFactory.newInstance();
-		//Transformer transformer = transformerFactory.newTransformer();
-		//DOMSource source = new DOMSource(xmldoc);
-		//StreamResult result = new StreamResult(new File(filename));
-		//transformer.transform(source, result);
-		FileOutputStream fos = new FileOutputStream(filename);
-		// XERCES 1 or 2 additionnal classes.
-		OutputFormat of = new OutputFormat("XML", "ISO-8859-1", true);
-		of.setIndent(1);
-		of.setIndenting(true);
-		XMLSerializer serializer = new XMLSerializer(fos, of);
-		// As a DOM Serializer
-		serializer.asDOMSerializer();
-		serializer.serialize(xmldoc.getDocumentElement());
-		fos.close();
-	}*/
+	}
 
 	private void writeXML(DOMImplementation domImpl, Document xmldoc,
 			String filename) throws FileNotFoundException {
@@ -157,7 +132,7 @@ public class XMLGenerator {
 	        lss.write(xmldoc, lso);
 	}
 
-	public void createWADL(WADLFile wadlFile, String xsdFilename) throws IOException, ParserConfigurationException {
+	public void createWADL(WADLFile wadlFile) throws IOException, ParserConfigurationException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		DocumentBuilder builder = factory.newDocumentBuilder();
@@ -168,17 +143,17 @@ public class XMLGenerator {
 		
 		Document xmldoc = domImpl.createDocument("http://wadl.dev.java.net/2009/02", "application", null);
 		Element root = xmldoc.getDocumentElement();
-		root.setAttribute("tns:schemaLocation", "http://wadl.dev.java.net/2009/02 "+xsdFilename);
-		root.setAttribute("xmlns:tns", "http://www.w3.org/2001/XMLSchema");
+		//root.setAttribute("tns:schemaLocation", "http://wadl.dev.java.net/2009/02 "+xsdFile.getFilename());
+		//root.setAttribute("xmlns:tns", "http://www.w3.org/2001/XMLSchema");
 		root.setAttribute("xmlns:xs", "http://www.w3.org/2001/XMLSchema");
 				
 		/* Grammars */
 		Grammars grammars = wadlFile.getGrammarsElements();
 		Element grammarsElement = xmldoc.createElement("grammars");
-		for(String hrefValue : grammars.getIncludedGrammars()) {
-			Element includeElement = xmldoc.createElement("include");
-			includeElement.setAttribute("href", hrefValue);
-			grammarsElement.appendChild(includeElement);
+		Element schemaElement = xmldoc.createElement(XML_SCHEMA_NAMESPACE+"schema");
+		for (XSDFile xsdFile : grammars.getIncludedGrammars()) {
+			createXSD(xsdFile, xmldoc, schemaElement);
+			grammarsElement.appendChild(schemaElement);
 		}
 		root.appendChild(grammarsElement);
 				

@@ -220,11 +220,11 @@ public class ClientAdaptationRefactoring extends Refactoring {
 		//String qualifiedNameOfOldReturnType = method.getReturnType2().resolveBinding().getQualifiedName();
 
 		//Delta responseDelta = delta.getDeltaByType(method.getReturnType2().resolveBinding().getName());
-		/*IType responseType = null;
+		/*XSDIType responseType = null;
 		if (responseDelta.getSource() != null) {
-			responseType = (IType) responseDelta.getSource();
+			responseType = (XSDIType) responseDelta.getSource();
 		} else {
-			responseType = (IType) responseDelta.getTarget();
+			responseType = (XSDIType) responseDelta.getTarget();
 		}*/
 
 		MethodInvocation newMethodInvocation = contextAST.newMethodInvocation();
@@ -252,7 +252,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 				contextAST.newName(qualifiedNameOfNewReturnType), null);
 
 		// copyValues(sourceRewriter, responseDelta, contextAST, method,
-		// findTypeDeclaration((ComplexType)responseType, newTypeDeclaration),
+		// findTypeDeclaration((XSDComplexType)responseType, newTypeDeclaration),
 		// contextAST.newMethodInvocation());
 
 		ListRewrite methodBody = sourceRewriter.getListRewrite(
@@ -406,7 +406,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 		if (source != null) {
 			if (target != null) {
 				if (source instanceof PrimitiveType) {
-					//PrimitiveType type = (PrimitiveType) source;
+					//XSDPrimitiveType type = (XSDPrimitiveType) source;
 					PrimitiveType newType = (PrimitiveType) target;
 
 					MethodInvocation getterInvocation = contextAST
@@ -586,7 +586,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 						true);
 				}
 				Expression newExpression = createChainOfGetterMethods(sourceRewriter, delta, contextAST, newTypeDec, getterMethodInvocation, qualifiedTypeName, null, newType, isArray, true);
-				/*if (delta.getParent().getSource() instanceof ComplexType) {
+				/*if (delta.getParent().getSource() instanceof XSDComplexType) {
 					sourceRewriter.set(newExpression,
 							MethodInvocation.EXPRESSION_PROPERTY,
 							getterMethodInvocation, null);
@@ -906,7 +906,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 					}
 
 					Expression newExpression = createChainOfGetterMethods(sourceRewriter, delta, contextAST, typeDec, getterMethodInvocation, oldInputName, type, newType, isArray, false);
-					/*if (delta.getParent().getSource() instanceof ComplexType) {
+					/*if (delta.getParent().getSource() instanceof XSDComplexType) {
 						newExpression = contextAST.newMethodInvocation();
 						sourceRewriter.set(newExpression,
 								MethodInvocation.EXPRESSION_PROPERTY,
@@ -993,12 +993,12 @@ public class ClientAdaptationRefactoring extends Refactoring {
 									.getVariableName()), contextAST
 									.newSimpleName(modifiedNewTypeName), false);
 					/*
-					 * TypeDeclaration typeDec = null; IType aType = null; if
+					 * TypeDeclaration typeDec = null; XSDIType aType = null; if
 					 * (isInput) { typeDec = newTypeDeclaration; aType =
 					 * newType; this.createSetterForParentComplexObject(
 					 * sourceRewriter, delta, contextAST, method,
 					 * this.findTypeDeclaration( aType.getVariableName(),
-					 * typeDec), new ComplexType(aType.getName(), aType
+					 * typeDec), new XSDComplexType(aType.getName(), aType
 					 * .getVariableName()), contextAST
 					 * .newSimpleName(modifiedNewTypeName), isInput); } else {
 					 * typeDec = oldTypeDeclaration; aType = type; }
@@ -1045,9 +1045,9 @@ public class ClientAdaptationRefactoring extends Refactoring {
 									parentTypeDeclaration.getName()
 											.getIdentifier().length())+"_"+((ComplexType)getElementFromDelta(delta.getParent(),isInput)).getVariableName();
 			/*isArray = isArray(findTypeDeclaration(
-					((ComplexType) delta.getParent().getSource())
+					((XSDComplexType) delta.getParent().getSource())
 					.getName(),
-			oldTypeDeclaration), (ComplexType) delta.getParent().getSource());*/
+			oldTypeDeclaration), (XSDComplexType) delta.getParent().getSource());*/
 		} else {
 			if (isInput) {
 				modifiedParentTypeName = NEW_REQUEST_NAME.substring(0, 1)
@@ -1062,8 +1062,8 @@ public class ClientAdaptationRefactoring extends Refactoring {
 			}
 		}
 		/*
-		 * String variableName; if (typeToBeSet instanceof PrimitiveType) {
-		 * variableName = ((PrimitiveType) typeToBeSet).getVariableName(); }
+		 * String variableName; if (typeToBeSet instanceof XSDPrimitiveType) {
+		 * variableName = ((XSDPrimitiveType) typeToBeSet).getVariableName(); }
 		 * else { variableName = typeToBeSet.getName(); }
 		 */
 
@@ -1357,7 +1357,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 		newStubReferenceModifiers.insertLast(contextAST
 				.newModifier(Modifier.ModifierKeyword.PRIVATE_KEYWORD), null);
 
-		// SimpleType simpleType =
+		// XSDSimpleType simpleType =
 		// contextAST.newSimpleType(contextAST.newName(newTypeDeclaration.getName().getIdentifier()));
 		sourceRewriter.set(newStubReference, FieldDeclaration.TYPE_PROPERTY,
 				contextAST.newName(newTypeDeclaration.resolveBinding()

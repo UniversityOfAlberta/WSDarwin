@@ -2,10 +2,15 @@ package wsdarwin.wadlgenerator.testMains;
 
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,7 +19,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import wsdarwin.util.XMLGenerator;
 import wsdarwin.wadlgenerator.RequestAnalyzer;
+import wsdarwin.wadlgenerator.Response2XSD;
 import wsdarwin.wadlgenerator.model.WADLFile;
+import wsdarwin.wadlgenerator.model.xsd.XSDFile;
 
 public class TestMainForWADLGeneration {
 
@@ -24,10 +31,10 @@ public class TestMainForWADLGeneration {
 	public static final Boolean DEBUG = true;
 	
 	private static final String VENDOR = "twitter";
-	private static final String PATH_PREFIX = "files/icsm2013/clientEvolution/"+VENDOR;
+	private static final String PATH_PREFIX = "files/icsm2014/"+VENDOR;
 	
 	private static final String FILENAME_DIR = PATH_PREFIX+"/wadl/";
-	private static final String XSD_DIR = PATH_PREFIX+"/xsd/";
+	//private static final String XSD_DIR = PATH_PREFIX+"/xsd/";
 	private static final String RESPONSE_DIR = PATH_PREFIX+"/responses/";
 
 	public static void main(String[] args) {
@@ -49,7 +56,7 @@ public class TestMainForWADLGeneration {
 			RequestAnalyzer analyzer = new RequestAnalyzer();
 			String resourceBase = analyzer.batchRequestAnalysis(uris);
 			for(String methodName : analyzer.getMethodNamesFromBatch(uris)) {
-				responses.put(methodName, new XSDFile(XSD_DIR+"/merged_"+methodName+".xsd"));
+				responses.put(methodName, new XSDFile());
 			}
 			String xsdFilename = null;
 
@@ -59,7 +66,7 @@ public class TestMainForWADLGeneration {
 			// create empty merged WADL file
 			WADLFile mergedWADL = new WADLFile(FILENAME_DIR+VENDOR+"Merged.wadl", null, null);
 			if(DEBUG) System.out.println("** Merged WADLFile: "+mergedWADL.getIdentifier()+" **");
-			HashSet<String> grammarSet = new HashSet<String>();
+			HashSet<XSDFile> grammarSet = new HashSet<XSDFile>();
 			// Looping over test queries
 			for(String requestLine : requests) {
 				String[] tokens = requestLine.split(" ");
@@ -94,19 +101,19 @@ public class TestMainForWADLGeneration {
 		        out.close();*/
 		        Response2XSD xsdBuilder = new Response2XSD();
 	        
-				xsdBuilder.buildXSDFromJSON(XSD_DIR+FILENAME_XSD, RESPONSE_DIR+FILENAME_XML, analyzer.getMethodID());
+				xsdBuilder.buildXSDFromJSON(RESPONSE_DIR+FILENAME_XML, analyzer.getMethodID());
 				XSDFile xsdFile = xsdBuilder.getXSDFile();
 				XSDFile mergedXSDFile = responses.get(analyzer.getMethodID());
-				xsdFilename = mergedXSDFile.getFilename();
-				generator.createXSD(xsdFile);
+				//xsdFilename = mergedXSDFile.getFilename();
+				//generator.createXSD(xsdFile);
 				
-				mergedXSDFile.diffXSD(xsdFile);
+				mergedXSDFile.compareToMerge(xsdFile);
 				
-		        WADLFile newWADL = new WADLFile(FILENAME_DIR+FILENAME_WADL, urlLine, mergedXSDFile.getResponseType());
+		        WADLFile newWADL = new WADLFile(FILENAME_DIR+FILENAME_WADL, urlLine, xsdBuilder.convertFromXSD(mergedXSDFile.getResponseType()));
 		        
-		        grammarSet.add(xsdFilename);		// TODO later change to Identifier + XSDElement
+		        grammarSet.add(xsdFile);		// TODO later change to Identifier + XSDElement
 		        newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
-		        generator.createWADL(newWADL, xsdFilename);
+		        generator.createWADL(newWADL);
 
 		        // Call diff&merge methods from sub-objects 
 		        mergedWADL.compareToMerge(newWADL);
@@ -117,11 +124,11 @@ public class TestMainForWADLGeneration {
 			}
 			
 			// write merged WADL file only once
-			generator.createWADL(mergedWADL, xsdFilename);
-			mergedWADL.serializeFile();
-			for(String methodID : responses.keySet()) {
+			generator.createWADL(mergedWADL);
+			//mergedWADL.serializeFile();
+			/*for(String methodID : responses.keySet()) {
 				generator.createXSD(responses.get(methodID));
-			}
+			}*/
 			testIn.close();
 			
 			/*System.out.println("");
