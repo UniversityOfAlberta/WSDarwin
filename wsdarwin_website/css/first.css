@@ -1,0 +1,116 @@
+
+body {
+	background-color: white;
+}
+
+.bodyWrap {
+	background-color: white;
+	margin: 0 auto;
+	width: 85%;
+}
+
+.textfieldWrap {
+	background-color: green;
+	
+}
+
+.urlTextfield {
+	width: 90%;
+}
+
+.fields_input {
+	margin: 0 auto;
+	margin-top: 50px;
+}
+
+.textarea {
+	resize: vertical;
+	vertical-align: text-top;
+	text-align: left;
+	width: 90%;
+	height: 80px;
+}
+
+.requestDetails {
+	display: inline-block;
+	border-style:solid;
+	border-width:thin;
+	border-color: #D8D8D8;
+	/*background-color: yellow;*/
+	width: 30%;
+	padding:0;
+	margin:0;
+	min-height: 100px;
+}
+
+.urlRequestDiv {
+	vertical-align: top;
+	/*background-color: gray;*/
+	margin-left: 10px;
+	margin-top: 10px;
+}
+
+.wadlDiv {
+	display: inline-block;
+	vertical-align: top;
+	width: 69%;
+	height: 100px;
+	padding:0;
+	margin:0;
+	
+}
+
+.wadlOutput {
+	margin-left: 10px;
+	/*background-color: gray;*/
+	max-width: inherit;
+	max-height: inherit;
+	border-style:solid;
+	border-width:thin;
+	border-color: #D8D8D8;
+	margin-bottom: 55px;
+}
+
+.middleRegion {
+	/*background-color: black;*/
+	/*margin-top: 25px;*/
+	margin-top: 10px;
+}
+
+.fieldUrlDiv {
+	height: auto;
+	overflow: auto;
+	max-height: 150px;
+	resize: vertical;
+	padding-bottom: 10px;
+	background-color: #F0F0F0;
+}
+
+.areaUrlDiv {
+	background-color: gray;
+	/*visibility: hidden;*/
+}
+
+.analyzeSingleURL {
+	display: inline-block;
+}
+
+.singleUrlDiv {
+	margin-top: 5px;
+}
+
+.urlInput {
+	width: 600px;
+}
+
+.popupDiv {
+	visibility: hidden;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 200px;
+	height: 150px;
+
+	border: 1px dotted #000000;
+	
+}
