@@ -1,0 +1,1805 @@
+[
+   {
+    "created_at": "Sun Mar 24 20:45:52 +0000 2013",
+    "id": 315927465782566900,
+    "id_str": "315927465782566912",
+    "text": "@Wartarkus eisai ninja?",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": 1296294584,
+    "in_reply_to_user_id_str": "1296294584",
+    "in_reply_to_screen_name": "Wartarkus",
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 1,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [],
+      "urls":  [],
+      "user_mentions":  [
+         {
+          "screen_name": "Wartarkus",
+          "name": "Allos Allounou",
+          "id": 1296294584,
+          "id_str": "1296294584",
+          "indices":  [
+            0,
+            10
+          ]
+        }
+      ]
+    },
+    "favorited": false,
+    "retweeted": false,
+    "lang": "fi"
+  },
+   {
+    "created_at": "Sat Mar 16 21:14:12 +0000 2013",
+    "id": 313035493984051200,
+    "id_str": "313035493984051200",
+    "text": "Heil Pavlis! #aek #katman #nazi_kaneis_i_mi_nazi #linen_o_aristeros #afieromeno_ston_ilia #agkelotos_aetos #dikefalos_stavros",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "aek",
+          "indices":  [
+            13,
+            17
+          ]
+        },
+         {
+          "text": "katman",
+          "indices":  [
+            18,
+            25
+          ]
+        },
+         {
+          "text": "nazi_kaneis_i_mi_nazi",
+          "indices":  [
+            26,
+            48
+          ]
+        },
+         {
+          "text": "linen_o_aristeros",
+          "indices":  [
+            49,
+            67
+          ]
+        },
+         {
+          "text": "afieromeno_ston_ilia",
+          "indices":  [
+            68,
+            89
+          ]
+        },
+         {
+          "text": "agkelotos_aetos",
+          "indices":  [
+            90,
+            106
+          ]
+        },
+         {
+          "text": "dikefalos_stavros",
+          "indices":  [
+            107,
+            125
+          ]
+        }
+      ],
+      "urls":  [],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "lang": "lt"
+  },
+   {
+    "created_at": "Fri Feb 22 16:56:22 +0000 2013",
+    "id": 304998077570363400,
+    "id_str": "304998077570363394",
+    "text": "O?a??!!\nhttp://t.co/5PeyyDAq3L #nicespot",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "nicespot",
+          "indices":  [
+            31,
+            40
+          ]
+        }
+      ],
+      "urls":  [
+         {
+          "url": "http://t.co/5PeyyDAq3L",
+          "expanded_url": "http://goo.gl/tEBcE",
+          "display_url": "goo.gl/tEBcE",
+          "indices":  [
+            8,
+            30
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Fri Feb 15 20:33:05 +0000 2013",
+    "id": 302515900219809800,
+    "id_str": "302515900219809792",
+    "text": "?????a? e?e???t?? t?? NASA e??a? ?  t??p?? ?a pe??????e?? ??a? ap? t??? sp??da??te???? ?????e? f?s?????...\nhttp://t.co/RwnbuoNu",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [],
+      "urls":  [
+         {
+          "url": "http://t.co/RwnbuoNu",
+          "expanded_url": "http://goo.gl/smZBQ",
+          "display_url": "goo.gl/smZBQ",
+          "indices":  [
+            107,
+            127
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Wed Jan 30 21:25:31 +0000 2013",
+    "id": 296730888128061440,
+    "id_str": "296730888128061440",
+    "text": "???? ? ?at??t?se ? G?a??da! ???e ???a??? ??a ?a ???t?s??e t? s???a?? t??!! #aris",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "aris",
+          "indices":  [
+            78,
+            83
+          ]
+        }
+      ],
+      "urls":  [],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Wed Jan 09 20:36:51 +0000 2013",
+    "id": 289108498007085060,
+    "id_str": "289108498007085056",
+    "text": "? ??????? a? St??!! G?a ?a d??e ?a a? ?e? ? ?a???!!\nhttp://t.co/I7p8hOXn",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [],
+      "urls":  [
+         {
+          "url": "http://t.co/I7p8hOXn",
+          "expanded_url": "http://goo.gl/VVg4o",
+          "display_url": "goo.gl/VVg4o",
+          "indices":  [
+            56,
+            76
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Mon Jan 07 19:49:07 +0000 2013",
+    "id": 288371706945478660,
+    "id_str": "288371706945478656",
+    "text": "?? ? ???ta? e ???ta pe???e?, t? jet lag pe???e? e jet lag; #inception #kourasi",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "inception",
+          "indices":  [
+            61,
+            71
+          ]
+        },
+         {
+          "text": "kourasi",
+          "indices":  [
+            72,
+            80
+          ]
+        }
+      ],
+      "urls":  [],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Fri Jan 04 22:48:42 +0000 2013",
+    "id": 287329737343393800,
+    "id_str": "287329737343393792",
+    "text": "-????t? pe????;\n-???...\nhttp://t.co/N6BSCEPM #lipos #krisi",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "lipos",
+          "indices":  [
+            45,
+            51
+          ]
+        },
+         {
+          "text": "krisi",
+          "indices":  [
+            52,
+            58
+          ]
+        }
+      ],
+      "urls":  [
+         {
+          "url": "http://t.co/N6BSCEPM",
+          "expanded_url": "http://goo.gl/iPUVD",
+          "display_url": "goo.gl/iPUVD",
+          "indices":  [
+            24,
+            44
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Thu Dec 20 21:07:58 +0000 2012",
+    "id": 281868570907000830,
+    "id_str": "281868570907000832",
+    "text": "Te????? ? ?as?????? st? ??6!!!\nhttp://t.co/N30CJUeR",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [],
+      "urls":  [
+         {
+          "url": "http://t.co/N30CJUeR",
+          "expanded_url": "http://goo.gl/vAVs8",
+          "display_url": "goo.gl/vAVs8",
+          "indices":  [
+            31,
+            51
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Thu Dec 20 15:33:34 +0000 2012",
+    "id": 281784416836145150,
+    "id_str": "281784416836145152",
+    "text": "?a??? ?a? ? p??ta????st?? a??? ?a? ? ?a??a??? t??a p?? de? a? s??e? st? ???? ?a p????se ?a t? pa??e? ?a? ???? nINJA \nhttp://t.co/XgQfpFTJ",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [],
+      "urls":  [
+         {
+          "url": "http://t.co/XgQfpFTJ",
+          "expanded_url": "http://goo.gl/nxUBt",
+          "display_url": "goo.gl/nxUBt",
+          "indices":  [
+            120,
+            140
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Sun Nov 18 20:58:17 +0000 2012",
+    "id": 270269719452454900,
+    "id_str": "270269719452454913",
+    "text": "(???) p?d?te ??at? ?a??aste! http://t.co/8XvwEXbs #ypogennitikotita-krisi0-1 #KovetaiToSex? #HrodisSamaras",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "ypogennitikotita",
+          "indices":  [
+            51,
+            68
+          ]
+        },
+         {
+          "text": "KovetaiToSex",
+          "indices":  [
+            78,
+            91
+          ]
+        },
+         {
+          "text": "HrodisSamaras",
+          "indices":  [
+            93,
+            107
+          ]
+        }
+      ],
+      "urls":  [
+         {
+          "url": "http://t.co/8XvwEXbs",
+          "expanded_url": "http://goo.gl/rY5bH",
+          "display_url": "goo.gl/rY5bH",
+          "indices":  [
+            30,
+            50
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Sat Nov 17 17:00:46 +0000 2012",
+    "id": 269847560754171900,
+    "id_str": "269847560754171904",
+    "text": "??? ?e p??st?! ?a? t??a t?;; http://t.co/tRfDz5UR #krisi #ParteParteParte #OLeonidasStonOAED #EftyxosExoumeLiakopoulo #mpoumpoukos",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "krisi",
+          "indices":  [
+            50,
+            56
+          ]
+        },
+         {
+          "text": "ParteParteParte",
+          "indices":  [
+            57,
+            73
+          ]
+        },
+         {
+          "text": "OLeonidasStonOAED",
+          "indices":  [
+            74,
+            92
+          ]
+        },
+         {
+          "text": "EftyxosExoumeLiakopoulo",
+          "indices":  [
+            93,
+            117
+          ]
+        },
+         {
+          "text": "mpoumpoukos",
+          "indices":  [
+            118,
+            130
+          ]
+        }
+      ],
+      "urls":  [
+         {
+          "url": "http://t.co/tRfDz5UR",
+          "expanded_url": "http://goo.gl/5KmLr",
+          "display_url": "goo.gl/5KmLr",
+          "indices":  [
+            29,
+            49
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Sat Nov 17 16:53:12 +0000 2012",
+    "id": 269845656473071600,
+    "id_str": "269845656473071616",
+    "text": "??t?? t?? ??t?se?;;; http://t.co/EAEANZxf #Dracumel",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "Dracumel",
+          "indices":  [
+            42,
+            51
+          ]
+        }
+      ],
+      "urls":  [
+         {
+          "url": "http://t.co/EAEANZxf",
+          "expanded_url": "http://goo.gl/nf1p9",
+          "display_url": "goo.gl/nf1p9",
+          "indices":  [
+            21,
+            41
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Fri Nov 16 20:23:12 +0000 2012",
+    "id": 269536115365662720,
+    "id_str": "269536115365662722",
+    "text": "???ad? ?a p??e? ? ???a???a t? p??t????a t? p??pe? ?a a? ???e? ? ??????a??? http://t.co/KOFrBttR #????",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [],
+      "urls":  [
+         {
+          "url": "http://t.co/KOFrBttR",
+          "expanded_url": "http://goo.gl/kpYPG",
+          "display_url": "goo.gl/kpYPG",
+          "indices":  [
+            78,
+            98
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Mon Oct 15 13:25:55 +0000 2012",
+    "id": 257834689677643780,
+    "id_str": "257834689677643776",
+    "text": "N I C E !! (??d??? ?pe????s???? ?a? ?a?t?f?) http://t.co/vvOnIZZD",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [],
+      "urls":  [
+         {
+          "url": "http://t.co/vvOnIZZD",
+          "expanded_url": "http://ditology.blogspot.co.uk/",
+          "display_url": "ditology.blogspot.co.uk",
+          "indices":  [
+            45,
+            65
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Thu Oct 11 00:20:18 +0000 2012",
+    "id": 256187434675626000,
+    "id_str": "256187434675625984",
+    "text": "???a? ? ?a?te??? ?a?te??d?? ? Justin Bieber t?? ????da?; #ksafnikiEpityxia #hellas2012 #pantelidomania",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "ksafnikiEpityxia",
+          "indices":  [
+            57,
+            74
+          ]
+        },
+         {
+          "text": "hellas2012",
+          "indices":  [
+            75,
+            86
+          ]
+        },
+         {
+          "text": "pantelidomania",
+          "indices":  [
+            87,
+            102
+          ]
+        }
+      ],
+      "urls":  [],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Tue Oct 09 17:37:51 +0000 2012",
+    "id": 255723763935608830,
+    "id_str": "255723763935608833",
+    "text": "http://t.co/jWBp8UBr ???? ??eta??? ?a p????se ?a e??a?. ?e?? ?? ?????e? e?aste s?a??? ?a? ?a??sp??pe? #AngelaTour2012 #sovarofaneia",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "AngelaTour2012",
+          "indices":  [
+            106,
+            121
+          ]
+        },
+         {
+          "text": "sovarofaneia",
+          "indices":  [
+            122,
+            135
+          ]
+        }
+      ],
+      "urls":  [
+         {
+          "url": "http://t.co/jWBp8UBr",
+          "expanded_url": "http://goo.gl/UKfEv",
+          "display_url": "goo.gl/UKfEv",
+          "indices":  [
+            0,
+            20
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Wed Sep 26 21:18:22 +0000 2012",
+    "id": 251068219182444540,
+    "id_str": "251068219182444544",
+    "text": "?p???? ? s????as?? st? goal t?? anderson!! http://t.co/6X6D9Pvy #manutd",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [
+         {
+          "text": "manutd",
+          "indices":  [
+            65,
+            72
+          ]
+        }
+      ],
+      "urls":  [
+         {
+          "url": "http://t.co/6X6D9Pvy",
+          "expanded_url": "http://goo.gl/s9l1U",
+          "display_url": "goo.gl/s9l1U",
+          "indices":  [
+            44,
+            64
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Fri Sep 07 08:40:04 +0000 2012",
+    "id": 243992017087127550,
+    "id_str": "243992017087127552",
+    "text": "http://t.co/c6cKrSSm ?? p?t? a??e?? a??f??a e a?t?.....",
+    "source": "web",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [],
+      "urls":  [
+         {
+          "url": "http://t.co/c6cKrSSm",
+          "expanded_url": "http://fliz-concept.blogspot.gr/",
+          "display_url": "fliz-concept.blogspot.gr",
+          "indices":  [
+            0,
+            20
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "el"
+  },
+   {
+    "created_at": "Thu Sep 06 19:28:10 +0000 2012",
+    "id": 243792728553574400,
+    "id_str": "243792728553574401",
+    "text": "Venture Lab http://t.co/PjMDBdpc",
+    "source": "<a href=\"http://www.linkedin.com/\" rel=\"nofollow\">LinkedIn</a>",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":  {
+      "id": 557957403,
+      "id_str": "557957403",
+      "name": "Pityrida Sta Frydia",
+      "screen_name": "PityridaFrydia",
+      "location": "",
+      "description": "",
+      "url": null,
+      "entities":  {
+        "description":  {
+          "urls":  []
+        }
+      },
+      "protected": false,
+      "followers_count": 6,
+      "friends_count": 3,
+      "listed_count": 0,
+      "created_at": "Thu Apr 19 17:01:40 +0000 2012",
+      "favourites_count": 0,
+      "utc_offset": null,
+      "time_zone": null,
+      "geo_enabled": false,
+      "verified": false,
+      "statuses_count": 90,
+      "lang": "en",
+      "contributors_enabled": false,
+      "is_translator": false,
+      "profile_background_color": "C0DEED",
+      "profile_background_image_url": "http://a0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme1/bg.png",
+      "profile_background_tile": false,
+      "profile_image_url": "http://a0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_image_url_https": "https://si0.twimg.com/sticky/default_profile_images/default_profile_3_normal.png",
+      "profile_link_color": "0084B4",
+      "profile_sidebar_border_color": "C0DEED",
+      "profile_sidebar_fill_color": "DDEEF6",
+      "profile_text_color": "333333",
+      "profile_use_background_image": true,
+      "default_profile": true,
+      "default_profile_image": true,
+      "following": false,
+      "follow_request_sent": false,
+      "notifications": false
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities":  {
+      "hashtags":  [],
+      "urls":  [
+         {
+          "url": "http://t.co/PjMDBdpc",
+          "expanded_url": "http://venture-lab.org/",
+          "display_url": "venture-lab.org",
+          "indices":  [
+            12,
+            32
+          ]
+        }
+      ],
+      "user_mentions":  []
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "en"
+  }
+]

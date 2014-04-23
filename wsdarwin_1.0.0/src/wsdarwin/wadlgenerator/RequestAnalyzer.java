@@ -186,9 +186,11 @@ public class RequestAnalyzer extends Uri {
 	}
 	
 	public String getRepresentationMediaType() {
-        String[] pathTokens = getPathComponentsAfterBase(resourceBase);
-        String[] methodTokens = pathTokens[pathTokens.length-1].split("\\.");
-        return methodTokens[1];
+        //String[] pathTokens = getPathComponentsAfterBase(resourceBase);
+        //System.out.println("path tokens length: " + pathTokens.length );
+        //String[] methodTokens = pathTokens[pathTokens.length-1].split("\\.");
+        //System.out.println("method tokens length: " + methodTokens[0] + ", " + methodTokens[1]);
+        return "json";
 	}
 	
 	

@@ -105,7 +105,7 @@ public class WADLParser {
 		}
 		return operations;
 	}
-
+	
 	private IType getOutputTypeOfOperation(Node method) {
 		Node response = getMethodChild(method, "response");
 		IType iType = null;

@@ -21,12 +21,18 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import wsdarwin.model.*;
 import wsdarwin.wadlgenerator.model.*;
 import wsdarwin.wadlgenerator.model.xsd.*;
-import wsdarwin.wadlgenerator.model.xsd.XSDComplexType;
-import wsdarwin.wadlgenerator.model.xsd.XSDIType;
-import wsdarwin.wadlgenerator.model.xsd.XSDSimpleType;
+
+import java.io.*;
+
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
 
 public class XMLGenerator {
 
@@ -39,7 +45,9 @@ public class XMLGenerator {
 		HashMap<String, XSDElement> elements = xsdFile.getElements();
 		HashMap<String, XSDIType> types = xsdFile.getTypes();
 		for (String name : elementsAndTypes) {
+			//System.out.println("--> name is: " + name);
 			if (elements.containsKey(name)) {
+				//System.out.println("---> name " + name + " is an xsdElement");
 				Element element = xmldoc.createElement(XML_SCHEMA_NAMESPACE+"element");
 				element.setAttribute("name", elements.get(name).getName());
 				if (xsdFile.getTypes().containsKey(elements.get(name).getType().getName())) {
@@ -129,10 +137,37 @@ public class XMLGenerator {
 	        LSSerializer lss = ls.createLSSerializer();
 	        LSOutput lso = ls.createLSOutput();
 	        lso.setByteStream(new FileOutputStream(new File(filename)));
+	        
 	        lss.write(xmldoc, lso);
+	        
+	        //Element root = xmldoc.get
+	        //System.out.println("root name ? " + getStringFromDocument(xmldoc) );
+	        //String jsonRet = gson.toJson( getStringFromDocument(xmldoc) );
+	        //System.out.println("THE FINAL XML: " + xmldoc.toString() );
 	}
-
-	public void createWADL(WADLFile wadlFile) throws IOException, ParserConfigurationException {
+	
+	/*
+	//method to convert Document to String
+	public String getStringFromDocument(Document doc)
+	{
+	    try
+	    {
+	       DOMSource domSource = new DOMSource(doc);
+	       StringWriter writer = new StringWriter();
+	       StreamResult result = new StreamResult(writer);
+	       TransformerFactory tf = TransformerFactory.newInstance();
+	       Transformer transformer = tf.newTransformer();
+	       transformer.transform(domSource, result);
+	       return writer.toString();
+	    }
+	    catch(TransformerException ex)
+	    {
+	       ex.printStackTrace();
+	       return null;
+	    }
+	} */
+	
+	public Document createWADL(WADLFile wadlFile) throws IOException, ParserConfigurationException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		DocumentBuilder builder = factory.newDocumentBuilder();
@@ -141,17 +176,36 @@ public class XMLGenerator {
 		/* Application = root element */
 // TODO	The namespaces are still implemented incorrectly. We will leave it for now and change it later.
 		
+		/*ArrayList<String> rootArray = new ArrayList<String>();
+		rootArray.add(new String("First top"));
+		rootArray.add(new String("Second top"));
+			
+		ArrayList<String> two = new ArrayList<String>();
+		two.add(new String("hello"));
+		two.add(new String("mellow"));
+		
+		
+		
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		System.out.println("json: " + gson.toJson(rootArray) );
+		rootArray.add(two);
+		
+		System.out.println("json: " + gson.toJson(rootArray) );*/
+		
 		Document xmldoc = domImpl.createDocument("http://wadl.dev.java.net/2009/02", "application", null);
 		Element root = xmldoc.getDocumentElement();
 		//root.setAttribute("tns:schemaLocation", "http://wadl.dev.java.net/2009/02 "+xsdFile.getFilename());
 		//root.setAttribute("xmlns:tns", "http://www.w3.org/2001/XMLSchema");
 		root.setAttribute("xmlns:xs", "http://www.w3.org/2001/XMLSchema");
-				
+		
+		System.out.println("element attt is " + root + ", v: " + root.getAttribute("xmlns:xs").toString() );
+		
 		/* Grammars */
 		Grammars grammars = wadlFile.getGrammarsElements();
 		Element grammarsElement = xmldoc.createElement("grammars");
 		Element schemaElement = xmldoc.createElement(XML_SCHEMA_NAMESPACE+"schema");
 		for (XSDFile xsdFile : grammars.getIncludedGrammars()) {
+			//System.out.println("-> xsd File: " + xsdFile);
 			createXSD(xsdFile, xmldoc, schemaElement);
 			grammarsElement.appendChild(schemaElement);
 		}
@@ -218,5 +272,7 @@ public class XMLGenerator {
 		}
 		
 		writeXML(domImpl, xmldoc, wadlFile.getIdentifier());
+		
+		return xmldoc;
 	}
 }
