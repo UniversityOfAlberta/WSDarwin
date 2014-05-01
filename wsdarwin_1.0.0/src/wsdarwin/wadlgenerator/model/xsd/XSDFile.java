@@ -16,6 +16,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -73,8 +74,91 @@ public class XSDFile implements WADLElement {
 		Collections.sort(names, String.CASE_INSENSITIVE_ORDER);
 		return names;
 	}
-
-	/*public void readXSD() throws ParserConfigurationException, SAXException,
+	
+	// ***************************************** BELOW UNCOMMENTED
+	
+	// find the xs:element with type 'xs_element_type' and return its name ('variableName' in XSDComplexType)
+	public String findXSElement(NodeList typesAndElementsList, String xs_element_type){
+		for (int k = 0; k < typesAndElementsList.getLength(); k++){
+			Node node = typesAndElementsList.item(k);
+			if ( getStringWithoutNamespace(node.getNodeName()).equals("element") ) {
+				if ( getStringWithoutNamespace(typesAndElementsList.item(k).getAttributes().getNamedItem("type").getNodeValue()).
+						equals(xs_element_type) ) {
+					return typesAndElementsList.item(k).getAttributes().getNamedItem("name").getNodeValue();
+				}
+			}
+		}
+		return null;
+	}
+	
+	public void readXSD(Document xmlDoc) throws ParserConfigurationException, SAXException,
+	IOException {
+		//DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		//factory.setNamespaceAware(true);
+		//DocumentBuilder builder = factory.newDocumentBuilder();
+		//Document xmlDoc = builder.parse(new File(filename));
+		
+		NodeList grammars = xmlDoc.getElementsByTagName("grammars");
+		NodeList schemas = grammars.item(0).getChildNodes();
+		
+		System.out.println("<<< READING THE XSD OF THE FILE >>>");
+		
+		// for all the 'xs:complexType' elements in <xs:schema> with index 0:
+		for (int i = 0; i < schemas.item(0).getChildNodes().getLength(); i++){
+			Node childNode = schemas.item(0).getChildNodes().item(i);
+			if (getStringWithoutNamespace(childNode.getNodeName()).equals("complexType")) {
+				
+				String variableName = findXSElement(schemas.item(0).getChildNodes(), childNode.getAttributes().getNamedItem("name").getNodeValue());
+				//TODO: Find cases when variableName can be null ?
+				
+				XSDComplexType type = new XSDComplexType(childNode.getAttributes().getNamedItem("name").getNodeValue(), variableName);
+				this.addType(type.getName(), type);
+				NodeList typeChildren = childNode.getChildNodes();
+				for (int k = 0; k < typeChildren.getLength(); k++) {
+					if (typeChildren.item(k).getNodeName().equals("sequence")) {
+						NodeList sequenceChildren = typeChildren.item(k)
+								.getChildNodes();
+						for (int j = 0; j < sequenceChildren.getLength(); j++) {
+							if (sequenceChildren.item(j).getNodeName()
+									.equals("element")) {
+								XSDElement element = new XSDElement(
+										sequenceChildren.item(j).getAttributes()
+												.getNamedItem("name")
+												.getNodeValue(),
+										createType(getStringWithoutNamespace(sequenceChildren
+												.item(j).getAttributes()
+												.getNamedItem("type")
+												.getNodeValue())));
+								type.addElement(element);
+							}
+						}
+					}
+				}
+				
+			} 
+		}
+		
+		// for all the 'xs:element' elements in <xs:schema> with index 0:
+		for (int i = 0; i < schemas.item(0).getChildNodes().getLength(); i++){
+			Node childNode = schemas.item(0).getChildNodes().item(i);
+			if (getStringWithoutNamespace(childNode.getNodeName()).equals("element")){
+				XSDElement element = new XSDElement(childNode.getAttributes().getNamedItem("name").getNodeValue(),
+						createType(getStringWithoutNamespace(childNode.getAttributes().getNamedItem("type")
+								.getNodeValue())));
+				if (!(element.getType() instanceof XSDPrimitiveType)) {
+					this.addElement(element.getName(), element);
+				}
+				
+			}
+		}
+		
+		responseType = findResponseType();
+		
+		System.out.println("<<< END OF READING THE XSD OF THE FILE >>>");
+	
+	}
+	
+	/*public void readXSD_BACKUP() throws ParserConfigurationException, SAXException,
 			IOException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
@@ -122,6 +206,8 @@ public class XSDFile implements WADLElement {
 		}
 		responseType = findResponseType();
 	}
+		
+	}*/
 
 	private XSDIType createType(String name) {
 		if (name.equals("string")) {
@@ -134,11 +220,14 @@ public class XSDFile implements WADLElement {
 			return XSDPrimitiveType.DOUBLE;
 		} else if (this.getTypes().containsKey(name)) {
 			return this.getTypes().get(name);
-		} else {
-			return new XSDComplexType(name);
+		} else {								//TODO: when does this occur .. ?
+			//return new XSDComplexType(name);	// originally..
+			return XSDPrimitiveType.STRING;		// wrong; just a placeholder.
 		}
-	}*/
-
+	}
+	
+	// ***************************************** ABOVE UNCOMMENTED
+	
 	private String getStringWithoutNamespace(String nodeValue) {
 		if (nodeValue.contains(":")) {
 			return nodeValue.split(":")[1];
@@ -194,7 +283,6 @@ public class XSDFile implements WADLElement {
 		for (XSDIType type : types) {
 			this.types.put(type.getName(), type);
 		}
-
 	}
 
 	private void putAllElements(Set<XSDElement> elements) {

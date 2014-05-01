@@ -1,6 +1,5 @@
 package wsdarwin.wadlgenerator.model;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -42,7 +41,8 @@ public class WADLFile implements WADLElement {
 	public static final String 	RESOURCE_PATH = "api";
 	public static final String 	METHOD_ID = "geocode";
 	public static final String 	METHOD_NAME = "GET";
-	*/public static final String 	PARAM_STYLE = "query";
+	*/
+	public static final String 	PARAM_STYLE = "query";
 	public static final boolean PARAM_REQUIRED = true;	
 	/*public static final int 	RESPONSE_STATUS = 200;	
 	public static final String	REPRESENTATION_MEDIATYPE = "application/xml";  // or JSON (with Directions)
@@ -128,7 +128,7 @@ public class WADLFile implements WADLElement {
         response.addRepresentationElement(XMLGenerator.TARGET_SCHEMA_NAMESPACE+this.response, representation);
         
         // Call URI Analyzer
-        
+        System.out.println("============== ANALYZING PARAMS ! ===============");
         request.addAllParamElements(analyzer.analyzeParams());
         
         analyzer.getQueryAsMap();
@@ -418,33 +418,55 @@ public class WADLFile implements WADLElement {
 
 	}*/
 
-
 	//missing the complete response part because we need to merge it with the readXSD()
-	/*public void readWADL() throws ParserConfigurationException, SAXException, IOException {
+	public void readWADL() throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document xmlDoc = builder.parse(new File(this.wadlFilename));
-
+		
+		System.out.println("XML DOC: " + this.wadlFilename);
+		
 		//add grammars
 		NodeList grammars = xmlDoc.getElementsByTagName("grammars");
 		this.grammarsElements = new Grammars();
 		NodeList includes = grammars.item(0).getChildNodes();
 		for(int i=0; i<includes.getLength(); i++) {
 			if(includes.item(i).getNodeName().equals("include")) {
-				this.grammarsElements.addIncludedGrammar(includes.item(i).getAttributes().getNamedItem("href").getNodeValue());
-				System.out.println(this.grammarsElements.toString());
+				//this.grammarsElements.addIncludedGrammar(includes.item(i).getAttributes().getNamedItem("href").getNodeValue());
+				//System.out.println(this.grammarsElements.toString());
 			}
 		}
-
+		
+		// Processing the <grammars> of the WADL
+		XSDFile xsdFile = new XSDFile();
+		//NodeList schemas = grammars.item(0).getChildNodes();	// list of schema elements
+		//System.out.println("THIS IS: " + schemas.item(0).getNodeName() + ", chillen: " + schemas.item(0).getChildNodes().getLength());
+		xsdFile.readXSD(xmlDoc);
+		this.addGrammarsElement(xsdFile);
+		
+		
+		/*
+		
+		System.out.println("grammar elements: " + grammars.getLength());
+		System.out.println("grammar name: " + grammars.item(0).getNodeName());
+		NodeList schemaNodeList = grammars.item(0).getChildNodes();
+		System.out.println("schema name: " + schemaNodeList.item(0).getNodeName());
+		NodeList schemaChildren = schemaNodeList.item(0).getChildNodes();
+		System.out.println("schema children count: " + schemaChildren.getLength());
+		System.out.println("schema children name: " + schemaChildren.item(0).getAttributes().toString());
+		
+		*/
+		
 		//add resourcesElements
 		NodeList resourcesElements = xmlDoc.getElementsByTagName("resources");
+		
 		for(int i=0; i<resourcesElements.getLength(); i++) {
 			Resources resourcesElement = new Resources(resourcesElements.item(i).getAttributes().getNamedItem("base").getNodeValue());
-			System.out.println(resourcesElement.toString());
 			this.resourcesElements.put(resourcesElement.getIdentifier(), resourcesElement);
-			System.out.println(this.resourcesElements.toString());
 			NodeList resourcesChildren = resourcesElements.item(i).getChildNodes();
+			System.out.println("resources element to string:" + resourcesElement.toString() + ", identifier: " + resourcesElement.getIdentifier());
+			System.out.println("resources elements to string: " + this.resourcesElements.toString());
 			for(int j=0; j<resourcesChildren.getLength(); j++) {
 				if(resourcesChildren.item(j).getNodeName().equals("resource")) {
 					System.out.println("inside " + resourcesChildren.item(j).getNodeName());
@@ -481,6 +503,7 @@ public class WADLFile implements WADLElement {
 											}
 											Param param = new Param(name, type, style, required);
 											request.addParamElement(param.getIdentifier(), param);
+											System.out.println("param identifier : " + param.getIdentifier());
 											NodeList paramChildren = requestChildren.item(m).getChildNodes();
 											for(int n=0; n<paramChildren.getLength(); n++) {
 												if(paramChildren.item(n).getNodeName().equals("option")) {
@@ -489,10 +512,10 @@ public class WADLFile implements WADLElement {
 											}
 										}
 									}
-								}
-								else if(methodChildren.item(l).getNodeName().equals("response")) {
+								} else if(methodChildren.item(l).getNodeName().equals("response")) {
 									Response response = new Response(Integer.parseInt(methodChildren.item(l).getAttributes().getNamedItem("status").getNodeValue()));
 									method.addResponseElement(response.getID(), response);
+									System.out.println("response ID : " + response.getID());
 								}
 							}
 						}
@@ -500,7 +523,7 @@ public class WADLFile implements WADLElement {
 				}
 			}
 		}
-	}*/
+	}
 
 	@Override
 	public boolean mapElement(WADLElement element) {

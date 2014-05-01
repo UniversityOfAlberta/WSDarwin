@@ -215,7 +215,7 @@ public class Response implements WADLElement {
 		}
 		
 	}
-
+	
 	//We haven't take into consideration MediaType at all here
 	private void mapByID(WADLElement element, HashMap<String, Representation> mapped, HashMap<String, Representation> added, HashMap<String, Representation> deleted) {
 		if(element instanceof Response){

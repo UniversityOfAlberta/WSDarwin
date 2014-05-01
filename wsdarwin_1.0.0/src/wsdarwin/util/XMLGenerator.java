@@ -53,6 +53,7 @@ public class XMLGenerator {
 				if (xsdFile.getTypes().containsKey(elements.get(name).getType().getName())) {
 					element.setAttribute("type", TARGET_SCHEMA_NAMESPACE
 							+ elements.get(name).getType());
+					//System.out.println("(1) Element: " + element.getAttribute("name") + ", type: " + element.getAttribute("type"));
 				}
 				else {
 					element.setAttribute("type", XML_SCHEMA_NAMESPACE
@@ -81,6 +82,7 @@ public class XMLGenerator {
 							childElement.setAttribute(
 									"type",
 									TARGET_SCHEMA_NAMESPACE+xsdElement.getType().getName());
+							//System.out.println("(2) Element: " + childElement.getAttribute("name") + ", type: " + childElement.getAttribute("type"));
 							
 						} else {
 							childElement.setAttribute("type", XML_SCHEMA_NAMESPACE+xsdElement
@@ -105,6 +107,7 @@ public class XMLGenerator {
 									TARGET_SCHEMA_NAMESPACE
 										+type.getList().getItemType()
 													.getName());
+							System.out.println("(3) list Element: " + list.getAttribute("name") + ", type: " + list.getAttribute("itemType"));
 						}
 						else {
 							list.setAttribute("itemType",
@@ -118,6 +121,7 @@ public class XMLGenerator {
 						Element base = xmldoc.createElement(XML_SCHEMA_NAMESPACE+"restriction");
 						base.setAttribute("base", TARGET_SCHEMA_NAMESPACE
 								+type.getRestrictionBase());
+						//System.out.println("(4) base Element: " + base.getAttribute("base"));
 						simpleType.appendChild(base);
 						for(String enume : type.getEnumerations()) {
 							Element enumeration = xmldoc.createElement(XML_SCHEMA_NAMESPACE+"enumeration");
@@ -245,8 +249,9 @@ public class XMLGenerator {
 						Element paramElement = xmldoc.createElement("param");
 //							paramElement.setIdAttribute("required", par.isRequired());
 						paramElement.setAttribute("style", par.getStyle());
-						paramElement.setAttribute("type", TARGET_SCHEMA_NAMESPACE+par.getType());
+						paramElement.setAttribute("type", XML_SCHEMA_NAMESPACE+par.getType());
 						paramElement.setAttribute("name", par.getIdentifier());
+						//System.out.println("(55) list Element: " + paramElement.getAttribute("name") + ", type: " + paramElement.getAttribute("type"));
 						requestElement.appendChild(paramElement);
 					}
 																	

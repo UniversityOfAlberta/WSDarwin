@@ -25,6 +25,8 @@ public class Param implements WADLElement {
 	
 	public Param(String name, String type, Object value, String style, boolean required) {
 		super();
+		
+		System.out.println("--------> " + type + ", name: " + name + ", style: " + style);
 		this.name = name;
 		this.type = type;
 		this.value = value;
@@ -63,6 +65,7 @@ public class Param implements WADLElement {
 	}
 
 	public void setType(String type) {
+		System.out.println("-----------------> SETTINGS PARAM TYPE: " + type);
 		this.type = type;
 	}
 

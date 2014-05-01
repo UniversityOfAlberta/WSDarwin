@@ -16,6 +16,8 @@ public class XSDComplexType implements Comparable<XSDComplexType>, XSDIType{
 		this.name = name;
 		this.variableName = variableName;
 		this.elements = new HashMap<String, XSDElement>();
+		
+		System.out.println(">>>>>>> variable name: " + this.variableName + ", name: " + this.name);
 	}
 
 	public XSDComplexType(String name, HashMap<String, XSDElement> elements) {

@@ -492,6 +492,7 @@ public class WADLParser {
 				"files/imdbMerged.wadl"));
 
 		Delta delta = parser1.getService().diff(parser2.getService());
+		
 
 		DeltaUtil.findMoveDeltas(delta);
 		delta.printDelta(0);

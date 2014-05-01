@@ -22,7 +22,6 @@ public class ComplexType implements IType {
 	private String name;
 	private String elementName;
 	private HashMap<String, WSElement> elements;
-
 	
 	
 	public ComplexType(String name, String elementName) {
