@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Vector;
 
 import javax.servlet.ServletContextEvent;
@@ -59,6 +60,15 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public String randomString(String chars, int length) {
+		  Random rand = new Random();
+		  StringBuilder buf = new StringBuilder();
+		  for (int i=0; i<length; i++) {
+		    buf.append(chars.charAt(rand.nextInt(chars.length())));
+		  }
+		  return buf.toString();
+	}
 
 	@Context private HttpServletRequest servletRequest;
 	//@Context private HttpServletContext servletContext;
@@ -84,26 +94,53 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 	//private static final String PATH_PREFIX_TWO = HOST_PATH + "files/icsm2014/"+VENDOR;
 	private static final String FILENAME_DIR_TWO = PATH_PREFIX_TWO+"/wadl/";
 	private static final String RESPONSE_DIR_TWO = PATH_PREFIX_TWO+"/responses/";
+	private static final String UPLOADED_WADLS = PATH_PREFIX_TWO+"/uploadedWADL/";
 	
 	private static final String LOCALHOST_WADL_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/";
 	//private static final String LOCALHOST_WADL_PATH = PATH_PREFIX_TWO + "http://localhost:8080/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/";
 	
 	@GET
 	@Path("/analyze")
-    public String singleURL(@QueryParam("urls") String jsonObj, @QueryParam("analyzedwadls") String wadlurlsjson) throws Exception {
+    public String singleURL(@QueryParam("newURLs") String newURLs, @QueryParam("newUppedFiles") String newUppedFiles, @QueryParam("sessionid") String sessionid, @QueryParam("type") String call_type, @QueryParam("compareURLs") String compareURLs, @QueryParam("compareWADLfiles") String compareWADLfiles) throws Exception {
 		//System.out.println("get aram is " + jsonObj );
 		
 		//Gson gson = new Gson();
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		ArrayList<String> urls = gson.fromJson(jsonObj, ArrayList.class);
-		ArrayList<String> analyzedWADLurls = gson.fromJson(wadlurlsjson, ArrayList.class);
-		
-		System.out.println("analyzed wadl url : " + analyzedWADLurls.get(0));
+		ArrayList<String> urls = gson.fromJson(newURLs, ArrayList.class);
+		ArrayList<String> compareurls = gson.fromJson(compareURLs, ArrayList.class);
+		ArrayList<String> analyzedWADLurls = gson.fromJson(newUppedFiles, ArrayList.class);
+		ArrayList<String> compareWADLurls = gson.fromJson(compareWADLfiles, ArrayList.class);
 		
 		//ArrayList<String> wadlPaths = getWadl(urls);
 		//WADLFile abc = getWadl(urls);
-		String mergedPath = getWadl(urls, analyzedWADLurls);
+		String mergedPath = getWadl(urls, analyzedWADLurls, "analyzeURLS");
+		String mergedPathTwo = "";
+		//System.out.println("COMPARING URL SIZE: " + compareurls.size() );
+		
+		if ( ( (compareurls != null) || (compareWADLurls != null) ) && ( (compareWADLurls.size() > 0) || (compareurls.size() > 0) ) ){
+			//System.out.println("THE compared url is: " + compareurls.get(0));
+			mergedPathTwo = getWadl(compareurls, compareWADLurls, "compareURLS");
+		}
 		//String jsonRet = gson.toJson(abc);
+		
+		ArrayList<String> returnArray = new ArrayList<String>();
+		
+		// if a session id is set, return it; if a session id is not set, create a new one
+		String sid = new String("session_");	//session id
+		if (sessionid.equals("")){
+			String lettersToRandomize = "qwertyuioplkjhgfdsazxcvbnm";
+			sid += randomString(lettersToRandomize ,11);
+			returnArray.add(sid);
+		} else {
+			returnArray.add(sessionid);
+		}
+		//System.out.println("the session id: " + returnArray.get(0));
+		
+		returnArray.add(mergedPath);
+		returnArray.add(mergedPathTwo);
+		
+		String ret = gson.toJson(returnArray);
+		
 		
 		//System.out.println( "gson.. " + abc );
 		//for (int k = 0; k < urls.size(); k++){
@@ -149,8 +186,7 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 		getWadl(jsonObj);*/
 		
 		
-		System.out.println("returning: " + mergedPath);
-		return mergedPath;
+		return ret;
 		
 		//return "The url you provided: " + jsonObj;
 	}	
@@ -158,7 +194,7 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 	/**
 	 * @param args
 	 */
-	public static String getWadl(ArrayList<String> url_list, ArrayList<String> analyzedWADLurls) {
+	public static String getWadl(ArrayList<String> url_list, ArrayList<String> analyzedWADLurls, String call_type) {
 		try {
 			ArrayList<String> requests = new ArrayList<String>();
 			ArrayList<String> uris = new ArrayList<String>();
@@ -188,30 +224,28 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 			// https://graph.facebook.com/oprescu3
 			// http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=HeyThere
 			// http://api.openweathermap.org/data/2.1/find/city?lat=55&lon=37&cnt=10
-			// doesnt work .. http://www.google.com/calendar/feeds/developer-calendar@google.com/public/full?alt=json
+			// doesnt work .. http://www.google.com/calendar	/feeds/developer-calendar@google.com/public/full?alt=json
 			// http://en.wikipedia.org/w/api.php?format=json&action=query&titles=Main%20Page&prop=revisions&rvprop=content&format=json
 			// http://www.biomedcentral.com/webapi/1.0/latest_articles.json
 			// http://api.artsholland.com/rest/production.json?per_page=5&page=4
 			// http://www.a3ultimate.com/API/Options/json/33916;3613214975,33916;3613214975,33916;3613214975,33916;3613214975
 			
-			System.out.println("==========================================");
+			//System.out.println("==========================================");
 			
 			for (int i = 0; i < url_list.size(); i++){
 				if ( "".equals( url_list.get(i) ) ){
-					System.out.println("11 ITS NULL");
+					//System.out.println("11 ITS NULL");
 				} else {
 					String proper_url = new String( i + " GET " + url_list.get(i) + "" );
 					links.add(proper_url);
-					System.out.println(" --> " + proper_url);
+					//System.out.println(" --> " + proper_url);
 				}
 			}			
 			
 			Iterator<String> it = links.iterator();
-			System.out.println("starting: ");
 			
 			while(it.hasNext()){
 			    String line = it.next();
-			    System.out.println("link: " + line);
 				requests.add(line);
 				String[] tokens = line.split(" ");
 				uris.add(tokens[2]);
@@ -224,23 +258,31 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 				uris.add(tokens[2]);
 				line = testIn.readLine();
 			}*/
-			
 			RequestAnalyzer analyzer = new RequestAnalyzer();
-			String resourceBase = analyzer.batchRequestAnalysis(uris);
-			for(String methodName : analyzer.getMethodNamesFromBatch(uris)) {
-				responses.put(methodName, new XSDFile());
+			String resourceBase = "";
+			if ( (uris != null) && (uris.size() > 0)){
+				resourceBase = analyzer.batchRequestAnalysis(uris);
+				
+				for(String methodName : analyzer.getMethodNamesFromBatch(uris)) {
+					responses.put(methodName, new XSDFile());
+				}
 			}
+
 			String xsdFilename = null;
 
 			XMLGenerator generator = new XMLGenerator();
-	        System.out.println("[Interface retrieval]");
+	        //System.out.println("[Interface retrieval]");
 			
 			// create empty merged WADL file
-			WADLFile mergedWADL = new WADLFile(FILENAME_DIR_TWO+VENDOR+"Merged.wadl", null, null);
+	        String mergedFileName = "";
+	        if (call_type.equals("analyzeURLS")){
+	        	mergedFileName = "Merged.wadl";
+	        } else if (call_type.equals("compareURLS")){
+	        	mergedFileName = "Merged2.wadl";
+	        }
+			WADLFile mergedWADL = new WADLFile(FILENAME_DIR_TWO+VENDOR+mergedFileName, null, null);
 			if(DEBUG) System.out.println("** Merged WADLFile: "+mergedWADL.getIdentifier()+" **");
 			HashSet<XSDFile> grammarSet = new HashSet<XSDFile>();
-			
-			
 			
 			// Looping over test queries
 			for(String requestLine : requests) {
@@ -259,7 +301,7 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 				final String FILENAME_WADL = "late_WADLresponse"+id+".wadl";
 				final String FILENAME_XSD  = "response"+id+".xsd";
 				
-		        System.out.println(" Request #"+id+"");
+		        //System.out.println(" Request #"+id+"");
 		        
 		        // URLConnection
 				URL yahoo = new URL(urlLine);
@@ -300,6 +342,7 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 		        // Call diff&merge methods from sub-objects 
 		        mergedWADL.compareToMerge(newWADL);
 		        
+		        
 		        //System.out.println(" wadl file: " + LOCALHOST_WADL_PATH+FILENAME_WADL);
 		        // Add the newly generated wadl's path to the list wadl_paths
 		        wadl_paths.add(LOCALHOST_WADL_PATH+FILENAME_WADL);
@@ -310,8 +353,66 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 				
 			}
 			
-			//for (int i = 0; i < analyzedWADLurls.size(); i++){
-			System.out.println("======================================");
+			
+			// merging uploaded wadl files
+	        /*WADLFile uppedWADL = new WADLFile("C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter/uploadedWADL/file0.wadl");
+	        WADLFile uppedWADL2 = new WADLFile("C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter/uploadedWADL/file1.wadl");
+	        try {
+				//System.out.println("<<< reading wadl >>>");
+				uppedWADL.readWADL();
+				uppedWADL2.readWADL();
+				//System.out.println("<<< finished reading wadl >>>");
+			} catch (SAXException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+	        // Call diff&merge methods from sub-objects
+	        mergedWADL.compareToMerge(uppedWADL);
+	        mergedWADL.compareToMerge(uppedWADL2);*/
+			if ( (analyzedWADLurls != null) && (analyzedWADLurls.size() > 0)){
+				//
+				//System.out.println("SIZE OF ANALYZED WADL URLS: " + analyzedWADLurls.size());
+				//System.out.println("SIZE OF ANALYZED WADL URLS: " + analyzedWADLurls.get(0));
+				for (int i = 0; i < analyzedWADLurls.size(); i++){
+					System.out.println("ADDING ANALYZED URL: " + analyzedWADLurls.get(i));
+			        // URLConnection
+					URL yahoo = new URL(analyzedWADLurls.get(i));
+			        URLConnection yc = yahoo.openConnection();
+			        BufferedReader in = new BufferedReader(
+		            new InputStreamReader(yc.getInputStream()));
+			        String inputLine;
+		
+			        //BufferedWriter out = new BufferedWriter(new FileWriter(new File(RESPONSE_DIR+FILENAME_XML)));
+			        String uppedWADLpath = UPLOADED_WADLS+"file"+i+".wadl";
+			        BufferedWriter out = new BufferedWriter(new FileWriter(new File(uppedWADLpath)));
+		
+			        while ((inputLine = in.readLine()) != null) {
+			            out.write(inputLine);
+			            out.newLine();
+			        }
+			        in.close();
+			        out.close();
+			        
+			        WADLFile uppedWADL = new WADLFile(uppedWADLpath);
+					try {
+						//System.out.println("<<< reading wadl >>>");
+						uppedWADL.readWADL();
+						//System.out.println("<<< finished reading wadl >>>");
+					} catch (SAXException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					System.out.println("-> Merging wadl with path: " + uppedWADLpath);
+			        // Call diff&merge methods from sub-objects
+			        mergedWADL.compareToMerge(uppedWADL);
+			        System.out.println("FILE MERGED !");
+				}
+			}
+			
+			//
+			
 			//InputStream inputStream = TestMainForWADLGeneration.class.getResourceAsStream("files/icsm2014/twitter/wadl/WADLResponse001.wadl");
 			/*
 			File randomWADLfile	= new File("C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/twitterMerged.wadl");
@@ -348,24 +449,25 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 			//}
 			
 
-			
-			
-			System.out.println("<<< reading end merged wadl >>>");
-			
-			WADLFile no = new WADLFile("C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/twitterMerged3.wadl");
-			try {
-				System.out.println("<<< reading wadl >>>");
-				no.readWADL();
-				System.out.println("<<< finished reading wadl >>>");
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println("End of run !");
-			
-			
-	        // Call diff&merge methods from sub-objects 
-	        mergedWADL.compareToMerge(no);
+			/*if (call_type.equals("compare")){
+				// READING MERGED WADL
+				System.out.println("<<< reading end merged wadl >>>");
+				
+				WADLFile no = new WADLFile("C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/twitterMerged3.wadl");
+				try {
+					System.out.println("<<< reading wadl >>>");
+					no.readWADL();
+					System.out.println("<<< finished reading wadl >>>");
+				} catch (SAXException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("End of run !");
+				
+				
+		        // Call diff&merge methods from sub-objects 
+		        mergedWADL.compareToMerge(no);
+			}*/
 			
 			// write merged WADL file only once
 			generator.createWADL(mergedWADL);
@@ -384,8 +486,10 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 			delta.printDelta(0);*/			
 			
 			String MERGED_WADL_PATH = LOCALHOST_WADL_PATH+VENDOR+"Merged.wadl";
+			String MERGED_WADL_PATH_TWO = LOCALHOST_WADL_PATH+VENDOR+"Merged2.wadl";
 	        // Add the merged wadl's path to the list wadl_paths
 	        wadl_paths.add(LOCALHOST_WADL_PATH+VENDOR+"Merged.wadl");
+	        
 			//return wadl_paths;
 			//return mergedWADL;
 	        
@@ -393,7 +497,12 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 			//Document xml_doc_merged = generator.createWADL(mergedWADL);
 			//return xml_doc_merged;
 	        //mergedWADL.serializeFile();
-	        return MERGED_WADL_PATH;
+	        if (call_type.equals("analyzeURLS")){
+	        	return MERGED_WADL_PATH;
+	        } else if (call_type.equals("compareURLS")){
+	        	return MERGED_WADL_PATH_TWO;
+	        }
+	        return "";
 			
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
