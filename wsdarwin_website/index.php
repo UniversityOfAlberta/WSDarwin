@@ -7,10 +7,15 @@
 <!-- <LINK REL="SHORTCUT ICON" HREF="http://pokemonpacific.com/images/PikachuSprite.gif" /> -->
 <!-- css sheets -->
 <link rel=stylesheet href="<?= $GLOBALS['baseURL']; ?>css/first.css" type="text/CSS">
-
+<link rel=stylesheet href="<?= $GLOBALS['baseURL']; ?>css/diffview.css" type="text/CSS">
 <!-- scripts -->
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/generalFuncs.js"></script>
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/ObjTree.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdiff.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdifflib-master/difflib.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdifflib-master/difflib.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdifflib-master/diffview.js"></script>
+
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script> -->
 
@@ -51,342 +56,212 @@ function parseXml(xml) {
 		//var xotree = new XML.ObjTree();
    		var url = "http://localhost:8080/wsdarwin_1.0.0/twitterMerged.wadl";
    		var url2 = "C:/Users/mihai/eclipse_workspace/wsdarwin_1.0.0/WebContent/twitterMerged.wadl";
-    	//var tree = xotree.parseHTTP( url );
-
-		//$("#wadlOutput").append("abc " + tree.html["@lang"]);
-
-		//var xotree = new XML.ObjTree();
-		//var xmlsrc = '<span class="author">Kawasaki Yusuke</span>';
-		//var tree = xotree.parseXML( xmlsrc );
-		//var class = tree.span["-class"];        # attribute
-		//var name  = tree.span["#text"];         # text node
-
-		/*var cc = "<orderperson>John Smith</orderperson>"+
-  "<shipto>"+
-   " <name>Ola Nordmann</name>"+
-    "<address>Langgt 23</address>"+
-    "<city>4000 Stavanger</city>"+
-    "<country>Norway</country>"+
-  "</shipto>"+
-  "<item>"+
-    "<title>Empire Burlesque</title>"+
-    "<note>Special Edition</note>"+
-    "<quantity>1</quantity>"+
-    "<price>10.90</price>"+
-  "</item>"+
-  "<item>"+
-    "<title>Hide your heart</title>"+
-    "<quantity>1</quantity>"+
-    "<price>9.90</price>"+
-  "</item>"+
-"</shiporder>";*/
-		//console.log( parseXml(cc) );
-		console.log("Hello world..");
-
-
-
-		//alert('1: ' + tree.span["-class"] + ", 2: " + tree.span["#text"] + ", 3: ");
-
-	});
+   	});
 
 
 
 </script>
-<?php
-/*
-//ini_set('display_errors', false);
-//set_exception_handler('ReturnError');
-
-$url = "http://pokemonpacific.com/twitterMerged.xml";
-		$r = '';
-		if ($url) {
-
-			// fetch XML
-			$c = curl_init();
-			curl_setopt_array($c, array(
-				CURLOPT_URL => $url,
-				CURLOPT_HEADER => false,
-				CURLOPT_TIMEOUT => 10,
-				CURLOPT_RETURNTRANSFER => true
-			));
-			$r = curl_exec($c);
-			curl_close($c);
-
-		}
-
-		function saveAttributes($src_elem, $dest_elem){
-  			// saving the element's attributes
-  			foreach ($src_elem->attributes AS $att){
-  				$dest_elem->attrs[$att->nodeName] = $att->nodeValue;
-  			}
-		}
-
-		$xmlDoc = new DOMDocument();
-		$xmlDoc->loadXML( $r );
-		$x = $xmlDoc->documentElement;
-
-		$all_element = new any_element;
-		$all_element->class_type = 'application';
-		$all_element->attrs['xmlns'] = "http://wadl.dev.java.net/2009/02";
-		$all_element->attrs['xmlns:xs'] = "http://www.w3.org/2001/XMLSchema";
-
-		foreach ($x->childNodes AS $item){
-		  	//print $item->nodeName . " = " . $item->nodeValue . "<br>";
-
-		  	if ($item->nodeName == 'grammars'){
-		  		// add code for multiple <grammars>..
-		  		$grammarsElem = new any_element;
-		  		$grammarsElem->class_type = $item->nodeName;	// grammars
-		  		//saveAttributes($item, $grammarsElem);
-
-		  		$schemaItem = $item->firstChild;
-
-		  		$schemaElem = new any_element;	// can only have 1 <xs:schema> element
-		  		$schemaElem->class_type = $schemaItem->nodeName;
-		  		saveAttributes($schemaItem, $schemaElem);
-
-		  		foreach ($schemaItem->childNodes AS $complex_simpleItem){
-		  			$xs_celeElem = new any_element;
-		  			$xs_celeElem->class_type = $complex_simpleItem->nodeName;		// <xs:complexType> or <xs:element>
-		  			saveAttributes($complex_simpleItem, $xs_celeElem);
-
-		  			foreach ($complex_simpleItem->childNodes AS $sequenceItem){
-			  			$xs_sequenceElem = new any_element;
-			  			$xs_sequenceElem->class_type = $sequenceItem->nodeName;		// xs:sequence
-			  			saveAttributes($sequenceItem, $xs_sequenceElem);
-
-			  			foreach ($sequenceItem->childNodes AS $xs_elementItem){
-				  			$xs_elementElem = new any_element;
-				  			$xs_elementElem->class_type = $xs_elementItem->nodeName;		// xs:element
-				  			saveAttributes($xs_elementItem, $xs_elementElem);
-
-				  			array_push($xs_sequenceElem->elements, $xs_elementElem);	// add <xs:element> element(s) to <xs:complexType> array
-			  				//var_dump($xs_elementElem);
-			  			}
-
-			  			array_push($xs_celeElem->elements, $xs_sequenceElem);	// add <xs:element> element(s) to <xs:complexType> array
-		  			}
-
-		  			array_push($schemaElem->elements, $xs_celeElem);			// add <xs:complexType> or <xs:element> element(s) to <schema> array
-		  		}
-
-		  		array_push($grammarsElem->elements, $schemaElem);			// add <xs:complexType> or <xs:element> element(s) to <schema> array
-
-		  		array_push($all_element->elements, $grammarsElem);
-
-		  	} else if ($item->nodeName == 'resources'){
-		  		$resources_Elem = new any_element;
-		  		$resources_Elem->class_type = 'resources';
-				saveAttributes($item, $resources_Elem);
-
-				foreach ($item->childNodes AS $resourceItem){
-					$resourceElem = new any_element;
-					$resourceElem->class_type = $resourceItem->nodeName;							// 'resource'
-					saveAttributes($resourceItem, $resourceElem);
-
-					foreach ($resourceItem->childNodes AS $methodItem){
-						$methodElem = new any_element;
-						$methodElem->class_type = $methodItem->nodeName;							// 'method'
-						saveAttributes($methodItem, $methodElem);
-
-						foreach ($methodItem->childNodes AS $request_responseItem){
-							$request_responseElem = new any_element;
-							$request_responseElem->class_type = $request_responseItem->nodeName;	// 'request' or 'response'
-							saveAttributes($request_responseItem, $request_responseElem);
-
-							foreach ($request_responseItem->childNodes AS $paramItem){
-								$paramElem = new any_element;
-								$paramElem->class_type = $paramItem->nodeName;						// 'param'
-								saveAttributes($paramItem, $paramElem);
-
-								array_push($request_responseElem->elements, $paramElem);	// add <param> element(s) to <request> or <response> array
-								//var_dump($paramElem);
-							}
-
-
-							array_push($methodElem->elements, $request_responseElem);	// add <request> or <response> element(s) to <method> array
-							//var_dump($request_responseElem);
-						}
-
-						array_push($resourceElem->elements, $methodElem);	// add <method> element(s) to <resource> array
-						//var_dump($methodElem);
-					}
-
-					array_push($resources_Elem->elements, $resourceElem);	// add <resource> element to <resources> array
-
-					//var_dump($resourceElem);
-				}
-
-				array_push($all_element->elements, $resources_Elem);
-		  		//var_dump($resources_Elem);
-		  	}
-
-
-		  }
-
-		//var_dump($all_element);
-		$elemString = '';
-		print_wadl($all_element);
-
-		$printoutString = '';
-		$spaces = 0;
-		//print $GLOBALS['elemString'];
-
-		function print_wadl($myNode){
-			global $elemString;
-			global $spaces;
-
-			$n = 0;
-			while ($n < $spaces){
-				$GLOBALS['elemString'] .= "&nbsp;";
-				$n++;
-			}
-
-			$GLOBALS['elemString'] .= htmlentities("<" . $myNode->class_type);
-
-			foreach ($myNode->attrs as $attName => $attValue){
-				//print $elemString;
-				$GLOBALS['elemString'] .= htmlentities(" " . $attName . "=\"" . $attValue . "\"" );
-				//print $elemString;
-				//var_dump($elemString);
-				//print $elemString;
-			}
-
-			$GLOBALS['elemString'] .= htmlentities(">");
-			$GLOBALS['elemString'] .= "</br>";
-
-			foreach ($myNode->elements AS $nodeElem){
-				$spaces += 4;
-				print_wadl($nodeElem);
-			}
-
-			$n = 0;
-			while ($n < $spaces){
-				$GLOBALS['elemString'] .= "&nbsp;";
-				$n++;
-			}
-			$spaces -= 4;
-
-			$GLOBALS['elemString'] .= htmlentities("</" . $myNode->class_type . ">");
-			$GLOBALS['elemString'] .= "</br>";
-			//print $elemString;
-		}
-
-		
-
-		//var_dump($doc);
-//print_r(simplexml_import_dom($doc)->asXML());
-//$abc = json_encode(new SimpleXMLElement($r));
-//print_r($abc);
-
-
-
-// //output xml in your response: 
-//header('Content-Type: text/xml'); 
-//echo $xml->asXML(); 
-
-
-//print_r( $abc[] );
-//print_r(json_encode($r));
-
-if ($r) {
-	// XML to JSON
-	//echo json_encode(new SimpleXMLElement($r));
-} else {
-	// nothing returned?
-	//ReturnError();
-	echo '{"error":true}';
-}
-
-class xs_complexType {
-	public $attrs = array();	// array of attributes
-	public $elements = array();	// array of 'xs_element' objects
-}
-
-class xs_element {
-	public $attrs = array();	// array of attributes
-
-}
-
-class any_element {
-	public $class_type;	// resources/resource/path/method/request/param
-	public $attrs = array();	// array of attributes
-	public $elements = array();
-}
-*/
-?>
-
 
 </head>
 
 <body>
 
-<div class='bodyWrap' id='bodyWrap'>
-
-<div class='popupDiv' id='popupDiv'>heeeeeeeeey</div>
-
-<div class='fields_input'>
-	<button onClick="addURLField()"> Add URL </button>
-	<button id='analyzeBtn' onClick="analyzeBtn()"> Analyze URI </button>
-	<br>
-
-	<div id='fieldUrlDiv' class='fieldUrlDiv'>
-		<script>addURLField();</script>
-	</div>
-	
-	<!--
-	<div class='areaUrlDiv'>
-		<textarea class='textarea' name='textarea' id='textarea' placeholder='Enter one URL per line'></textarea>
-	</div>
-	-->
-
+<div class='outerpopup' id='outerpopup'>
+	<div class='popupBig' id="popupBig"></div>
 </div>
 
-<div class='middleRegion'>
+<div class='bodyWrap' id='bodyWrap'>
+
+	<div class='popupDiv' id='popupDiv'>heeeeeeeeey</div>
+
+	<div class='fields_input'>
+		<button onClick="addURLField()"> Add URL </button>
+
+		<!--
+		<form action="upload_file.php" method="post"
+		enctype="multipart/form-data">
+		<label for="file">Filename:</label>
+		<input type="file" name="file" id="file"><br>
+		<input type="submit" name="submit" value="Submit">
+		</form>
+			 -->
+
+		
+		<!--
+		<span>
+		Upload a WADL File<input id='filesAnalyze' type='file' placeholder='Upload'></input>
+		</span>
+		-->
+
+		Select images: <input id='files' type="file" multiple>
+		<input type="submit">
+
+		<script>
+		document.getElementById('files').addEventListener('change', function(e) {
+		    //var file = this.files[0];
+		    console.log("files length: " + this.files.length);
+		    var xhr = new XMLHttpRequest();
+		    //xhr.file = file; // not necessary if you create scopes like this
+		    xhr.addEventListener('progress', function(e) {
+		        var done = e.position || e.loaded, total = e.totalSize || e.total;
+		        console.log('xhr progress: ' + (Math.floor(done/total*1000)/10) + '%');
+		    }, false);
+		    if ( xhr.upload ) {
+		        xhr.upload.onprogress = function(e) {
+		            var done = e.position || e.loaded, total = e.totalSize || e.total;
+		            console.log('xhr.upload progress: ' + done + ' / ' + total + ' = ' + (Math.floor(done/total*1000)/10) + '%');
+		        };
+		    }
+		    xhr.onreadystatechange = function(e) {
+		        if ( 4 == this.readyState ) {
+		            console.log(['xhr upload complete', e]);
+		            console.log("e is " + e.responseText );
+		        }
+		    };
+
+			xhr.onreadystatechange = function() {
+			    if(xhr.readyState == 4 && xhr.status == 200) {
+			        alert(xhr.responseText);
+			        var resp = JSON.parse(xhr.responseText);
+			        console.log("links: " + resp['filepaths'] + ", count: " + resp['filepaths'].length );
+			    	for (var i = 0; i < resp['filepaths'].length; i++){
+			    		uppedWADLurls.push(resp['filepaths'][i]);
+			    	}
+			    	//console.log("URLS added: " + uppedWADLurls);
+			    }
+			}
+
+		    xhr.open('post', "/wsdarwin/funcsPHP/uploadFile.php", true);
+		    //alert("file is " + file);
+		    //var filesArray = [];
+		    var formData = new FormData();
+		    for (var i = 0; i < this.files.length; i++){
+		    	//filesArray.push(this.files[i]);
+		    	formData.append("file"+i, this.files[i]);
+		    }
+			//formData.append("uppedFiles", this.files);
+		    xhr.send(formData);
+
+		}, false);
+
+		/*function var_dump(obj) {
+		    var out = '';
+		    for (var i in obj) {
+		        out += i + ": " + obj[i] + "\n";
+		    }
+		    console.log(out);
+		}*/
+		</script>
+
+		<div id='fieldUrlDiv' class='fieldUrlDiv'>
+			<script type="text/javascript"> addURLField(); </script>
+		</div>
+		
+		<!--
+		<div class='areaUrlDiv'>
+			<textarea class='textarea' name='textarea' id='textarea' placeholder='Enter one URL per line'></textarea>
+		</div>
+		-->
+
+	</div>
+	<div class='middleRegion'>
+	<!--
 	<div class='requestDetails'>
 		<div id='urlRequestDiv' class='urlRequestDiv'>
 			Hello There. Parameter Analysis goes here.
 		</div>
 	</div>
+	-->
 
-	<div class='wadlDiv'>
-		<div id='wadlOutput' class='wadlOutput' placeholder='WADL'>
-			<p>WADL:</p>
-			<?php
-			//$homepage = file_get_contents("http://google.com");
-			//echo $homepage;
-			//$xml = simplexml_load_file('http://localhost:8080/wsdarwin_1.0.0/twitterMerged.wadl');
+	<div id='compareDiv' class='compareDiv'>
+		<button class='showCompareBtn' id='showCompareBtn' onClick="showCompareOptions()">+ Show Compare Tool</button>
+		<div id='compareInsideDiv' class='compareInsideDiv'>
+			<button onClick="addCompareURLField()"> Add URL </button>
+			<span>
+			Upload a WADL File<input id='filesCompare' type='file' placeholder='Upload'></input>
+			</span>
 
-			//print($xml);
-			$map_url = "http://localhost:8080/wsdarwin_1.0.0/twitterMerged.wadl";
-			//$map_url = "http://google.com";
-			//$response_xml_data = file_get_contents($map_url);
+			<script>
+				document.getElementById('filesCompare').addEventListener('change', function(e) {
+				    //var file = this.files[0];
+				    console.log("files length: " + this.files.length);
+				    var xhr = new XMLHttpRequest();
+				    //xhr.file = file; // not necessary if you create scopes like this
+				    xhr.addEventListener('progress', function(e) {
+				        var done = e.position || e.loaded, total = e.totalSize || e.total;
+				        console.log('xhr progress: ' + (Math.floor(done/total*1000)/10) + '%');
+				    }, false);
+				    if ( xhr.upload ) {
+				        xhr.upload.onprogress = function(e) {
+				            var done = e.position || e.loaded, total = e.totalSize || e.total;
+				            console.log('xhr.upload progress: ' + done + ' / ' + total + ' = ' + (Math.floor(done/total*1000)/10) + '%');
+				        };
+				    }
+				    xhr.onreadystatechange = function(e) {
+				        if ( 4 == this.readyState ) {
+				            console.log(['xhr upload complete', e]);
+				            console.log("e is " + e.responseText );
+				        }
+				    };
 
-    		//if($response_xml_data){
-    			//echo "<pre>";
-            	//print($response_xml_data);
-            	//echo "</pre>";
-        	//}
-			//$response_xml_data = file_get_contents($map_url);
-	        //$data = simplexml_load_string($response_xml_data);
-        	//echo "<pre>"; print_r($data); exit; 
+					xhr.onreadystatechange = function() {
+					    if(xhr.readyState == 4 && xhr.status == 200) {
+					        alert(xhr.responseText);
+					        var resp = JSON.parse(xhr.responseText);
+					        console.log("links: " + resp['filepaths'] + ", count: " + resp['filepaths'].length );
+					    	for (var i = 0; i < resp['filepaths'].length; i++){
+					    		compareWADLurls.push(resp['filepaths'][i]);
+					    	}
+					    	//console.log("URLS added: " + uppedWADLurls);
+					    }
+					}
 
-        	//$xml = simplexml_load_file("http://localhost:8080/wsdarwin_1.0.0/twitterMerged.wadl"); // or simplexml_load_string()
-			//$json = json_encode($xml);
-			$url = "http://localhost:8080/wsdarwin_1.0.0/twitterMerged.wadl";
-			/*$fileContents= file_get_contents($url);
-			$fileContents = str_replace(array("\n", "\r", "\t"), '', $fileContents);
-			$fileContents = trim(str_replace('"', "'", $fileContents));
-			$simpleXml = simplexml_load_string($fileContents);
-			$json = json_encode($simpleXml);*/
+				    xhr.open('post', "/wsdarwin/funcsPHP/uploadFile.php", true);
+				    //alert("file is " + file);
+				    //var filesArray = [];
+				    var formData = new FormData();
+				    for (var i = 0; i < this.files.length; i++){
+				    	//filesArray.push(this.files[i]);
+				    	formData.append("file"+i, this.files[i]);
+				    }
+					//formData.append("uppedFiles", this.files);
+				    xhr.send(formData);
 
-			
-			//echo $json;
-
-			?>
+				}, false);
+			</script>
 
 		</div>
 	</div>
+
+	<div id='optionsDiv' class='optionsDiv'>
+		<button class='showOptionsBtn' id='showOptionsBtn' onClick="showOptions()">+ Show Options</button>
+		<div class='optionsInsideDiv'>
+			<div>Comparison View: </div>
+			<div>Parameters: </div>
+			<span>Comparison View: </span>
+			<!--
+			<span>Side By Side Diff</span><input type='radio' id='sideBySideDiff' onClick='diffUsingJS()'></input>
+			<span>Inline Diff</span><input type='radio' id='inlineDiff' onClick='diffUsingJS()'></input>
+			-->
+			<input type="radio" name="comparisonDiffType" value="true" id="complete_yes" />
+			<label for="complete_yes">Inline Diff</label>
+			<input type="radio" name="comparisonDiffType" value="false" id="complete_no" />
+			<label for="complete_no">Side by Side Diff</label>
+
+		</div>
+	</div>
+
+	<button class='analyzeBtn' id='analyzeBtn' onClick="analyze('analyze')"> Analyze URI </button>		
+	<button class='compareBtn' id='compareBtn' onClick="compareBtn()"> Compare </button>
+	<!--<button class='saveWADLbtn' id='saveWADLbtn' onClick='save_wadl_to_file()'>Save WADL File</button>-->
+	<button class='saveWADLbtn' id='saveWADLbtn' onClick='downloadWADL()'>Save WADL File</button>
+
+	<div class='wadlDiv'>
+		<div id='wadlOutput' class='wadlOutput' placeholder='WADL'>
+			<p>No WADL Output</p>
+		</div>
+	</div>
+
 </div>
 
 </div>
@@ -395,8 +270,7 @@ class any_element {
 if (isset($GLOBALS['error_message'])){
 	echo "err:" . $GLOBALS['error_message'];
 }
-?> 
-
+?>
 
 </body>
 </html>

@@ -53,16 +53,19 @@ body {
 .wadlDiv {
 	display: inline-block;
 	vertical-align: top;
-	width: 69%;
-	height: 100px;
+	width: 100%;
 	padding:0;
 	margin:0;
 	
 }
 
+p {
+	margin: 0;
+	padding: 0;
+}
 .wadlOutput {
-	margin-left: 10px;
-	/*background-color: gray;*/
+	/*margin-left: 10px;
+	background-color: gray;*/
 	max-width: inherit;
 	max-height: inherit;
 	border-style:solid;
@@ -71,13 +74,40 @@ body {
 	margin-bottom: 55px;
 }
 
+.optionsDiv {
+	background-color: #F0F0F0;
+	height: 23px;
+	width: 100%;
+	margin-bottom: 10px;
+	overflow: hidden;
+}
+
+.compareDiv {
+	background-color: #F0F0F0;
+	height: 23px;
+	width: 100%;
+	margin-bottom: 10px;
+	overflow: hidden;
+}
+
+.optionsInsideDiv {
+	margin-top: 8px;
+	padding-left: 8px;
+}
+
+.compareInsideDiv {
+	margin-top: 8px;
+	padding-left: 8px;
+}
+
 .middleRegion {
 	/*background-color: black;*/
 	/*margin-top: 25px;*/
-	margin-top: 10px;
+	margin-top: 5px;
 }
 
 .fieldUrlDiv {
+	margin-top: 2px;
 	height: auto;
 	overflow: auto;
 	max-height: 150px;
@@ -88,6 +118,8 @@ body {
 
 .areaUrlDiv {
 	background-color: gray;
+	padding: 0;
+	margin: 0;
 	/*visibility: hidden;*/
 }
 
@@ -103,6 +135,44 @@ body {
 	width: 600px;
 }
 
+.urlInput2 {
+	width: 600px;
+}
+
+.outerpopup {
+	visibility: hidden;
+	position: relative;
+	margin: 0 auto;
+	width: 70%;
+}
+
+.analyzeBtn {
+	/*background-image: url("/wsdarwin/images/plusBtn.png");
+
+	background:url("/wsdarwin/images/plusBtn.png") 2px center no-repeat;
+    height: 32px;
+    padding: 10px 10px 10px 70px;
+    height: 28px;
+    width: 28px;
+    padding: 0;
+    margin: 0;*/
+}
+
+.saveWADLbtn {
+	/*visibility: 'hidden';*/
+}
+
+.popupBig {
+	background-color: white;
+	position: absolute;
+	width: 100%;
+	top: 100px;
+	height: auto;
+	padding-top: 20px;
+	padding-left: 15px;
+	border: 1px dotted #000000;
+}
+
 .popupDiv {
 	visibility: hidden;
 	position: absolute;
@@ -114,3 +184,4 @@ body {
 	border: 1px dotted #000000;
 	
 }
+

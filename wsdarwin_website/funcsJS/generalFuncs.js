@@ -1,10 +1,25 @@
 //import "ObjTree.js";
-
+//import "jsdiff.js";
 
 var noURLFields = 0;
+var noCompareURLFields = 0;
+var uppedWADLurls = [];
+var compareWADLurls = [];
+
+
+//wadl html file
+var wadl_attribute_edit_mode = true;	// DEBUG (only applicable to 'analyze', not 'compare')
+var add_elements_mode = true;			// DEBUG (only applicable to 'analyze', not 'compare')
+
+var session_id = '';	// initially set in the java app
+var html_wadl_string = '';
+var strapped_html_wadl_string = '';
+var spaces = 0;
+var rootNode;
+var node_id = 0;
+var xmlDoc;
 
 function addURLField(){
-	
 	var fullDiv = "	<div class='singleUrlDiv' id='singleURLdiv_" + noURLFields + "'>"+
 				  "	<select id='requestType1'>"+
 				  "	<option value='get' selected>GET</option>"+
@@ -21,61 +36,119 @@ function addURLField(){
 	noURLFields++;
 }
 
-function analyzeBtn(){
-    //grab html values and stringify into JSON
-	/*var item = {};
-    item.id = id;
-	item.user_owner = user_owner;*/
+function addCompareURLField(){
+	//alert("ss");
+	var fullDiv = "	<div class='singleUrlDiv' id='singleCompareUrlDiv" + noCompareURLFields + "'>"+
+				  "	<select id='requestType1'>"+
+				  "	<option value='get' selected>GET</option>"+
+						"<option value='post'>POST</option>"+
+						"<option value='put'>PUT</option>"+
+						"<option value='delete'>DELETE</option>"+
+						"<option value='head'>HEAD</option>"+
+					"</select>"+
+					"<input type='text' name='comparelname' id='urlCompareInput_" + noCompareURLFields + "' class='urlInput2'>"+
+					//"<button id='analyzeSingleURL1' class='analyzeSingleURL' onClick=\"analyzeSingleURL('" + noCompareURLFields + "')\"> Analyze </button>"+
+					"<button onClick=\"removeURLField('" + noCompareURLFields + "')\">Remove</button>"+
+					"</div>";
+	$('#compareDiv').append(fullDiv);
+	noCompareURLFields++;
+}
 
-	var obj = [];
+function var_dump(obj) {
+    var out = '';
+    for (var i in obj) {
+        out += i + ": " + obj[i] + "\n";
+    }
+    console.log(out);
+}
 
-	$("#wadlOutput").html('');
+function showCompareOptions(){
+	$("#showCompareBtn").html("- Hide Compare Tool");
+	$("#showCompareBtn").attr('onclick', "hideCompareOptions()");
+	$("#compareDiv").css('height', "inherit");
+}
 
-	$('input.urlInput').each(function(index) {
-	    // set div id to array value
-	    //$('div').attr('id', "singleURLdiv_" + idcount);
-	    //idcount++;
-	    //alert("id: " + $('#urlInput_'+index).attr('id') + ", val: " + $('#urlInput_'+index).val() + " index:" + index );
-	    //alert('index is' + index);
-		obj.push( $('#urlInput_'+index).val() );
-		//parseInputURLs( $('#urlInput_'+index).val() );
-	});
+function hideCompareOptions(){
+	$("#showCompareBtn").html("+ Show Compare Tool");
+	$("#showCompareBtn").attr('onclick', "showCompareOptions()");
+	$("#compareDiv").css('height', "23px");
+}
 
-	for (var i = 0; i < obj.length; i++){
-		//alert('i: ' + i + ", val: " + obj[i]);
-	}
-	
-	var jsonStr = JSON.stringify(obj);
+function showOptions() {
+	$("#showOptionsBtn").html("- Hide Options");
+	$("#showOptionsBtn").attr('onclick', "hideOptions()");
+	$("#optionsDiv").css('height', "inherit");
+}
 
+function hideOptions() {
+	$("#showOptionsBtn").html("+ Show Options");
+	$("#showOptionsBtn").attr('onclick', "showOptions()");
+	$("#optionsDiv").css('height', "23px");
+}
+
+var firstWADL = "";
+var secondWADL = "";
+
+function text_diff_JS() {
+    // get the baseText and newText values from the two textboxes, and split them into lines
+
+    var base = difflib.stringAsLines( firstWADL );
+    var newtxt = difflib.stringAsLines( secondWADL );
+
+    // create a SequenceMatcher instance that diffs the two sets of lines
+    var sm = new difflib.SequenceMatcher(base, newtxt);
+
+    // get the opcodes from the SequenceMatcher instance
+    // opcodes is a list of 3-tuples describing what changes should be made to the base text
+    // in order to yield the new text
+    var opcodes = sm.get_opcodes();
+    var diffoutputdiv = $("wadlOutput");
+    while (diffoutputdiv.firstChild) diffoutputdiv.removeChild(diffoutputdiv.firstChild);
+    //var contextSize = $("contextSize").value;
+    //contextSize = contextSize ? contextSize : null;
+
+    // build the diff view and add it to the current DOM
+    //diffoutputdiv.appendChild(
+    var diffed_string = diffview.buildView({
+	        baseTextLines: base,
+	        newTextLines: newtxt,
+	        opcodes: opcodes,
+	        // set the display titles for each resource
+	        baseTextName: "Base Text",
+	        newTextName: "New Text",
+	        //contextSize: null,
+	        //viewType: $("comparisonDiffType").checked ? 1 : 0
+	        viewType: 1
+    	});
+    //);
+
+    $("#wadlOutput").html( diffed_string );
+
+    //downloadWADL();
+}
+
+function saveWADLtoFile(){
+    console.log("saving wadl file");
     $.ajax({
-    	url: "http://localhost:8080/wsdarwin_1.0.0/jaxrs/api/analyze",
-        type: "GET",
-        data: { urls: jsonStr },
-        //parameters: { url:  },
+    	url: "/wsdarwin/funcsPHP/downloadWADLfile.php",
+        type: "POST",
+        data: { wadlString: strapped_html_wadl_string },
         dataType: "html",
-        crossDomain: true,	// sending ajax call to a jsp servlet, thus needing to enable this
-        //data: { buyerid: buyerid_arg, txnid: txn_id},
         success: function(response) {
-        	//alert('resp: ' + response);
-        	//var jsonObj = JSON.parse(response);
-        	//alert("WTF ");
-			$("#wadlOutput").append("<a href=\"" + response + "\">" + response + "</a> <br>");
-			$("#wadlOutput").append( getWADL(response) );
+        	//console.log("RESPONSE: " + response);
+        	//$("#wadlOutput").append("<a href=\"http://pokemonpacific.com/wsdarwin/funcsPHP/wadlFile.wadl\">Download the wadl file</a>");
         },
         error: function(xhr, status, error) {
-          alert("status: " + status + ", xhr: " + xhr.responseText + ", error: " + error) ;
-		  //var err = eval("(" + xhr.responseText + ")");
-		  //alert(err.Message);
+		  console.log("Error acccesing downloadWADLfile.");
 		}
 
     });
+}
 
-
-	/*var xotree = new XML.ObjTree();
-    var url = "http://localhost:8080/wsdarwin_1.0.0/twitterMerged.wadl";
-    var tree = xotree.parseHTTP( url );
-
-	$("#wadlOutput").html(yy);*/
+function downloadWADL(){
+	saveWADLtoFile();
+	window.open("http://pokemonpacific.com/wsdarwin/funcsPHP/wadlFile.wadl", '_blank', 'download');
+	//window.location = "http://pokemonpacific.com/wsdarwin/funcsPHP/wadlFile.wadl";
 }
 
 function removeURLField(id){
@@ -96,180 +169,42 @@ function removeURLField(id){
 	noURLFields = idcount;
 }*/
 
-function hideStuff(){
-	alert('Hiding ?');
-
-}
-
-function analyzeSingleURL(id){
-	var urlToAnalyze = $("#urlInput_" + id).val();
-	//alert('its value is ' + urlToAnalyze);
-    $.ajax({
-    	url: "http://localhost:8080/wsdarwin_1.0.0/jaxrs/api/analyze",
-        type: "GET",
-        data: { url: urlToAnalyze },
-        dataType: "html",
-        crossDomain: true,	// sending ajax call to a jsp servlet, thus needing to enable this
-        //data: { buyerid: buyerid_arg, txnid: txn_id},
-        success: function(response) {
-			//alert("cart saved !resp:" + response);
-			//JSON.decode();
-			
-        },
-        error: function(xhr, status, error) {
-          alert("status: " + status + ", xhr: " + xhr.responseText + ", error: " + error) ;
-		  //var err = eval("(" + xhr.responseText + ")");
-		  //alert(err.Message);
-		}
-    });
-}
-
-// analyzing a text area ( this func should be used for batch url input)
-function parseInputURLs(url){
-	//$("#urlRequestDiv").text("");
-	
-	//$('input.urlInput').each(function(index) {
-
-	//}
-
-
-}
-
-function parseURL(url) {
-    var a =  document.createElement('a');
-    a.href = url;
-    return {
-        source: url,
-        protocol: a.protocol.replace(':',''),
-        host: a.hostname,
-        port: a.port,
-        query: a.search,
-        params: (function(){
-            var ret = {},
-                seg = a.search.replace(/^\?/,'').split('&'),
-                len = seg.length, i = 0, s;
-            for (;i<len;i++) {
-                if (!seg[i]) { continue; }
-                s = seg[i].split('=');
-                ret[s[0]] = s[1];
-            }
-            return ret;
-        })(),
-        file: (a.pathname.match(/\/([^\/?#]+)$/i) || [,''])[1],
-        hash: a.hash.replace('#',''),
-        path: a.pathname.replace(/^([^\/])/,'/$1'),
-        relative: (a.href.match(/tps?:\/\/[^\/]+(.+)/) || [,''])[1],
-        segments: a.pathname.replace(/^\//,'').split('/')
-    };
-}
-
-
-function loadXMLString(txt) 
-{
-if (window.DOMParser)
-  {
-  parser=new DOMParser();
-  xmlDoc=parser.parseFromString(txt,"text/xml");
-  }
-else // code for IE
-  {
-  xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
-  xmlDoc.async=false;
-  xmlDoc.loadXML(txt); 
-  }
-return xmlDoc;
-}
-
-function loadXMLDoc(filename)
-{
-if (window.XMLHttpRequest)
-  {
-  xhttp=new XMLHttpRequest();
-  }
-else // code for IE5 and IE6
-  {
-  xhttp=new ActiveXObject("Microsoft.XMLHTTP");
-  }
-xhttp.open("GET",filename,false);
-xhttp.send();
-return xhttp.responseXML;
-}
-
-function any_element(){
-	this.class_type = new String();
-	this.attrs = new Array();
-	this.elementsArray = new Array();
-}
-
+// utility funcs
 function htmlentities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-
-var elemString = '';
-var spaces = 0;
-var rootNode;
-var node_id = 0;
-var xmlDoc;
-
-function getWADL(merged_url_path){
-
-	var application = new any_element();
-
-	console.log('name: ' + application.elementsArray.length);
-
-	xmlDoc = loadXMLDoc(merged_url_path);
-	//console.log(xmlDoc);
-	rootNode=xmlDoc.documentElement;
-	var appElem = new any_element();
-	appElem.classType = rootNode.nodeName;
-
-	console.log('root node name: ' + xmlDoc.documentElement.attributes[0].name);
-	console.log('root node name: ' + xmlDoc.documentElement.attributes[0].value);
-	console.log('root node name: ' + xmlDoc.documentElement.attributes.length);
-
-	// nodeName, attributes, childNodes
-
-	var finalPrint = '';
-
-	init_elements(rootNode);
-	setup_wadl_print();
-}
-
-//var retElem;
-
 function removeNode(mynodeid){
-	var foundNode = find_id(rootNode, mynodeid);
+	var foundNode = find_node(rootNode, mynodeid);
 	//console.log('found node name: ' + foundNode.nodeName + ', parent: ' + foundNode.parentNode.nodeName);
 	foundNode.parentNode.removeChild(foundNode);
 	setup_wadl_print();
 }
 
 function hideNodesChildren(mynodeid){
-	var foundNode = find_id(rootNode, mynodeid);
-
+	console.log("HIIIIIIIIIIDING");
+	var foundNode = find_node(rootNode, mynodeid);
 	foundNode.minimized = true;
 	setup_wadl_print();
 }
 
 function showNodesChildren(mynodeid){
-	var foundNode = find_id(rootNode, mynodeid);
+	var foundNode = find_node(rootNode, mynodeid);
 	foundNode.minimized = false;
 	setup_wadl_print();
 }
 
 function addResource(mynodeid){
-	var foundNode = find_id(rootNode, mynodeid);
+	var foundNode = find_node(rootNode, mynodeid);
 	var newNode=xmlDoc.createElement("resource");
 	newNode.setAttribute("path","");
 	foundNode.appendChild(newNode);
 	//document.getElementById("popupDiv").style.visibility="visible";
-
 	setup_wadl_print();
 }
 
 function addMethod(mynodeid){
-	var foundNode = find_id(rootNode, mynodeid);
+	var foundNode = find_node(rootNode, mynodeid);
 	var methodNode=xmlDoc.createElement("method");
 	//methodNode.setAttribute("id","");
 	methodNode.setAttribute("name","");
@@ -281,7 +216,7 @@ function addMethod(mynodeid){
 }
 
 function addParam(mynodeid){
-	var foundNode = find_id(rootNode, mynodeid);
+	var foundNode = find_node(rootNode, mynodeid);
 	var newNode=xmlDoc.createElement("param");
 	newNode.setAttribute("path","");
 	foundNode.appendChild(newNode);
@@ -291,7 +226,7 @@ function addParam(mynodeid){
 }
 
 function addRequest(mynodeid){
-	var foundNode = find_id(rootNode, mynodeid);
+	var foundNode = find_node(rootNode, mynodeid);
 	var newNode=xmlDoc.createElement("request");
 	foundNode.appendChild(newNode);
 	//document.getElementById("popupDiv").style.visibility="visible";
@@ -300,7 +235,7 @@ function addRequest(mynodeid){
 }
 
 function addResponse(mynodeid){
-	var foundNode = find_id(rootNode, mynodeid);
+	var foundNode = find_node(rootNode, mynodeid);
 	var newNode=xmlDoc.createElement("response");
 	newNode.setAttribute("status","");
 	foundNode.appendChild(newNode);
@@ -310,7 +245,7 @@ function addResponse(mynodeid){
 }
 
 function addRepresentation(mynodeid){
-	var foundNode = find_id(rootNode, mynodeid);
+	var foundNode = find_node(rootNode, mynodeid);
 	var newNode=xmlDoc.createElement("representation");
 	newNode.setAttribute("element","");
 	newNode.setAttribute("mediaType","");
@@ -320,7 +255,7 @@ function addRepresentation(mynodeid){
 }
 
 function addFault(mynodeid){
-	var foundNode = find_id(rootNode, mynodeid);
+	var foundNode = find_node(rootNode, mynodeid);
 	var newNode=xmlDoc.createElement("fault");
 	newNode.setAttribute("status","");
 	newNode.setAttribute("mediaType","");
@@ -329,32 +264,32 @@ function addFault(mynodeid){
 	setup_wadl_print();
 }
 
-function find_id(mynode, sid){
+function updateAttribute(mynodeid, nodeAttrName, newAttrValue){
+	//alert('node attribute: ' + nodeAttrName + ", value: " + newAttrValue );
+	var foundNode = find_node(rootNode, mynodeid);
+	for (var i = 0; i < foundNode.attributes.length; i++){
+		if (foundNode.attributes[i].nodeName == nodeAttrName){
+			foundNode.attributes[i].value = newAttrValue;
+			console.log("updated node with id: " + foundNode.my_id + ", nodeName: " + foundNode.attributes[i].nodeName + ",value of attr:" + foundNode.attributes[i].value);
+		}
+	}
+	setup_wadl_print();
+}
+
+function find_node(mynode, sid){
 	if (mynode.my_id == sid){
 		window.foundNode = mynode;
 	}
 	for (var i = 0; i < mynode.childNodes.length; i++){
-		console.log('FINDING NODES: ' + mynode.childNodes[i].nodeName + ", id: " + mynode.childNodes[i].my_id);
+		//console.log('FINDING NODES: ' + mynode.childNodes[i].nodeName + ", id: " + mynode.childNodes[i].my_id);
 		if (mynode.childNodes[i].my_id == sid){
 			window.foundNode = mynode.childNodes[i];		// window.foundNode global
 			console.log('! name is ' + window.foundNode.nodeName);
 			return window.foundNode;
 		}
-		find_id(mynode.childNodes[i], sid);
+		find_node(mynode.childNodes[i], sid);
 	}
 	return window.foundNode;
-}
-
-function save_wadl_to_file(){
-
-}
-
-function setup_wadl_print(){
-	elemString = '';
-	node_id = 0;
-	spaces = 0;
-	print_wadl(rootNode);
-	$("#wadlOutput").html(elemString);
 }
 
 function init_elements(myNode){
@@ -375,106 +310,238 @@ function unhighlight(divid){
 	$("#"+divid).css('text-decoration', '');
 }
 
-function addSpaces() {
-	var n = 0;
-	while (n < spaces){
-		console.log('SUP !');
-		elemString += "&nbsp;";
-		n++;
-	}
-	//spaces -= 4;
-	console.log('spaces in func: ' + spaces);
-	//elemString += "AAAAAAAAAAAAAAAAA";
+function setup_wadl_print_free(){
+	html_wadl_string = '';
+	strapped_html_wadl_string = '';
+	node_id = 0;
+	spaces = 0;
+	parse_wadl_html(rootNode);
+	//parse_wadl_html_two(rootNode);
+	$("#wadlOutput").html(strapped_html_wadl_string);
 }
 
-var attribute_edit_mode = true;
-var last_element = false;
-
-function print_wadl(myNode){
-
+function addSpaces(){
 	var n = 0;
-	// spacing between each node and it's child nodes
 	while (n < spaces){
-		elemString += "&nbsp;";
+		html_wadl_string += "&nbsp;";
+		strapped_html_wadl_string += " ";
 		n++;
 	}
+}
 
+function addSpacesTwo(){
+	var n = 0;
+	while (n < spaces){
+		html_wadl_string += "&nbsp;";
+		//strapped_html_wadl_string += " ";
+		n++;
+	}
+}
+
+function compareBtn(){
+	analyze("compare");
+}
+
+function analyze(process_mode){
+	// reset 
+	$("#wadlOutput").html('');
+
+	var analyze_urls_array = [];
+	var compare_urls_array = [];
+
+	// JSON urls to analyze
+	$('input.urlInput').each(function(index) {
+		analyze_urls_array.push( $('#urlInput_'+index).val() );
+	});
+	// JSON urls to compare
+	if (process_mode === 'compare'){
+		$('input.urlInput2').each(function(index) {
+			compare_urls_array.push( $('#urlCompareInput_'+index).val() );
+			//console.log("compare urls: " + $('#urlCompareInput_'+index).val() );
+		});
+	}
+	
+	var analyze_json = JSON.stringify(analyze_urls_array);
+	var compare_json = JSON.stringify(compare_urls_array);
+
+	// WADL files uploaded..
+	var analyzed_wadls_URLs = [];
+	var compare_wadls_URLs = [];
+
+	for (var i = 0; i < uppedWADLurls.length; i++){
+		analyzed_wadls_URLs.push(uppedWADLurls[i]);
+		//console.log("link " + i + ": " + uppedWADLurls[i]);
+	}
+
+	// WADL files to compare
+	if (process_mode === 'compare'){
+		for (var i = 0; i < compareWADLurls.length; i++){
+			compare_wadls_URLs.push(compareWADLurls[i]);
+			//console.log("link " + i + ": " + compareWADLurls[i]);
+		}
+	}
+
+	//analyzed_wadls_URLs.push("http://localhost:8080/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/WADLresponse020.wadl");
+	var jsonWadlURLs = JSON.stringify(analyzed_wadls_URLs);
+	var jsonCompareWadlURLs = JSON.stringify(compare_wadls_URLs);
+
+    $.ajax({
+    	url: "http://localhost:8080/wsdarwin_1.0.0/jaxrs/api/analyze",
+        type: "GET",
+        data: { newURLs: analyze_json, newUppedFiles: jsonWadlURLs, sessionid: session_id, type: process_mode, compareURLs: compare_json, compareWADLfiles: jsonCompareWadlURLs },
+        //parameters: { url:  },
+        dataType: "html",
+        crossDomain: true,	// sending ajax call to a jsp servlet, thus needing to enable this
+        //data: { buyerid: buyerid_arg, txnid: txn_id},
+        success: function(response) {
+        	//alert('resp: ' + response);
+        	var jsonObj = JSON.parse(response);
+
+        	session_id = jsonObj[0];
+        	var analysis_merged_wadl_url_path = jsonObj[1];
+			var compare_merged_wadl_url_path = jsonObj[2];
+
+			console.log("merged #1: " + analysis_merged_wadl_url_path);
+			console.log("merged #2: " + compare_merged_wadl_url_path);
+			console.log("process_mode is " + process_mode);
+
+			if (process_mode == "compare"){
+				console.log("diffing the wadl's");
+				add_elements_mode = false;
+
+				getWADL(analysis_merged_wadl_url_path);
+				firstWADL = strapped_html_wadl_string;
+				getWADL(compare_merged_wadl_url_path);
+				secondWADL = strapped_html_wadl_string;
+
+				text_diff_JS();
+				saveWADLtoFile();
+			} else if (process_mode == "analyze"){
+				add_elements_mode = true;
+				getWADL(analysis_merged_wadl_url_path);
+				saveWADLtoFile();
+			}
+        },
+        error: function(xhr, status, error) {
+          //alert("status: " + status + ", xhr: " + xhr.responseText + ", error: " + error) ;
+		  alert("Error accessing app. Please try again !");
+		  //var err = eval("(" + xhr.responseText + ")");
+		  //alert(err.Message);
+		}
+
+    });
+}
+
+function getWADL(wadl_url_path){
+	xmlDoc = loadXMLDoc(wadl_url_path);
+	rootNode=xmlDoc.documentElement;
+	// nodeName, attributes, childNodes
+
+	init_elements(rootNode);
+	setup_wadl_print();
+	//setup_wadl_print_free();
+}
+
+function loadXMLDoc(filename){
+	if (window.XMLHttpRequest){
+		xhttp=new XMLHttpRequest();
+	} else // code for IE5 and IE6
+	{
+		xhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	xhttp.open("GET",filename,false);
+	xhttp.send();
+	return xhttp.responseXML;
+}
+
+// setup and print the wadl document ( in html form)
+function setup_wadl_print(){
+	html_wadl_string = '';
+	strapped_html_wadl_string = '';
+	node_id = 0;
+	spaces = 0;
+	parse_wadl_html(rootNode);
+	//parse_wadl_html_two(rootNode);
+	$("#wadlOutput").html(html_wadl_string);
+	//$("#wadlOutput").html(strapped_html_wadl_string);
+}
+
+// parses the wadl/xml document recursively and print it out
+function parse_wadl_html(myNode){
+
+	//var n = 0;
+	addSpaces();
 
 	// set a unique id for each node
 	myNode.my_id = node_id;
 	node_id++;
-
-	console.log('NODE AND ID: ' + myNode.nodeName + ", " + myNode.my_id);
 	
 	// if 'myNode' has any child nodes, then it can be expanded/minimized; otherwise, it can't
 	if (myNode.childNodes.length > 0){
 		// if the node is not minimized, add an onClick 'hideNode' action; else, add an onClick 'showNode' action
 		if (myNode.minimized){
-			elemString += "<button onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";			// remove element button
+			html_wadl_string += "<button onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";			// remove element button
 		} else {
-			elemString += "<button onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";			// remove element button
+			html_wadl_string += "<button onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";			// remove element button
 		}
 	}
 
-	elemString += "<span id='" + myNode.my_id + "'>";
-	elemString += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
+	html_wadl_string += "<span id='" + myNode.my_id + "'>";
+	html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
+
+	strapped_html_wadl_string += "<" + myNode.nodeName;
 
 	// print myNode's attributes
 	for (var i = 0; i < myNode.attributes.length; i++){
-		if (attribute_edit_mode){
-			elemString += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + "<input type='text' value=\"" + htmlentities( myNode.attributes[i].value ) + "\"></input>" + "\"" + "</i></font>";
+		if (wadl_attribute_edit_mode){
+			html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + "<input type='text' onchange=\"updateAttribute('" + myNode.my_id + "', '" + myNode.attributes[i].nodeName + "', this.value );\" value=\"" + htmlentities( myNode.attributes[i].value ) + "\"></input>" + "\"" + "</i></font>";
 		} else {
-			elemString += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+			html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
 		}
+		strapped_html_wadl_string += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
 	}
 
-	elemString += "<font color='#008080'>" + htmlentities(">") + "</font>";
-	elemString += "<button onmouseout=\"unhighlight('" + myNode.my_id + "');\" onmouseover=\"highlightDiv('" + myNode.my_id + "');\" onClick=\"removeNode('" + myNode.my_id + "')\">X</button>";	// remove element button
-	elemString += "</br>";
-
+	strapped_html_wadl_string += ">";
+	strapped_html_wadl_string += "\n";
+	html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
+	html_wadl_string += "<button onmouseout=\"unhighlight('" + myNode.my_id + "');\" onmouseover=\"highlightDiv('" + myNode.my_id + "');\" onClick=\"removeNode('" + myNode.my_id + "')\">X</button>";	// remove element button
+	html_wadl_string += "</br>";
+	
 	// only print myNode's children nodes if myNode is not minimized
 	if (!myNode.minimized){
 		// print myNode's children nodes
 		for (var i = 0; i < myNode.childNodes.length; i++){
-			if ( (i+1) == myNode.childNodes.length){
-				last_element = true;
-			}
 			spaces += 4;
-			print_wadl(myNode.childNodes[i]);
+			parse_wadl_html(myNode.childNodes[i]);
 		}
 	}
 
+	console.log("SUP 6");
+	// printing the add 'element(s)' buttons
 	if (myNode.nodeName == 'resources'){
-		addSpaces();
-		elemString += "&nbsp;&nbsp;&nbsp;&nbsp;";
-		elemString += "<button onClick=\"addResource('" + myNode.my_id + "')\">Add Resource</button>";		// remove element button
-		elemString += "</br>";
+		addSpacesTwo();
+		html_wadl_string += "<button onClick=\"addResource('" + myNode.my_id + "')\">Add Resource</button>";		// remove element button
+		html_wadl_string += "</br>";
 		
-		addSpaces();
-		elemString += "&nbsp;&nbsp;&nbsp;&nbsp;";
-		elemString += "<button onClick=\"addMethod('" + myNode.my_id + "')\">Add Method</button>";			// remove element button
-		elemString += "</br>";
+		addSpacesTwo();
+		html_wadl_string += "<button onClick=\"addMethod('" + myNode.my_id + "')\">Add Method</button>";			// remove element button
+		html_wadl_string += "</br>";
 
-		addSpaces();
-		elemString += "&nbsp;&nbsp;&nbsp;&nbsp;";
-		elemString += "<button onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";			// remove element button
-		elemString += "</br>";
+		addSpacesTwo();
+		html_wadl_string += "<button onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";			// remove element button
+		html_wadl_string += "</br>";
 	} else if (myNode.nodeName == 'resource'){
-		addSpaces();
-		elemString += "&nbsp;&nbsp;&nbsp;&nbsp;";
-		elemString += "<button onClick=\"addResource('" + myNode.my_id + "')\">Add Resource</button>";		// remove element button
-		elemString += "</br>";
+		addSpacesTwo();
+		html_wadl_string += "<button onClick=\"addResource('" + myNode.my_id + "')\">Add Resource</button>";		// remove element button
+		html_wadl_string += "</br>";
 		
-		addSpaces();
-		elemString += "&nbsp;&nbsp;&nbsp;&nbsp;";
-		elemString += "<button onClick=\"addMethod('" + myNode.my_id + "')\">Add Method</button>";			// remove element button
-		elemString += "</br>";
+		addSpacesTwo();
+		html_wadl_string += "<button onClick=\"addMethod('" + myNode.my_id + "')\">Add Method</button>";			// remove element button
+		html_wadl_string += "</br>";
 		
-		addSpaces();
-		elemString += "&nbsp;&nbsp;&nbsp;&nbsp;";
-		elemString += "<button onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";			// remove element button
-		elemString += "</br>";
-		//elemString += "</br>";
+		addSpacesTwo();
+		html_wadl_string += "<button onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";			// remove element button
+		html_wadl_string += "</br>";
 	} else if (myNode.nodeName == 'method'){
 		// a method element can only have one request and one response element
 		var hasRequest = false;
@@ -488,16 +555,15 @@ function print_wadl(myNode){
 		}
 
 		if (!hasRequest){
-			addSpaces();
-			elemString += "&nbsp;&nbsp;&nbsp;&nbsp;";
-			elemString += "<button onClick=\"addRequest('" + myNode.my_id + "')\">Add Request</button>";		// remove element button
-			elemString += "</br>";
+			addSpacesTwo();
+			html_wadl_string += "<button onClick=\"addRequest('" + myNode.my_id + "')\">Add Request</button>";		// remove element button
+			html_wadl_string += "</br>";
 		}
+
 		if (!hasResponse){
-			addSpaces();
-			elemString += "&nbsp;&nbsp;&nbsp;&nbsp;";
-			elemString += "<button onClick=\"addResponse('" + myNode.my_id + "')\">Add Response</button>";		// remove element button
-			elemString += "</br>";
+			addSpacesTwo();
+			html_wadl_string += "<button onClick=\"addResponse('" + myNode.my_id + "')\">Add Response</button>";		// remove element button
+			html_wadl_string += "</br>";
 		}
 	} else if (myNode.nodeName == 'request'){
 		// a request element can only have one representation element
@@ -509,16 +575,14 @@ function print_wadl(myNode){
 		}
 
 		if (!hasRepresentation){
-			addSpaces();
-			elemString += "&nbsp;&nbsp;&nbsp;&nbsp;";
-			elemString += "<button onClick=\"addRepresentation('" + myNode.my_id + "')\">Add Representation</button>";		// remove element button
-			elemString += "</br>";
+			addSpacesTwo();
+			html_wadl_string += "<button onClick=\"addRepresentation('" + myNode.my_id + "')\">Add Representation</button>";		// remove element button
+			html_wadl_string += "</br>";
 		}
 
-		addSpaces();
-		elemString += "&nbsp;&nbsp;&nbsp;&nbsp;";
-		elemString += "<button onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";		// remove element button
-		elemString += "</br>";
+		addSpacesTwo();
+		html_wadl_string += "<button onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";		// remove element button
+		html_wadl_string += "</br>";
 	} else if (myNode.nodeName == 'response'){
 		// a response element can only have one representation element
 		var hasRepresentation = false;
@@ -529,162 +593,86 @@ function print_wadl(myNode){
 		}
 
 		if (!hasRepresentation){
-			addSpaces();
-			elemString += "&nbsp;&nbsp;&nbsp;&nbsp;";
-			elemString += "<button onClick=\"addRepresentation('" + myNode.my_id + "')\">Add Representation</button>";		// remove element button
-			elemString += "</br>";
+			addSpacesTwo();
+			html_wadl_string += "<button onClick=\"addRepresentation('" + myNode.my_id + "')\">Add Representation</button>";		// remove element button
+			html_wadl_string += "</br>";
 		}
 
-		addSpaces();
-		elemString += "&nbsp;&nbsp;&nbsp;&nbsp;";
-		elemString += "<button onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";		// remove element button
-		elemString += "</br>";
+		addSpacesTwo();
+		html_wadl_string += "<button onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";		// remove element button
+		html_wadl_string += "</br>";
 
-		addSpaces();
-		elemString += "&nbsp;&nbsp;&nbsp;&nbsp;";
-		elemString += "<button onClick=\"addFault('" + myNode.my_id + "')\">Add Fault</button>";		// remove element button
-		elemString += "</br>";
+		addSpacesTwo();
+		html_wadl_string += "<button onClick=\"addFault('" + myNode.my_id + "')\">Add Fault</button>";		// remove element button
+		html_wadl_string += "</br>";
 	}
 
 	// print the end element of myNode
 	addSpaces();
-	elemString += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
-	elemString += "</span>";
-	elemString += "</br>";
+
+	strapped_html_wadl_string += "</" + myNode.nodeName + ">";
+	strapped_html_wadl_string += "\n";
+	html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
+	html_wadl_string += "</span>";
+	html_wadl_string += "</br>";
 
 	// decrease spaces as the recursion is going down in the element hierarchy
 	spaces -= 4;
 }
 
-//function insertNode(){
-	// 
-//}
-
-
-
 /*
-function print_wadl($myNode){
-	global $elemString;
-	global $spaces;
+function parse_wadl_html_two(myNode){
 
-	//$colorTagStart = "<font color='#3E94C0'>";
-	//$colorTagEnd = "<font color='#3E94C0'>";
+	// set a unique id for each node
+	myNode.my_id = node_id;
+	node_id++;
 
-	$n = 0;
-	while ($n < $spaces){
-		$GLOBALS['elemString'] .= "&nbsp;";
-		$n++;
+	addSpaces();
+
+	html_wadl_string += "<span id='" + myNode.my_id + "'>";
+	html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
+	
+	strapped_html_wadl_string += "<" + myNode.nodeName;
+
+	// print myNode's attributes
+	for (var i = 0; i < myNode.attributes.length; i++){
+		html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+		strapped_html_wadl_string += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
 	}
 
-	//$no_childNodes = 0;
-	//if ($myNode->elements){
-	//	$no_childNodes++;
-	//}
-	if ($myNode->elements){
-		$GLOBALS['elemString'] .= "<button onClick='hideStuff()'>" . '1' . "</button><font color='#008080'>" . htmlentities("<" . $myNode->class_type) . "</font>";
-	} else {
-		$GLOBALS['elemString'] .= "<font color='#008080'>" . htmlentities("<" . $myNode->class_type) . "</font>";
+	strapped_html_wadl_string += ">";
+	strapped_html_wadl_string += "\n";
+	html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
+	html_wadl_string += "</br>";
+
+	// print myNode's children nodes
+	for (var i = 0; i < myNode.childNodes.length; i++){
+		spaces += 4;
+		parse_wadl_html_two(myNode.childNodes[i]);
 	}
 
+	// print the end element of myNode
+	addSpaces();
+	strapped_html_wadl_string += "</" + myNode.nodeName + ">";
+	strapped_html_wadl_string += "\n";
+	html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
+	html_wadl_string += "</span>";
+	html_wadl_string += "</br>";
 
-	foreach ($myNode->attrs as $attName => $attValue){
-		//print $elemString;
-		$GLOBALS['elemString'] .= "<font color='#7B277C'>" . htmlentities(" " . $attName ) . "</font>" . "=" . "<font color='#4152A3'><i>" . htmlentities("\"" . $attValue . "\"" ) . "</i></font>";
-		//print $elemString;
-		//var_dump($elemString);
-		//print $elemString;
-	}
-
-	$GLOBALS['elemString'] .= "<font color='#008080'>" . htmlentities(">") . "</font>";
-	$GLOBALS['elemString'] .= "</br>";
-
-	foreach ($myNode->elements AS $nodeElem){
-		$spaces += 4;
-		print_wadl($nodeElem);
-	}
-
-	$n = 0;
-	while ($n < $spaces){
-		$GLOBALS['elemString'] .= "&nbsp;";
-		$n++;
-	}
-	$spaces -= 4;
-
-	$GLOBALS['elemString'] .= "<font color='#008080'>" . htmlentities("</" . $myNode->class_type . ">") . "</font>";
-	$GLOBALS['elemString'] .= "</br>";
-	//print $elemString;
-}*/
-
-
-
-
-
-
-/*
-// old version -> calls getWadlService, which then returns a String with the xml data
-function getWADL(merged_url_path){
-    /*$.ajax({
-    	url: "http://localhost/abc/funcsPHP/getWadlService.php",
-        type: "GET",
-        data: { mergedUrlPath: merged_url_path },
-        //parameters: { url:  },
-        //dataType: "html",
-        //data: { buyerid: buyerid_arg, txnid: txn_id},
-        success: function(response) {
-        	//alert('resp: ' + response);
-        	console.log('obj is  ' + response);
-        	console.log("===========================================");
-        	var jsonObj = JSON.parse(response);
-        	console.dir('obj is  ' + jsonObj['class_type']);
-        	console.dir('obj is  ' + jsonObj['attrs']);
-        	console.dir('obj is  ' + jsonObj['elements']);
-
-
-        	var xmlDoc=loadXMLString(response);
-
-			// documentElement always represents the root node
-			var x=xmlDoc.documentElement.childNodes;
-
-			for (i=0;i<x.length;i++)
-			  {
-			  console.log(x[i].nodeName);
-			  console.log(": ");
-			  console.log(x[i].childNodes[0].nodeValue);
-			  console.log("<br>");
-			  }
-        	console.log('xml doc: ' + xmlDoc);
-        	console.log('xml doc: ' + xmlDoc.childNodes);
-
-			//alert("web service resp: " + response);
-			$("#wadlOutput").append( response );
-        },
-        error: function(xhr, status, error) {
-          alert("ERROR status: " + status + ", xhr: " + xhr.responseText + ", error: " + error) ;
-		  //var err = eval("(" + xhr.responseText + ")");
-		  //alert(err.Message);
-		}
-    });
+	// decrease spaces as the recursion is going down in the element hierarchy
+	spaces -= 4;
 }
 
+function save_wadl_to_file(){
+	html_wadl_string = '';
+	strapped_html_wadl_string = '';
+	node_id = 0;
+	spaces = 0;
+	parse_wadl_html_two(rootNode);
+	$('#popupBig').html(html_wadl_string);
+	$('#popupBig').append("</br><button onClick=\"document.getElementById('outerpopup').style.visibility='hidden';\">Close</button>");
+
+	document.getElementById("outerpopup").style.visibility="visible";
+}
 
 */
-
-/*
-
-
-parsing every line of a textarea element
-
-	var lines = $('#textarea').val().split('\n');
-	for(var i = 0;i < lines.length;i++){
-	    //code here using lines[i] which will give you each line
-	    alert('url ' + i + ": " + lines[i]);
-	    urlObj = parseURL(lines[i]);
-	    var cont = "Url #" + i + ":\n";
-	    $('#urlRequestDiv').append(cont);
-	}
-
-
-*/
-
-
-

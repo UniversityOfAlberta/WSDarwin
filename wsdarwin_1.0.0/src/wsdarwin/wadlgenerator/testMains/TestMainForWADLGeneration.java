@@ -46,29 +46,7 @@ import java.net.*;
 import java.io.*;
 
 @Path(value="/api")
-public class TestMainForWADLGeneration implements ServletContextListener {
-	
-	
-    public void contextInitialized(ServletContextEvent e) {
-    	System.out.println("aaaaaaaaa: " + e.getServletContext() );
-        //appHome = new File(e.getServletContext().getInitParameter("MyAppHome"));
-        //File customerDataFile = new File(appHome, "SuppliedFile.csv");
-    }
-    
-	@Override
-	public void contextDestroyed(ServletContextEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	public String randomString(String chars, int length) {
-		  Random rand = new Random();
-		  StringBuilder buf = new StringBuilder();
-		  for (int i=0; i<length; i++) {
-		    buf.append(chars.charAt(rand.nextInt(chars.length())));
-		  }
-		  return buf.toString();
-	}
+public class TestMainForWADLGeneration {
 
 	@Context private HttpServletRequest servletRequest;
 	//@Context private HttpServletContext servletContext;
@@ -99,6 +77,18 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 	private static final String LOCALHOST_WADL_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/";
 	//private static final String LOCALHOST_WADL_PATH = PATH_PREFIX_TWO + "http://localhost:8080/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/";
 	
+	static WADLFile wadl_one;
+	static WADLFile wadl_two;
+	
+	public String randomString(String chars, int length) {
+		  Random rand = new Random();
+		  StringBuilder buf = new StringBuilder();
+		  for (int i=0; i<length; i++) {
+		    buf.append(chars.charAt(rand.nextInt(chars.length())));
+		  }
+		  return buf.toString();
+	}
+	
 	@GET
 	@Path("/analyze")
     public String singleURL(@QueryParam("newURLs") String newURLs, @QueryParam("newUppedFiles") String newUppedFiles, @QueryParam("sessionid") String sessionid, @QueryParam("type") String call_type, @QueryParam("compareURLs") String compareURLs, @QueryParam("compareWADLfiles") String compareWADLfiles) throws Exception {
@@ -106,22 +96,37 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 		
 		//Gson gson = new Gson();
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		ArrayList<String> urls = gson.fromJson(newURLs, ArrayList.class);
-		ArrayList<String> compareurls = gson.fromJson(compareURLs, ArrayList.class);
-		ArrayList<String> analyzedWADLurls = gson.fromJson(newUppedFiles, ArrayList.class);
-		ArrayList<String> compareWADLurls = gson.fromJson(compareWADLfiles, ArrayList.class);
+		ArrayList<String> analyze_URLs = gson.fromJson(newURLs, ArrayList.class);
+		ArrayList<String> compare_URLs = gson.fromJson(compareURLs, ArrayList.class);
+		ArrayList<String> analyzed_WADLurls = gson.fromJson(newUppedFiles, ArrayList.class);
+		ArrayList<String> compare_WADLurls = gson.fromJson(compareWADLfiles, ArrayList.class);
 		
-		//ArrayList<String> wadlPaths = getWadl(urls);
-		//WADLFile abc = getWadl(urls);
-		String mergedPath = getWadl(urls, analyzedWADLurls, "analyzeURLS");
-		String mergedPathTwo = "";
-		//System.out.println("COMPARING URL SIZE: " + compareurls.size() );
+		WADLFile helloworld = null;
 		
-		if ( ( (compareurls != null) || (compareWADLurls != null) ) && ( (compareWADLurls.size() > 0) || (compareurls.size() > 0) ) ){
-			//System.out.println("THE compared url is: " + compareurls.get(0));
-			mergedPathTwo = getWadl(compareurls, compareWADLurls, "compareURLS");
+		if (helloworld == null){
+			System.out.println("helloworld is null !");
 		}
-		//String jsonRet = gson.toJson(abc);
+		
+		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyzed_WADLurls, "analyzeURLS");
+		String compare_wadl_merged_path_url = "";
+		
+		if ( ( (compare_URLs != null) || (compare_WADLurls != null) ) && ( (compare_WADLurls.size() > 0) || (compare_URLs.size() > 0) ) ){
+			compare_wadl_merged_path_url = getWadl(compare_URLs, compare_WADLurls, "compareURLS");
+			
+			System.out.println("analysis path: " + analysis_wadl_merged_path_url);
+			System.out.println("compare path: " + compare_wadl_merged_path_url);
+			
+			// parse the 2 wadl's into a wsdarwin.model and diff them
+			WADLParser parser1 = new WADLParser(new File(FILENAME_DIR_TWO + "twitterMerged.wadl"));
+			WADLParser parser2 = new WADLParser(new File(FILENAME_DIR_TWO + "twitterMerged2.wadl"));
+			
+			Delta delta = parser1.getService().diff(parser2.getService());
+			
+			DeltaUtil.findMoveDeltas(delta);
+			delta.printDelta(0);
+			System.out.println("Diff finished");
+			System.out.println("Finished!!");
+		}
 		
 		ArrayList<String> returnArray = new ArrayList<String>();
 		
@@ -136,8 +141,9 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 		}
 		//System.out.println("the session id: " + returnArray.get(0));
 		
-		returnArray.add(mergedPath);
-		returnArray.add(mergedPathTwo);
+		returnArray.add(analysis_wadl_merged_path_url);
+		returnArray.add(compare_wadl_merged_path_url);
+		
 		
 		String ret = gson.toJson(returnArray);
 		
@@ -169,17 +175,7 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 		 
 		 // to diff 2 files..
 		/*System.out.println("Diff started");
-		WADLParser parser1 = new WADLParser(new File(
-				"files/icsm2014/twitter/wadl/WADLResponse001.wadl"));
-		WADLParser parser2 = new WADLParser(new File(
-				"files/icsm2014/twitter/wadl/WADLResponse002.wadl"));
-
-		Delta delta = parser1.getService().diff(parser2.getService());
-
-		DeltaUtil.findMoveDeltas(delta);
-		delta.printDelta(0);
-		System.out.println("Diff finished");
-		System.out.println("Finished!!");*/
+*/
 		
 		/*
 		Gson gsonObj = new Gson();
@@ -187,8 +183,6 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 		
 		
 		return ret;
-		
-		//return "The url you provided: " + jsonObj;
 	}	
 	
 	/**
@@ -209,7 +203,6 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 			
 			//String line = testIn.readLine();
 			
-			
 			ArrayList<String> links = new ArrayList<String>();
 			ArrayList<String> wadl_paths = new ArrayList<String>();
 			WADLFile ret = null;
@@ -217,10 +210,14 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 			//links.add(new String("005 GET https://api.github.com/users/mralexgray/repos"));
 			//links.add(new String("001 GET http://api.openweathermap.org/data/2.1/find/city?lat=55&lon=37&cnt=10"));
 			
+			// ===============================================================================================================================
 			// some api calls that return json
 			// https://api.github.com/users/penguinsource/repos
 			// https://api.github.com/users/mralexgray/repos
 			// https://api.github.com/users/fokaefs/repos
+			// https://api.github.com/users/mojombo
+			// https://api.github.com/users/willcodeforfoo
+			// 
 			// https://graph.facebook.com/oprescu3
 			// http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=HeyThere
 			// http://api.openweathermap.org/data/2.1/find/city?lat=55&lon=37&cnt=10
@@ -229,8 +226,7 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 			// http://www.biomedcentral.com/webapi/1.0/latest_articles.json
 			// http://api.artsholland.com/rest/production.json?per_page=5&page=4
 			// http://www.a3ultimate.com/API/Options/json/33916;3613214975,33916;3613214975,33916;3613214975,33916;3613214975
-			
-			//System.out.println("==========================================");
+			// ===============================================================================================================================
 			
 			for (int i = 0; i < url_list.size(); i++){
 				if ( "".equals( url_list.get(i) ) ){
@@ -498,8 +494,10 @@ public class TestMainForWADLGeneration implements ServletContextListener {
 			//return xml_doc_merged;
 	        //mergedWADL.serializeFile();
 	        if (call_type.equals("analyzeURLS")){
+	        	wadl_one = mergedWADL;
 	        	return MERGED_WADL_PATH;
 	        } else if (call_type.equals("compareURLS")){
+	        	wadl_two = mergedWADL;
 	        	return MERGED_WADL_PATH_TWO;
 	        }
 	        return "";
