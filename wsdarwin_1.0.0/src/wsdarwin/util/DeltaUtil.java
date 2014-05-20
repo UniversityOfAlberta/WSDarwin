@@ -177,7 +177,7 @@ public class DeltaUtil {
 
 	private static WSElement hasCommonAncestor(Delta delta1, Delta delta2) {
 		WSElement commonAncestor = null;
-		if (delta1.getSource() != null && delta2.getSource() != null && !(delta2.getParent().getSource() instanceof IService)) {
+		if (delta1.getSource() != null && delta2.getSource() != null || !(delta2.getParent().getSource() instanceof IService)) {
 			if (delta1.getSource().equals(delta2.getSource())) {
 				commonAncestor = delta1.getSource();
 			} else {

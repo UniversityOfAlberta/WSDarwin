@@ -4,6 +4,8 @@ package wsdarwin.wadlgenerator.testMains;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -26,8 +28,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
+import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
@@ -67,6 +76,7 @@ public class TestMainForWADLGeneration {
 	//private static final String PATH_PREFIX_TWO = "C:/Users/mihai/eclipse_workspace/wsdarwin_1.0.0/WebContent/files/icsm2014/"+VENDOR;
 	// tomcat path
 	private static final String PATH_PREFIX_TWO = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/"+VENDOR;
+	private static final String PATH_PREFIX_FILES = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
 	//private static final String HOST_PATH = "localhost:8080/wsdarwin_1.0.0/";
 	
 	//private static final String PATH_PREFIX_TWO = HOST_PATH + "files/icsm2014/"+VENDOR;
@@ -74,6 +84,7 @@ public class TestMainForWADLGeneration {
 	private static final String RESPONSE_DIR_TWO = PATH_PREFIX_TWO+"/responses/";
 	private static final String UPLOADED_WADLS = PATH_PREFIX_TWO+"/uploadedWADL/";
 	
+	private static final String LOCALHOST_FILES_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
 	private static final String LOCALHOST_WADL_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/";
 	//private static final String LOCALHOST_WADL_PATH = PATH_PREFIX_TWO + "http://localhost:8080/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/";
 	
@@ -110,6 +121,7 @@ public class TestMainForWADLGeneration {
 		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyzed_WADLurls, "analyzeURLS");
 		String compare_wadl_merged_path_url = "";
 		
+		Delta delta = null;
 		if ( ( (compare_URLs != null) || (compare_WADLurls != null) ) && ( (compare_WADLurls.size() > 0) || (compare_URLs.size() > 0) ) ){
 			compare_wadl_merged_path_url = getWadl(compare_URLs, compare_WADLurls, "compareURLS");
 			
@@ -120,10 +132,11 @@ public class TestMainForWADLGeneration {
 			WADLParser parser1 = new WADLParser(new File(FILENAME_DIR_TWO + "twitterMerged.wadl"));
 			WADLParser parser2 = new WADLParser(new File(FILENAME_DIR_TWO + "twitterMerged2.wadl"));
 			
-			Delta delta = parser1.getService().diff(parser2.getService());
+			delta = parser1.getService().diff(parser2.getService());
 			
 			DeltaUtil.findMoveDeltas(delta);
 			delta.printDelta(0);
+			
 			System.out.println("Diff finished");
 			System.out.println("Finished!!");
 		}
@@ -143,6 +156,24 @@ public class TestMainForWADLGeneration {
 		
 		returnArray.add(analysis_wadl_merged_path_url);
 		returnArray.add(compare_wadl_merged_path_url);
+		System.out.println("call type is: " + call_type);
+		if (call_type.equals("compare")){
+			System.out.println("creating xml comparison file");
+			
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setNamespaceAware(true);
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			DOMImplementation domImpl = builder.getDOMImplementation();
+			Document xmldoc = domImpl.createDocument("localXMLdelta", "deltas", null);
+			
+			delta.createXMLElement(xmldoc, xmldoc.getDocumentElement());
+			//String comparison_file_path = 
+			writeXML(domImpl, xmldoc, PATH_PREFIX_FILES + "deltaComparison.xml");
+			System.out.println("done creating xml comparison file");
+			//String deltaString = gson.toJson(delta);
+			returnArray.add(LOCALHOST_FILES_PATH + "deltaComparison.xml");
+	    }
+		
 		
 		
 		String ret = gson.toJson(returnArray);
@@ -184,6 +215,21 @@ public class TestMainForWADLGeneration {
 		
 		return ret;
 	}	
+	
+	private void writeXML(DOMImplementation domImpl, Document xmldoc,
+			String filename) throws FileNotFoundException {
+			DOMImplementationLS ls = (DOMImplementationLS) domImpl;
+	        LSSerializer lss = ls.createLSSerializer();
+	        LSOutput lso = ls.createLSOutput();
+	        lso.setByteStream(new FileOutputStream(new File(filename)));
+	        
+	        lss.write(xmldoc, lso);
+	        
+	        //Element root = xmldoc.get
+	        //System.out.println("root name ? " + getStringFromDocument(xmldoc) );
+	        //String jsonRet = gson.toJson( getStringFromDocument(xmldoc) );
+	        //System.out.println("THE FINAL XML: " + xmldoc.toString() );
+	}
 	
 	/**
 	 * @param args
@@ -270,6 +316,7 @@ public class TestMainForWADLGeneration {
 	        //System.out.println("[Interface retrieval]");
 			
 			// create empty merged WADL file
+			System.out.println("THE CALL_TYPE IS: !!! " + call_type);
 	        String mergedFileName = "";
 	        if (call_type.equals("analyzeURLS")){
 	        	mergedFileName = "Merged.wadl";
@@ -378,7 +425,7 @@ public class TestMainForWADLGeneration {
 			        BufferedReader in = new BufferedReader(
 		            new InputStreamReader(yc.getInputStream()));
 			        String inputLine;
-		
+			        
 			        //BufferedWriter out = new BufferedWriter(new FileWriter(new File(RESPONSE_DIR+FILENAME_XML)));
 			        String uppedWADLpath = UPLOADED_WADLS+"file"+i+".wadl";
 			        BufferedWriter out = new BufferedWriter(new FileWriter(new File(uppedWADLpath)));
@@ -387,6 +434,7 @@ public class TestMainForWADLGeneration {
 			            out.write(inputLine);
 			            out.newLine();
 			        }
+			        
 			        in.close();
 			        out.close();
 			        
@@ -483,7 +531,8 @@ public class TestMainForWADLGeneration {
 			
 			String MERGED_WADL_PATH = LOCALHOST_WADL_PATH+VENDOR+"Merged.wadl";
 			String MERGED_WADL_PATH_TWO = LOCALHOST_WADL_PATH+VENDOR+"Merged2.wadl";
-	        // Add the merged wadl's path to the list wadl_paths
+	        
+			// Add the merged wadl's path to the list wadl_paths
 	        wadl_paths.add(LOCALHOST_WADL_PATH+VENDOR+"Merged.wadl");
 	        
 			//return wadl_paths;

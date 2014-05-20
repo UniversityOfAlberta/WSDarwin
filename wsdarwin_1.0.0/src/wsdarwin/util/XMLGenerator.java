@@ -39,6 +39,8 @@ public class XMLGenerator {
 	public static final String XML_SCHEMA_NAMESPACE = "xs:";
 	public static final String TARGET_SCHEMA_NAMESPACE = "tns:";
 
+	
+	
 	private void createXSD(XSDFile xsdFile, Document xmldoc, Element schemaElement) throws IOException, ParserConfigurationException {
 		
 		ArrayList<String> elementsAndTypes = xsdFile.sortedElementAndTypeNames();

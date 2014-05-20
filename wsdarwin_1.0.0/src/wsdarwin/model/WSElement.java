@@ -14,4 +14,6 @@ public interface WSElement extends Serializable {
 	public Delta diff(WSElement input);
 
 	public HashMap<String, WSElement> getChildren();
+	
+	public String getName();
 }

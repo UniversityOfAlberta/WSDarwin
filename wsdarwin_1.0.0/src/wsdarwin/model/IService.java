@@ -21,6 +21,11 @@ public class IService implements WSElement {
 	public IService() {
 		
 	}
+	
+	@Override
+	public String getName() {
+		return targetNamespace;
+	}
 		
 	public IService(String targetNamespace) {
 		this.targetNamespace = targetNamespace;
@@ -181,5 +186,7 @@ public class IService implements WSElement {
 		}
 		return averageNesting/(double)interfaces.size();
 	}
+
+
 
 }
