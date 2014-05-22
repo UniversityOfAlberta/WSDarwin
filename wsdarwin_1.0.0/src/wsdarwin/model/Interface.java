@@ -30,7 +30,9 @@ public class Interface implements WSElement {
 	}
 	
 	public String getName() {
-		return name;
+		System.out.println(" === getName called: name: " + name + ", address: " + address + "  ===");
+		//return name;
+		return address;	// for WADL
 	}
 
 	public void setName(String name) {
@@ -174,7 +176,7 @@ public class Interface implements WSElement {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return name;
+		return getName();
 	}
 
 	public int getNumberOfTypes() {

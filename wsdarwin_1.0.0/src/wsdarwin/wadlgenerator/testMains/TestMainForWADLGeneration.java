@@ -134,7 +134,7 @@ public class TestMainForWADLGeneration {
 			
 			delta = parser1.getService().diff(parser2.getService());
 			
-			DeltaUtil.findMoveDeltas(delta);
+			//DeltaUtil.findMoveDeltas(delta);
 			delta.printDelta(0);
 			
 			System.out.println("Diff finished");
