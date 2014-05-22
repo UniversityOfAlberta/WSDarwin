@@ -142,7 +142,7 @@ public abstract class Delta {
 			return target;
 		}
 	}
-
+	
 	public abstract void printDelta(int level);
 	
 	public abstract Element createXMLElement(Document document, Element parent);

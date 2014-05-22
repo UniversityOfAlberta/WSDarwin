@@ -87,7 +87,7 @@ public class IService implements WSElement {
 		for(String nameAdded : interfacesAdded.keySet()) {
 			for(String nameDeleted : interfacesDeleted.keySet()) {
 				if(((Interface)interfacesAdded.get(nameAdded)).getChildren().equals(((Interface)interfacesDeleted.get(nameDeleted)).getChildren())) {
-					deltas.add(interfacesAdded.get(nameAdded).diff(interfacesDeleted.get(nameDeleted)));
+					deltas.add(interfacesDeleted.get(nameDeleted).diff(interfacesAdded.get(nameAdded)));
 					interfacesNotAdded.add(nameAdded);
 					interfacesNotDeleted.add(nameDeleted);
 				}

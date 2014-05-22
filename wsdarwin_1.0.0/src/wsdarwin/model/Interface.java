@@ -108,7 +108,7 @@ public class Interface implements WSElement {
 		for(String operationAdded : operationsAdded.keySet()) {
 			for(String operationDeleted : operationsDeleted.keySet()) {
 				if(((Operation)operationsAdded.get(operationAdded)).getChildren().equals(((Operation)operationsDeleted.get(operationDeleted)).getChildren())) {
-					deltas.add(operationsAdded.get(operationAdded).diff(operationsDeleted.get(operationDeleted)));
+					deltas.add(operationsDeleted.get(operationDeleted).diff(operationsAdded.get(operationAdded)));
 					operationsNotAdded.add(operationAdded);
 					operationsNotDeleted.add(operationDeleted);
 				}
