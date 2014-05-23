@@ -18,7 +18,9 @@ public class Operation implements WSElement {
 	private String pattern;
 
 	private IType request;
+	private String requestMediaType;
 	private IType response;
+	private String responseMediaType;
 
 	public Operation(String name, String method, String pattern, IType request,
 			IType response) {
@@ -28,6 +30,30 @@ public class Operation implements WSElement {
 		this.pattern = pattern;
 		this.request = request;
 		this.response = response;
+	}
+	
+	public Operation(String name, String method, String pattern, IType request, String requestMediaType,
+			IType response, String responseMediaType) {
+		super();
+		this.name = name;
+		this.method = method;
+		this.pattern = pattern;
+		this.request = request;
+		if (requestMediaType.substring(requestMediaType
+				.lastIndexOf("/")).contains("xml")) {
+			this.requestMediaType = "Xml";
+		}
+		else {
+			this.requestMediaType = "Json";
+		}
+		this.response = response;
+		if (responseMediaType
+				.substring(responseMediaType.lastIndexOf("/")).contains("xml")) {
+			this.responseMediaType = "Xml";
+		}
+		else {
+			this.responseMediaType = "Json";
+		}
 	}
 
 	public String getName() {
@@ -60,6 +86,22 @@ public class Operation implements WSElement {
 
 	public void setRequest(IType request) {
 		this.request = request;
+	}
+
+	public String getRequestMediaType() {
+		return requestMediaType;
+	}
+
+	public void setRequestMediaType(String requestMediaType) {
+		this.requestMediaType = requestMediaType;
+	}
+
+	public String getResponseMediaType() {
+		return responseMediaType;
+	}
+
+	public void setResponseMediaType(String responseMediaType) {
+		this.responseMediaType = responseMediaType;
 	}
 
 	public IType getResponse() {

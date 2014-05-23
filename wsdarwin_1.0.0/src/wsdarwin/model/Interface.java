@@ -25,8 +25,12 @@ public class Interface implements WSElement {
 	
 	public Interface(String name, String address) {
 		super();
-		this.name = name;
 		this.address = address;
+		this.name = name;
+		if(name.equals("")) {
+			this.name = getResourcePath().substring(1,2).toUpperCase()+getResourcePath().substring(2);
+		}
+		
 	}
 	
 	public String getName() {
@@ -195,6 +199,12 @@ public class Interface implements WSElement {
 		return averageNesting/(double)operations.size();
 	}
 	
+	public String getResourcePath() {
+		return address.substring(address.lastIndexOf("/"));
+	}
 	
+	public String getBase() {
+		return address.substring(0, address.lastIndexOf("/")-1);
+	}
 
 }

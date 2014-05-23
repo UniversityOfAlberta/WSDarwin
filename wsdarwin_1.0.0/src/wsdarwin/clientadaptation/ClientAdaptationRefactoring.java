@@ -75,16 +75,17 @@ public class ClientAdaptationRefactoring extends Refactoring {
 	public static final String NEW_REQUEST_NAME = "newRequest";
 	public static final String OLD_RESPONSE_NAME = "oldResponse";
 	public static final String NEW_RESPONSE_NAME = "newResponse";
-
-	private CompilationUnit oldCompilationUnit;
-	private CompilationUnit newCompilationUnit;
-	private TypeDeclaration oldTypeDeclaration;
-	private TypeDeclaration newTypeDeclaration;
-	private Map<MethodDeclaration, Delta> changedMethods;
-	private CompilationUnitChange compilationUnitChange;
-	private Set<ITypeBinding> requiredImportDeclarationsInExtractedClass;
-	private TreeMap<String, TypeDeclaration> oldTypeDeclarations;
-	private TreeMap<String, TypeDeclaration> newTypeDeclarations;
+	
+	protected CompilationUnit oldCompilationUnit;
+	protected CompilationUnit newCompilationUnit;
+	protected TypeDeclaration oldTypeDeclaration;
+	protected TypeDeclaration newTypeDeclaration;
+	protected Map<MethodDeclaration, Delta> changedMethods;
+	protected CompilationUnitChange compilationUnitChange;
+	protected Set<ITypeBinding> requiredImportDeclarationsInExtractedClass;
+	protected TreeMap<String, TypeDeclaration> oldTypeDeclarations;
+	protected TreeMap<String, TypeDeclaration> newTypeDeclarations;
+	protected boolean isWSDL;
 
 	public ClientAdaptationRefactoring(CompilationUnit oldCompilationUnit,
 			CompilationUnit newCompilationUnit,
@@ -109,9 +110,27 @@ public class ClientAdaptationRefactoring extends Refactoring {
 				(ICompilationUnit) oldCompilationUnit.getJavaElement());
 		compilationUnitChange.setEdit(oldMultiTextEdit);
 		this.requiredImportDeclarationsInExtractedClass = new LinkedHashSet<ITypeBinding>();
+		isWSDL = true;
 	}
 	
-	private boolean getStubTypeDeclaration(boolean isInput) {
+	public ClientAdaptationRefactoring(TypeDeclaration oldTypeDeclaration,
+			TypeDeclaration newTypeDeclaration,
+			Map<MethodDeclaration, Delta> changedMethods) {
+		this.oldTypeDeclaration = oldTypeDeclaration;
+		this.oldTypeDeclarations = new TreeMap<String, TypeDeclaration>();
+		for(TypeDeclaration type : oldTypeDeclaration.getTypes()) {
+			oldTypeDeclarations.put(type.getName().getIdentifier(), type);
+		}
+		this.newTypeDeclaration = newTypeDeclaration;
+		this.newTypeDeclarations = new TreeMap<String, TypeDeclaration>();
+		for(TypeDeclaration type : newTypeDeclaration.getTypes()) {
+			newTypeDeclarations.put(type.getName().getIdentifier(), type);
+		}
+		this.changedMethods = changedMethods;
+		this.requiredImportDeclarationsInExtractedClass = new LinkedHashSet<ITypeBinding>();
+	}
+	
+	protected boolean getStubTypeDeclaration(boolean isInput) {
 		if(isInput) {
 			return false;
 		}
@@ -120,7 +139,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 		}
 	}
 	
-	private WSElement getElementFromDelta(Delta delta, boolean isInput) {
+	protected WSElement getElementFromDelta(Delta delta, boolean isInput) {
 		if(isInput) {
 			return delta.getTarget();
 		}
@@ -144,7 +163,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 		return status;
 	}
 
-	private void apply() {
+	protected void apply() {
 		Set<ITypeBinding> typeBindings = new LinkedHashSet<ITypeBinding>();
 		TypeVisitor typeVisitor = new TypeVisitor();
 		for (MethodDeclaration method : changedMethods.keySet()) {
@@ -169,13 +188,13 @@ public class ClientAdaptationRefactoring extends Refactoring {
 			prepareInput(method, changedMethods.get(method));
 			invokeNewMethod(method, changedMethods.get(method));
 			prepareOutput(method, changedMethods.get(method));
-			returnOuput(method);
+			returnOutput(method);
 		}
 
 	}
 
-	private void returnOuput(MethodDeclaration method) {
-		ASTRewrite sourceRewriter = ASTRewrite.create(oldTypeDeclaration
+	protected void returnOutput(MethodDeclaration method) {
+		ASTRewrite sourceRewriter = ASTRewrite.create(method
 				.getAST());
 		AST contextAST = method.getAST();
 
@@ -184,9 +203,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 				ReturnStatement.EXPRESSION_PROPERTY,
 				contextAST.newSimpleName(OLD_RESPONSE_NAME), null);
 
-		ListRewrite methodBody = sourceRewriter.getListRewrite(
-				method.getBody(), Block.STATEMENTS_PROPERTY);
-		methodBody.insertLast(returnStatement, null);
+		insertStatementInMethod(method, sourceRewriter, returnStatement);
 
 		try {
 			TextEdit sourceEdit = sourceRewriter.rewriteAST();
@@ -198,6 +215,13 @@ public class ClientAdaptationRefactoring extends Refactoring {
 		} catch (JavaModelException javaModelException) {
 			javaModelException.printStackTrace();
 		}
+	}
+
+	protected void insertStatementInMethod(MethodDeclaration method,
+			ASTRewrite sourceRewriter, Statement statement) {
+		ListRewrite methodBody = sourceRewriter.getListRewrite(
+				method.getBody(), Block.STATEMENTS_PROPERTY);
+		methodBody.insertLast(statement, null);
 	}
 
 	private void invokeNewMethod(MethodDeclaration method, Delta delta) {
@@ -255,9 +279,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 		// findTypeDeclaration((XSDComplexType)responseType, newTypeDeclaration),
 		// contextAST.newMethodInvocation());
 
-		ListRewrite methodBody = sourceRewriter.getListRewrite(
-				method.getBody(), Block.STATEMENTS_PROPERTY);
-		methodBody.insertLast(declaration, null);
+		insertStatementInMethod(method, sourceRewriter, declaration);
 
 		try {
 			TextEdit sourceEdit = sourceRewriter.rewriteAST();
@@ -331,13 +353,11 @@ public class ClientAdaptationRefactoring extends Refactoring {
 					VariableDeclarationStatement.TYPE_PROPERTY,
 					arrayType, null);
 		}
-		ListRewrite methodBody = sourceRewriter.getListRewrite(
-				method.getBody(), Block.STATEMENTS_PROPERTY);
-		methodBody.insertLast(variableDeclarationStatement, null);
+		insertStatementInMethod(method, sourceRewriter, variableDeclarationStatement);
 	}
 
-	private void prepareInput(MethodDeclaration method, Delta delta) {
-		ASTRewrite sourceRewriter = ASTRewrite.create(oldTypeDeclaration
+	protected void prepareInput(MethodDeclaration method, Delta delta) {
+		ASTRewrite sourceRewriter = ASTRewrite.create(method
 				.getAST());
 		AST contextAST = method.getAST();
 
@@ -366,8 +386,8 @@ public class ClientAdaptationRefactoring extends Refactoring {
 
 	}
 
-	private void prepareOutput(MethodDeclaration method, Delta delta) {
-		ASTRewrite sourceRewriter = ASTRewrite.create(oldTypeDeclaration
+	protected void prepareOutput(MethodDeclaration method, Delta delta) {
+		ASTRewrite sourceRewriter = ASTRewrite.create(method
 				.getAST());
 		AST contextAST = method.getAST();
 
@@ -395,7 +415,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 
 	}
 
-	private void copyValuesInput(ASTRewrite sourceRewriter, Delta delta,
+	protected void copyValuesInput(ASTRewrite sourceRewriter, Delta delta,
 			AST contextAST, MethodDeclaration method,
 			TypeDeclaration oldTypeDec, TypeDeclaration newTypeDec,
 			Expression getterMethodInvocation) {
@@ -479,10 +499,17 @@ public class ClientAdaptationRefactoring extends Refactoring {
 										.getQualifiedName(), newTypeName, false);
 					}
 					
-					modifiedNewTypeName = newType.getName().substring(0, 1)
-							.toLowerCase()
-							+ newType.getName().substring(1,
-									newType.getName().length())+"_"+newType.getVariableName();
+					if (isWSDL) {
+						modifiedNewTypeName = newType.getName().substring(0, 1)
+								.toLowerCase()
+								+ newType.getName().substring(1,
+										newType.getName().length())
+								+ "_"
+								+ newType.getVariableName();
+					}
+					else {
+						modifiedNewTypeName = newTypeName;
+					}
 					qualifiedTypeName = findTypeDeclaration(newType.getName(),
 							getStubTypeDeclaration(true)).resolveBinding()
 							.getQualifiedName();
@@ -518,15 +545,18 @@ public class ClientAdaptationRefactoring extends Refactoring {
 					if(typeDec == null) {
 						typeDec = newTypeDec;
 					}
-					this.createSetterForParentComplexObject(
-							sourceRewriter,
-							delta,
-							contextAST,
-							method,
-							typeDec,
-							new ComplexType(newType.getName(), newType
-									.getVariableName()), contextAST
-									.newSimpleName(modifiedNewTypeName), true);
+					if (isWSDL) {
+						this.createSetterForParentComplexObject(
+								sourceRewriter,
+								delta,
+								contextAST,
+								method,
+								typeDec,
+								new ComplexType(newType.getName(), newType
+										.getVariableName()), contextAST
+										.newSimpleName(modifiedNewTypeName),
+								true);
+					}
 
 				}
 			}
@@ -647,7 +677,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 		}
 	}
 
-	private boolean isArray(TypeDeclaration parentTypeDeclaration, IType type) {
+	protected boolean isArray(TypeDeclaration parentTypeDeclaration, IType type) {
 		for (FieldDeclaration field : parentTypeDeclaration
 				.getFields()) {
 			if ((field.getType().resolveBinding().getName()
@@ -794,7 +824,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 		return newExpression;
 	}
 
-	private void copyValuesOutput(ASTRewrite sourceRewriter, Delta delta,
+	protected void copyValuesOutput(ASTRewrite sourceRewriter, Delta delta,
 			AST contextAST, MethodDeclaration method,
 			TypeDeclaration oldTypeDec, TypeDeclaration newTypeDec,
 			Expression getterMethodInvocation) {
@@ -885,10 +915,16 @@ public class ClientAdaptationRefactoring extends Refactoring {
 						typeDec = oldTypeDec;
 					}
 					
-					modifiedNewTypeName = "_"+type.getName().substring(0, 1)
-							.toLowerCase()
-							+ type.getName().substring(1,
-									type.getName().length())+"_"+type.getVariableName();
+					if (isWSDL) {
+						modifiedNewTypeName = "_"
+								+ type.getName().substring(0, 1).toLowerCase()
+								+ type.getName().substring(1,
+										type.getName().length()) + "_"
+								+ type.getVariableName();
+					}
+					else {
+						modifiedNewTypeName = newTypeName;
+					}
 					qualifiedTypeName = findTypeDeclaration(type.getName(),
 							getStubTypeDeclaration(false)).resolveBinding()
 							.getQualifiedName();
@@ -983,33 +1019,36 @@ public class ClientAdaptationRefactoring extends Refactoring {
 					if(typeDec == null) {
 						typeDec = oldTypeDec;
 					}
-					this.createSetterForParentComplexObject(
-							sourceRewriter,
-							delta,
-							contextAST,
-							method,
-							typeDec,
-							new ComplexType(type.getName(), type
-									.getVariableName()), contextAST
-									.newSimpleName(modifiedNewTypeName), false);
-					/*
-					 * TypeDeclaration typeDec = null; XSDIType aType = null; if
-					 * (isInput) { typeDec = newTypeDeclaration; aType =
-					 * newType; this.createSetterForParentComplexObject(
-					 * sourceRewriter, delta, contextAST, method,
-					 * this.findTypeDeclaration( aType.getVariableName(),
-					 * typeDec), new XSDComplexType(aType.getName(), aType
-					 * .getVariableName()), contextAST
-					 * .newSimpleName(modifiedNewTypeName), isInput); } else {
-					 * typeDec = oldTypeDeclaration; aType = type; }
-					 */
+					if (isWSDL) {
+						this.createSetterForParentComplexObject(
+								sourceRewriter,
+								delta,
+								contextAST,
+								method,
+								typeDec,
+								new ComplexType(type.getName(), type
+										.getVariableName()), contextAST
+										.newSimpleName(modifiedNewTypeName),
+								false);
+						/*
+						 * TypeDeclaration typeDec = null; XSDIType aType = null; if
+						 * (isInput) { typeDec = newTypeDeclaration; aType =
+						 * newType; this.createSetterForParentComplexObject(
+						 * sourceRewriter, delta, contextAST, method,
+						 * this.findTypeDeclaration( aType.getVariableName(),
+						 * typeDec), new XSDComplexType(aType.getName(), aType
+						 * .getVariableName()), contextAST
+						 * .newSimpleName(modifiedNewTypeName), isInput); } else {
+						 * typeDec = oldTypeDeclaration; aType = type; }
+						 */
+					}
 
 				}
 			}
 		} 
 	}
 
-	private void createSetterForParentComplexObject(ASTRewrite sourceRewriter,
+	protected void createSetterForParentComplexObject(ASTRewrite sourceRewriter,
 			Delta delta, AST contextAST, MethodDeclaration method,
 			TypeDeclaration parentTypeDeclaration, IType typeToBeSet,
 			Expression setterArgument, boolean isInput) {
@@ -1115,12 +1154,10 @@ public class ClientAdaptationRefactoring extends Refactoring {
 
 		ExpressionStatement setterStatement = contextAST
 				.newExpressionStatement(setterInvocation);
-		ListRewrite methodBody = sourceRewriter.getListRewrite(
-				method.getBody(), Block.STATEMENTS_PROPERTY);
-		methodBody.insertLast(setterStatement, null);
+		insertStatementInMethod(method, sourceRewriter, setterStatement);
 	}
 
-	private boolean similarTo(String localVariableName, String variableName) {
+	protected boolean similarTo(String localVariableName, String variableName) {
 		String[] localVariableNameHumanized = HumaniseCamelCase.humanise(
 				localVariableName).split(" ");
 		String[] variableNameHumanized = HumaniseCamelCase.humanise(
@@ -1147,7 +1184,7 @@ public class ClientAdaptationRefactoring extends Refactoring {
 		return false;
 	}
 
-	private SimpleName isSetterMethod(MethodDeclaration aMethod) {
+	protected SimpleName isSetterMethod(MethodDeclaration aMethod) {
 		Block methodBody = aMethod.getBody();
 		List<SingleVariableDeclaration> parameters = aMethod.parameters();
 		if (methodBody != null) {
@@ -1220,13 +1257,13 @@ public class ClientAdaptationRefactoring extends Refactoring {
 		return null;
 	}
 
-	private TypeDeclaration findTypeDeclaration(String newTypeName,
+	protected TypeDeclaration findTypeDeclaration(String newTypeName,
 			boolean old) {
 		if(old) {
-			return oldTypeDeclarations.get(newTypeName);
+			return oldTypeDeclarations.get(newTypeName.toLowerCase());
 		}
 		else {
-			return newTypeDeclarations.get(newTypeName);
+			return newTypeDeclarations.get(newTypeName.toLowerCase());
 		}
 	}
 
