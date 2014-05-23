@@ -63,6 +63,14 @@ p {
 	margin: 0;
 	padding: 0;
 }
+
+.halfwadlOutput {
+	width: 50%;
+	display: inline-block;
+	float: right;
+	/*background-color: red;*/
+}
+
 .wadlOutput {
 	/*margin-left: 10px;
 	background-color: gray;*/

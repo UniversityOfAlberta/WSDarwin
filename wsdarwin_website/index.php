@@ -243,10 +243,10 @@ function parseXml(xml) {
 			<span>Side By Side Diff</span><input type='radio' id='sideBySideDiff' onClick='diffUsingJS()'></input>
 			<span>Inline Diff</span><input type='radio' id='inlineDiff' onClick='diffUsingJS()'></input>
 			-->
-			<input type="radio" name="comparisonDiffType" value="true" id="complete_yes" />
-			<label for="complete_yes">Inline Diff</label>
-			<input type="radio" name="comparisonDiffType" value="false" id="complete_no" />
-			<label for="complete_no">Side by Side Diff</label>
+			<input type="radio" onClick="inlineDiff()" name="comparisonDiffType" value="true" id="diff_yes" />
+			<label for="diff_yes">Inline Diff</label>
+			<input type="radio" onClick="sideBySideDiff()" name="comparisonDiffType" value="false" id="diff_no" />
+			<label for="diff_no">Side by Side Diff</label>
 
 		</div>
 	</div>
@@ -260,6 +260,8 @@ function parseXml(xml) {
 		<div id='wadlOutput' class='wadlOutput' placeholder='WADL'>
 			<p>No WADL Output</p>
 		</div>
+		<div id='right_wadl_output' class='halfwadlOutput'>sdasd</div>
+		<div id='left_wadl_output' class='halfwadlOutput'>dddd</div>
 	</div>
 
 </div>
