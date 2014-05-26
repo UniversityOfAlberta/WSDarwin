@@ -464,6 +464,31 @@ function java_diff(deltas_path, oldDocNode, newDocNode){
 					highlightMethodNodeDiv(sourceVal, oldDocNode, 'DeleteDelta');
 				}
 				//console.log("operation node source: " + operationNode.attributes.getNamedItem("source").value);
+				
+				for (var m = 0; m < operationNode.childNodes.length; m++){
+					complexTypeNode = operationNode.childNodes[m];
+
+					if (complexTypeNode.nodeName == "MatchDelta"){
+						console.log("Skipping operation:" + complexTypeNode.nodeName);
+						continue;
+					} else if (complexTypeNode.nodeName == "ChangeDelta"){
+						if (complexTypeNode.attributes.getNamedItem("changedAttribute") != null){
+							if (complexTypeNode.attributes.getNamedItem("changedAttribute").value === "WHAT SHOULD GO HERE !*****"){ // <-------****
+								// -- no cases encountered
+							}
+						}
+					} else if (complexTypeNode.nodeName == "AddDelta"){
+
+						var targetVal = complexTypeNode.attributes.getNamedItem("target").value;
+						console.log("hello thereee !!!!!!!!!!!!!!!!! " + targetVal);
+						var sourceSplits = sourceVal.split(":");
+						highlightCTypeNodeDiv(sourceSplits[0], newDocNode, 'AddDelta');
+					} else if (complexTypeNode.nodeName == "DeleteDelta"){
+						var sourceVal = complexTypeNode.attributes.getNamedItem("source").value;
+						var targetSplits = sourceVal.split(":");
+						highlightCTypeNodeDiv(targetSplits[0], oldDocNode, 'DeleteDelta');
+					}
+				}
 			}
 		}
 	}
@@ -517,9 +542,40 @@ function highlightMethodNodeDiv(method_id, xml_doc, type){
 	}
 }
 
+function highlightCTypeNodeDiv(ctype_id, xml_doc, type){
+	var highlightColor = '';
+	if (type == "AddDelta"){
+		highlightColor = "green";
+	} else if (type == "DeleteDelta"){
+		highlightColor = "red";
+	} else if (type == "ChangeDelta"){
+		highlightColor = "yellow";
+	}
+
+	console.log("CTYPE id: " + ctype_id);
+	if ( (xml_doc.childNodes[1].nodeName != null) && (xml_doc.childNodes[1].nodeName == "resources") ){
+		var resourcesNode = xml_doc.childNodes[1];
+		for (var i = 0; i < resourcesNode.childNodes.length; i++){
+			var resource_Node = resourcesNode.childNodes[i];
+			for (var j = 0; j < resource_Node.childNodes.length; j++){
+				var methodNode = resource_Node.childNodes[i];
+				console.log("Method node id val is: " + methodNode.attributes.getNamedItem("id").value);
+				for (var m = 0; m < methodNode.childNodes.length; m++){
+					console.log("CTYPE 22 id: " + ctype_id);
+					var ctypeNode = methodNode.childNodes[m];
+					if (ctypeNode.attributes.getNamedItem("id").value == ctype_id){
+						$("#"+ctypeNode.my_id).css("background-color", highlightColor);
+					}
+				}
+			}
+		}
+	}
+}
+
 //function changeResource(oldValue, newValue){	// Resource === Interface in WSMeta Model
 
 //}
+
 function analyze(process_mode){
 	// reset
 	$("#left_wadl_output").hide();
