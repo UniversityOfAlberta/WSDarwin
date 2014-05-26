@@ -369,9 +369,6 @@ function java_diff(deltas_path, oldDocNode, newDocNode){
 	xmlDoc = loadXMLDoc(deltas_path);
 	mainNode=xmlDoc.documentElement;
 
-		console.log("old doc: " + oldDocNode.childNodes[1].childNodes[0].attributes.getNamedItem("path").value);
-	console.log("new doc: " + newDocNode.childNodes[1].childNodes[0].attributes.getNamedItem("path").value);
-
 	console.log(" --- JAVA DIFFING --- ");
 	//console.log("name: " + mainNode.nodeName + ", attrs length: " + mainNode.childNodes.length + ", attribute's value: " + mainNode.attributes.getNamedItem("xmlns").value);
 	//console.log(xmlDoc);
@@ -396,33 +393,21 @@ function java_diff(deltas_path, oldDocNode, newDocNode){
 	for (var i = 0; i < mainNode.childNodes.length; i++){
 		iserviceNode = mainNode.childNodes[i];
 		if (iserviceNode.nodeName == "MatchDelta"){
-			console.log("Skipping iservice:" + iserviceNode.nodeName);
+			//console.log("Skipping iservice:" + iserviceNode.nodeName);
 			continue;
 		}
-		console.log("iservice: " + mainNode.childNodes[i].nodeName);
-		console.log("node: " + mainNode.childNodes[i]);
-		//console.log("type: " + mainNode.childNodes[i].attributes.getNamedItem("type").value);
+
 		for (var k = 0; k < iserviceNode.childNodes.length; k++){
 			interfaceNode = iserviceNode.childNodes[k];
 			if (interfaceNode.nodeName == "MatchDelta"){
-				console.log("Skipping interface:" + interfaceNode.nodeName);
 				continue;
 			} else if (interfaceNode.nodeName == "ChangeDelta"){
-				console.log("Change Delta interface:" + interfaceNode.nodeName);
 				if (interfaceNode.attributes.getNamedItem("changedAttribute") != null){
 					if (interfaceNode.attributes.getNamedItem("changedAttribute").value === "address"){
-						//var newAddress = interfaceNode.attributes.getNamedItem("newValue").value;
-						//var oldAddress = interfaceNode.attributes.getNamedItem("oldValue").value;
 						var sourceSplits = interfaceNode.attributes.getNamedItem("source").value.split("\\");
 						var targetSplits = interfaceNode.attributes.getNamedItem("target").value.split("\\");
-						//console.log("splits: " + sourceSplits);
-						//console.log("splits length: " + sourceSplits.length);
-						//console.log("last of splits: " + sourceSplits[splits.length - 1]);
-						console.log("old doc node:");
 						highlightResourceNodeDiv(sourceSplits[sourceSplits.length - 1], oldDocNode, 'ChangeDelta');
-						console.log("new doc node:");
 						highlightResourceNodeDiv(targetSplits[targetSplits.length - 1], newDocNode, 'ChangeDelta');
-						// code to add changed address for a resource
 					}
 				}
 			} else if (interfaceNode.nodeName == "AddDelta"){
@@ -437,56 +422,65 @@ function java_diff(deltas_path, oldDocNode, newDocNode){
 			for (var j = 0; j < interfaceNode.childNodes.length; j++){
 				operationNode = interfaceNode.childNodes[j];
 				if (operationNode.nodeName == "MatchDelta"){
-					console.log("Skipping operation:" + operationNode.nodeName);
+					//console.log("Skipping operation:" + operationNode.nodeName);
 					continue;
 				} else if (operationNode.nodeName == "ChangeDelta"){
 					if (operationNode.attributes.getNamedItem("changedAttribute") != null){
 						if (operationNode.attributes.getNamedItem("changedAttribute").value === "WHAT SHOULD GO HERE !*****"){ // <-------****
-							//var newAddress = interfaceNode.attributes.getNamedItem("newValue").value;
-							//var oldAddress = interfaceNode.attributes.getNamedItem("oldValue").value;
-							//var sourceSplits = interfaceNode.attributes.getNamedItem("source").value.split("\\");
-							//var targetSplits = interfaceNode.attributes.getNamedItem("target").value.split("\\");
-							//console.log("splits: " + sourceSplits);
-							//console.log("splits length: " + sourceSplits.length);
-							//console.log("last of splits: " + sourceSplits[splits.length - 1]);
-							//var source = interfaceNode.attributes.getNamedItem("target").value;
-							//highlightMethodNodeDiv(targetVal, newDocNode, 'AddDelta');
-							// code to add changed address for a resource
+							// *****
 						}
 					}
 				} else if (operationNode.nodeName == "AddDelta"){
 
 					var targetVal = operationNode.attributes.getNamedItem("target").value;
-					console.log("hello thereee !!!!!!!!!!!!!!!!! " + targetVal);
+					//console.log("hello thereee !!!!!!!!!!!!!!!!! " + targetVal);
 					highlightMethodNodeDiv(targetVal, newDocNode, 'AddDelta');
 				} else if (operationNode.nodeName == "DeleteDelta"){
 					var sourceVal = operationNode.attributes.getNamedItem("source").value;
 					highlightMethodNodeDiv(sourceVal, oldDocNode, 'DeleteDelta');
 				}
-				//console.log("operation node source: " + operationNode.attributes.getNamedItem("source").value);
 				
 				for (var m = 0; m < operationNode.childNodes.length; m++){
-					complexTypeNode = operationNode.childNodes[m];
+					xsNode = operationNode.childNodes[m];
 
-					if (complexTypeNode.nodeName == "MatchDelta"){
-						console.log("Skipping operation:" + complexTypeNode.nodeName);
+					if (xsNode.nodeName == "MatchDelta"){
+						console.log("Skipping operation:" + xsNode.nodeName);
 						continue;
-					} else if (complexTypeNode.nodeName == "ChangeDelta"){
-						if (complexTypeNode.attributes.getNamedItem("changedAttribute") != null){
-							if (complexTypeNode.attributes.getNamedItem("changedAttribute").value === "WHAT SHOULD GO HERE !*****"){ // <-------****
+					} else if (xsNode.nodeName == "ChangeDelta"){
+						if (xsNode.attributes.getNamedItem("changedAttribute") != null){
+							if (xsNode.attributes.getNamedItem("changedAttribute").value === "WHAT SHOULD GO HERE !*****"){ // <-------****
 								// -- no cases encountered
 							}
 						}
-					} else if (complexTypeNode.nodeName == "AddDelta"){
-
-						var targetVal = complexTypeNode.attributes.getNamedItem("target").value;
-						console.log("hello thereee !!!!!!!!!!!!!!!!! " + targetVal);
-						var sourceSplits = sourceVal.split(":");
+					} else if (xsNode.nodeName == "AddDelta"){
+						// request:  operationNode.attributes.getNamedItem('target').value + "RequestType"
+						// response: operationNode.attributes.getNamedItem('target').value + "ResponseType"
+						var targetVal = xsNode.attributes.getNamedItem("target").value;
+						var sourceSplits = targetVal.split(":");
 						highlightCTypeNodeDiv(sourceSplits[0], newDocNode, 'AddDelta');
-					} else if (complexTypeNode.nodeName == "DeleteDelta"){
-						var sourceVal = complexTypeNode.attributes.getNamedItem("source").value;
+					} else if (xsNode.nodeName == "DeleteDelta"){
+						// request:  operationNode.attributes.getNamedItem('source').value + "RequestType"
+						// response: operationNode.attributes.getNamedItem('source').value + "ResponseType"
+						var sourceVal = xsNode.attributes.getNamedItem("source").value;
 						var targetSplits = sourceVal.split(":");
 						highlightCTypeNodeDiv(targetSplits[0], oldDocNode, 'DeleteDelta');
+					}
+
+					for (var k = 0; k < xsNode.childNodes.length; k++){
+						var xs_twoNode = xsNode.childNodes[k];
+						if (xs_twoNode.nodeName == "MatchDelta"){
+							continue;
+						} else if (xs_twoNode.nodeName == "ChangeDelta"){
+							// *** add change delta
+						} else if (xs_twoNode.nodeName == "AddDelta"){
+							var targetSplits = xsNode.attributes.getNamedItem("target").value.split(":");
+							var targetSplitsInside = xs_twoNode.attributes.getNamedItem("target").value.split(":");
+							highlightXSElemInsideCTypeNodeDiv(targetSplits[0], targetSplitsInside[0], newDocNode, 'AddDelta');
+						} else if (xs_twoNode.nodeName == "DeleteDelta"){
+							var sourceSplits = xsNode.attributes.getNamedItem("source").value.split(":");
+							var sourceSplitsInside = xs_twoNode.attributes.getNamedItem("source").value.split(":");
+							highlightXSElemInsideCTypeNodeDiv(sourceSplits[0], sourceSplitsInside[0], oldDocNode, 'DeleteDelta');
+						}
 					}
 				}
 			}
@@ -496,14 +490,18 @@ function java_diff(deltas_path, oldDocNode, newDocNode){
 	console.log(" --- END OF JAVA DIFFING --- ");
 }
 
+var highlightGreen = "#A2D293";
+var highlightRed = "#ED9899";
+var highlightYellow = "#FFDC87";
+
 function highlightResourceNodeDiv(resourcePath, xml_doc, type){
 	var highlightColor = '';
 	if (type == "AddDelta"){
-		highlightColor = "green";
+		highlightColor = highlightGreen;
 	} else if (type == "DeleteDelta"){
-		highlightColor = "red";
+		highlightColor = highlightRed;
 	} else if (type == "ChangeDelta"){
-		highlightColor = "yellow";
+		highlightColor = highlightYellow;
 	}
 
 	if ( (xml_doc.childNodes[1].nodeName != null) && (xml_doc.childNodes[1].nodeName == "resources") ){
@@ -520,11 +518,11 @@ function highlightResourceNodeDiv(resourcePath, xml_doc, type){
 function highlightMethodNodeDiv(method_id, xml_doc, type){
 	var highlightColor = '';
 	if (type == "AddDelta"){
-		highlightColor = "green";
+		highlightColor = highlightGreen;
 	} else if (type == "DeleteDelta"){
-		highlightColor = "red";
+		highlightColor = highlightRed;
 	} else if (type == "ChangeDelta"){
-		highlightColor = "yellow";
+		highlightColor = highlightYellow;
 	}
 
 	if ( (xml_doc.childNodes[1].nodeName != null) && (xml_doc.childNodes[1].nodeName == "resources") ){
@@ -545,11 +543,11 @@ function highlightMethodNodeDiv(method_id, xml_doc, type){
 function highlightCTypeNodeDiv(ctype_id, xml_doc, type){
 	var highlightColor = '';
 	if (type == "AddDelta"){
-		highlightColor = "green";
+		highlightColor = highlightGreen;
 	} else if (type == "DeleteDelta"){
-		highlightColor = "red";
+		highlightColor = highlightRed;
 	} else if (type == "ChangeDelta"){
-		highlightColor = "yellow";
+		highlightColor = highlightYellow;
 	}
 
 	console.log("CTYPE id: " + ctype_id);
@@ -563,8 +561,66 @@ function highlightCTypeNodeDiv(ctype_id, xml_doc, type){
 				for (var m = 0; m < methodNode.childNodes.length; m++){
 					console.log("CTYPE 22 id: " + ctype_id);
 					var ctypeNode = methodNode.childNodes[m];
-					if (ctypeNode.attributes.getNamedItem("id").value == ctype_id){
-						$("#"+ctypeNode.my_id).css("background-color", highlightColor);
+					//if (ctypeNode.attributes.getNamedItem("id").value == ctype_id){
+					//	$("#"+ctypeNode.my_id).css("background-color", highlightColor);
+					//}
+				}
+			}
+		}
+	}
+	console.log("Highlighting grammars part: " + xml_doc.childNodes[0].nodeName);
+	if ( (xml_doc.childNodes[0].nodeName != null) && (xml_doc.childNodes[0].nodeName == "grammars") ){
+		var grammarsNode = xml_doc.childNodes[0];
+		console.log("grammars: " + grammarsNode.nodeName);
+		for (var i = 0; i < grammarsNode.childNodes.length; i++){
+			var schemaNode = grammarsNode.childNodes[i];
+			for (var j = 0; j < schemaNode.childNodes.length; j++){
+				var xsNode = schemaNode.childNodes[j];
+				console.log("xs node: " + xsNode.nodeName);
+				if (xsNode.nodeName == "xs:complexType"){
+					console.log("xs node name: " + xsNode.attributes.getNamedItem("name").value);
+					if (xsNode.attributes.getNamedItem("name").value == ctype_id){
+						$("#"+xsNode.my_id).css("background-color", highlightColor);
+					}
+				}
+
+				if (xsNode.nodeName == "xs:element"){
+					var typeSplits = xsNode.attributes.getNamedItem("type").value.split(":");
+					if (typeSplits[1] == ctype_id){
+						$("#"+xsNode.my_id).css("background-color", highlightColor);
+					}
+				}
+			}
+		}
+	}
+}
+
+function highlightXSElemInsideCTypeNodeDiv(xs_ctype_id, xsnode_name, xml_doc, type){
+	var highlightColor = '';
+	if (type == "AddDelta"){
+		highlightColor = highlightGreen;
+	} else if (type == "DeleteDelta"){
+		highlightColor = highlightRed;
+	} else if (type == "ChangeDelta"){
+		highlightColor = highlightYellow;
+	}
+
+	console.log("Highlighting grammars part: " + xml_doc.childNodes[0].nodeName);
+	if ( (xml_doc.childNodes[0].nodeName != null) && (xml_doc.childNodes[0].nodeName == "grammars") ){
+		var grammarsNode = xml_doc.childNodes[0];
+		console.log("grammars: " + grammarsNode.nodeName);
+		for (var i = 0; i < grammarsNode.childNodes.length; i++){
+			var schemaNode = grammarsNode.childNodes[i];
+			for (var j = 0; j < schemaNode.childNodes.length; j++){
+				var xsNode = schemaNode.childNodes[j];
+				console.log("xs node: " + xsNode.nodeName);
+				if (xsNode.attributes.getNamedItem('name').value == xs_ctype_id){
+					var xsSeq = xsNode.childNodes[0];
+					for (var u = 0; u < xsSeq.childNodes.length; u++){
+						var insideXSelem = xsSeq.childNodes[u];
+						if (insideXSelem.attributes.getNamedItem('name').value == xsnode_name){
+							$("#"+insideXSelem.my_id).css("background-color", highlightColor);
+						}
 					}
 				}
 			}
@@ -734,7 +790,7 @@ function parse_wadl_html(myNode){
 	html_wadl_string += "<span id='" + myNode.my_id + "'>";
 	html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
 
-	strapped_html_wadl_string += "<div style=\"background-color: white; padding-left: 10px;\" id='" + myNode.my_id + "'>";
+	strapped_html_wadl_string += "<div style=\"background-color: white; margin-left: 10px;\" id='" + myNode.my_id + "'>";
 	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
 	//$("#"+myNode.my_id).css("margin-left") += '3px';
 	//$("#"+myNode.my_id).css("margin-left", "35px");
@@ -773,7 +829,6 @@ function parse_wadl_html(myNode){
 		}
 	}
 
-	console.log("SUP 6");
 	// printing the add 'element(s)' buttons
 	if (myNode.nodeName == 'resources'){
 		addSpacesTwo();
