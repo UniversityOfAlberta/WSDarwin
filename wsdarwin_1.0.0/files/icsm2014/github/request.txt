@@ -1,1 +1,2 @@
-GET 001 https://api.github.com/users/penguinsource/repos
+001 GET https://api.github.com/users/penguinsource/repos
+002 GET https://api.github.com/users/mralexgray/repos

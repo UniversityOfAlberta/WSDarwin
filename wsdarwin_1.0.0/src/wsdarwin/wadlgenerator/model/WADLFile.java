@@ -477,56 +477,69 @@ public class WADLFile implements WADLElement {
 			NodeList resourcesChildren = resourcesElements.item(i).getChildNodes();
 			//System.out.println("resources element to string:" + resourcesElement.toString() + ", identifier: " + resourcesElement.getIdentifier());
 			//System.out.println("resources elements to string: " + this.resourcesElements.toString());
-			for(int j=0; j<resourcesChildren.getLength(); j++) {
-				if(resourcesChildren.item(j).getNodeName().equals("resource")) {
-					//System.out.println("inside " + resourcesChildren.item(j).getNodeName());
-					Resource resource = new Resource(resourcesChildren.item(j).getAttributes().getNamedItem("path").getNodeValue());
-					resourcesElement.addResourceElement(resource.getIdentifier(), resource);
-					NodeList resourceChildren = resourcesChildren.item(j).getChildNodes();
-					for(int k=0; k<resourceChildren.getLength(); k++) {
-						if(resourceChildren.item(k).getNodeName().equals("method")) {
-							Method method = new Method(resourceChildren.item(k).getAttributes().getNamedItem("name").getNodeValue(), resourceChildren.item(k).getAttributes().getNamedItem("id").getNodeValue());
-							resource.addMethodElement(method.getIdentifier(), method);
-							NodeList methodChildren = resourceChildren.item(k).getChildNodes();
-							for(int l=0; l<methodChildren.getLength(); l++) {
-								if(methodChildren.item(l).getNodeName().equals("request")) {
-									Request request = new Request();
-									method.addRequestElement(request);
-									NodeList requestChildren = methodChildren.item(l).getChildNodes();
-									for(int m=0; m<requestChildren.getLength(); m++) {
-										if(requestChildren.item(m).getNodeName().equals("param")) {
-											String name = "";
-											String type = "";
-											String style = "";
-											boolean required = false;
-											if(requestChildren.item(m).getAttributes().getNamedItem("name") != null) {
-												name = requestChildren.item(m).getAttributes().getNamedItem("name").getNodeValue();
-											}
-											if(requestChildren.item(m).getAttributes().getNamedItem("type") != null) {
-												type = requestChildren.item(m).getAttributes().getNamedItem("type").getNodeValue();
-											}
-											if(requestChildren.item(m).getAttributes().getNamedItem("style") != null) {
-												style = requestChildren.item(m).getAttributes().getNamedItem("style").getNodeValue();
-											}
-											if(requestChildren.item(m).getAttributes().getNamedItem("required") != null) {
-												required = Boolean.parseBoolean(requestChildren.item(m).getAttributes().getNamedItem("required").getNodeValue());
-											}
-											Param param = new Param(name, type, style, required);
-											request.addParamElement(param.getIdentifier(), param);
-											//System.out.println("param identifier : " + param.getIdentifier());
-											NodeList paramChildren = requestChildren.item(m).getChildNodes();
-											for(int n=0; n<paramChildren.getLength(); n++) {
-												if(paramChildren.item(n).getNodeName().equals("option")) {
-													param.addOption(new Option(paramChildren.item(n).getAttributes().getNamedItem("value").getNodeValue()));
-												}
+			readResourceElements(resourcesElement, resourcesChildren);
+		}
+	}
+
+	private void readResourceElements(WADLElement resourcesElement,
+			NodeList resourcesChildren) {
+		for(int j=0; j<resourcesChildren.getLength(); j++) {
+			if(resourcesChildren.item(j).getNodeName().equals("resource")) {
+				//System.out.println("inside " + resourcesChildren.item(j).getNodeName());
+				Resource resource = new Resource(resourcesChildren.item(j).getAttributes().getNamedItem("path").getNodeValue());
+				if (resourcesElement instanceof Resources) {
+					((Resources)resourcesElement).addResourceElement(
+							resource.getIdentifier(), resource);
+				}
+				else if(resourcesElement instanceof Resource) {
+					((Resource)resourcesElement).addResourceElement(
+							resource.getIdentifier(), resource);
+				}
+				NodeList resourceChildren = resourcesChildren.item(j).getChildNodes();
+				readResourceElements(resource, resourceChildren);
+				for(int k=0; k<resourceChildren.getLength(); k++) {
+					if(resourceChildren.item(k).getNodeName().equals("method")) {
+						Method method = new Method(resourceChildren.item(k).getAttributes().getNamedItem("name").getNodeValue(), resourceChildren.item(k).getAttributes().getNamedItem("id").getNodeValue());
+						resource.addMethodElement(method.getIdentifier(), method);
+						NodeList methodChildren = resourceChildren.item(k).getChildNodes();
+						for(int l=0; l<methodChildren.getLength(); l++) {
+							if(methodChildren.item(l).getNodeName().equals("request")) {
+								Request request = new Request();
+								method.addRequestElement(request);
+								NodeList requestChildren = methodChildren.item(l).getChildNodes();
+								for(int m=0; m<requestChildren.getLength(); m++) {
+									if(requestChildren.item(m).getNodeName().equals("param")) {
+										String name = "";
+										String type = "";
+										String style = "";
+										boolean required = false;
+										if(requestChildren.item(m).getAttributes().getNamedItem("name") != null) {
+											name = requestChildren.item(m).getAttributes().getNamedItem("name").getNodeValue();
+										}
+										if(requestChildren.item(m).getAttributes().getNamedItem("type") != null) {
+											type = requestChildren.item(m).getAttributes().getNamedItem("type").getNodeValue();
+										}
+										if(requestChildren.item(m).getAttributes().getNamedItem("style") != null) {
+											style = requestChildren.item(m).getAttributes().getNamedItem("style").getNodeValue();
+										}
+										if(requestChildren.item(m).getAttributes().getNamedItem("required") != null) {
+											required = Boolean.parseBoolean(requestChildren.item(m).getAttributes().getNamedItem("required").getNodeValue());
+										}
+										Param param = new Param(name, type, style, required);
+										request.addParamElement(param.getIdentifier(), param);
+										//System.out.println("param identifier : " + param.getIdentifier());
+										NodeList paramChildren = requestChildren.item(m).getChildNodes();
+										for(int n=0; n<paramChildren.getLength(); n++) {
+											if(paramChildren.item(n).getNodeName().equals("option")) {
+												param.addOption(new Option(paramChildren.item(n).getAttributes().getNamedItem("value").getNodeValue()));
 											}
 										}
 									}
-								} else if(methodChildren.item(l).getNodeName().equals("response")) {
-									Response response = new Response(Integer.parseInt(methodChildren.item(l).getAttributes().getNamedItem("status").getNodeValue()));
-									method.addResponseElement(response.getID(), response);
-									//System.out.println("response ID : " + response.getID());
 								}
+							} else if(methodChildren.item(l).getNodeName().equals("response")) {
+								Response response = new Response(Integer.parseInt(methodChildren.item(l).getAttributes().getNamedItem("status").getNodeValue()));
+								method.addResponseElement(response.getID(), response);
+								//System.out.println("response ID : " + response.getID());
 							}
 						}
 					}
