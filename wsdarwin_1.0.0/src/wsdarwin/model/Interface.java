@@ -30,7 +30,7 @@ public class Interface implements WSElement {
 		if(name.equals("")) {
 			this.name = getResourcePath().substring(1,2).toUpperCase()+getResourcePath().substring(2);
 		}
-		
+		this.operations = new HashMap<String, WSElement>();
 	}
 	
 	public String getName() {

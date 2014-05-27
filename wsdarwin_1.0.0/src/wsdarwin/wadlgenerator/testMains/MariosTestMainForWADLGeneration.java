@@ -17,6 +17,8 @@ import java.util.HashSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import wsdarwin.comparison.delta.Delta;
+import wsdarwin.parsers.WADLParser;
 import wsdarwin.util.XMLGenerator;
 import wsdarwin.wadlgenerator.RequestAnalyzer;
 import wsdarwin.wadlgenerator.Response2XSD;
@@ -38,6 +40,11 @@ public class MariosTestMainForWADLGeneration {
 	private static final String RESPONSE_DIR = PATH_PREFIX+"/responses/";
 
 	public static void main(String[] args) {
+		testComparison();
+
+	}
+
+	private static void testGeneration() {
 		try {
 			ArrayList<String> requests = new ArrayList<String>();
 			ArrayList<String> uris = new ArrayList<String>();
@@ -120,7 +127,6 @@ public class MariosTestMainForWADLGeneration {
 				
 				
 			}
-			
 			// write merged WADL file only once
 			generator.createWADL(mergedWADL);
 			//mergedWADL.serializeFile();
@@ -144,7 +150,13 @@ public class MariosTestMainForWADLGeneration {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+	}
 
+	private static void testComparison() {
+		WADLParser parser1 = new WADLParser(new File(FILENAME_DIR+"firstOne.wadl"));
+		WADLParser parser2 = new WADLParser(new File(FILENAME_DIR+"secondOne.wadl"));
+		Delta delta = parser1.getService().diff(parser2.getService());
+		delta.printDelta(0);
 	}
 
 }

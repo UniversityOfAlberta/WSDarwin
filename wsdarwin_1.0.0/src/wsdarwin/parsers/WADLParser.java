@@ -63,30 +63,55 @@ public class WADLParser {
 		NodeList resourcesList = document.getElementsByTagNameNS("*",
 				"resources");
 		for (int i = 0; i < resourcesList.getLength(); i++) {
-			String base = resourcesList.item(i).getAttributes()
-					.getNamedItem("base").getNodeValue();
+			Node resourcesNode = resourcesList.item(i);
+			String base = resourcesNode.getAttributes()
+					.getNamedItem("base").getNodeValue().substring(0,resourcesNode.getAttributes()
+					.getNamedItem("base").getNodeValue().length()-1);
 			NodeList resourceList = document.getElementsByTagNameNS("*",
 					"resource");
-			for (int j = 0; j < resourceList.getLength(); j++) {
-				if (resourceList.item(j).getParentNode()
-						.equals(resourcesList.item(i))) {
-					String id="";
-					if(resourceList.item(j).getAttributes().getNamedItem("id") != null) {
-						id = resourceList.item(j).getAttributes().getNamedItem("id").getNodeValue();
+			HashMap<String, WSElement> operations = new HashMap<String, WSElement>();
+			parseResources(serviceInterfaces, resourcesNode, base,
+					resourceList, operations);
+		}
+		return serviceInterfaces;
+	}
+
+	private void parseResources(HashMap<String, WSElement> serviceInterfaces,
+			Node resourcesNode, String base, NodeList resourceList,
+			HashMap<String, WSElement> operations) {
+		for (int j = 0; j < resourceList.getLength(); j++) {
+			Node resourceNode = resourceList.item(j);
+			if (resourceNode.getParentNode()
+					.equals(resourcesNode)) {
+				if (containsMethods(resourceNode)) {
+					String id = "";
+					if (resourceNode.getAttributes().getNamedItem("id") != null) {
+						id = resourceNode.getAttributes()
+								.getNamedItem("id").getNodeValue();
 					}
-					Interface serviceInterface = new Interface(id, base
-							+ "\\"
-							+ resourceList.item(j).getAttributes()
-									.getNamedItem("path").getNodeValue());
-					HashMap<String, WSElement> operations = new HashMap<String, WSElement>();
-					operations = getInterfaceOperations(resourceList.item(j));
-					serviceInterface.setOperations(operations);
+					Interface serviceInterface = new Interface(id, base);
+					operations.putAll(getInterfaceOperations(resourceNode));
+					serviceInterface.getChildren().putAll(operations);
 					serviceInterfaces.put(serviceInterface.getAddress(),
 							serviceInterface);
 				}
+				else if(resourceNode.getNodeName().equals("resource")) {
+					resourceList = resourceNode.getChildNodes();
+					base+="/"+resourceNode.getAttributes().getNamedItem("path").getNodeValue();
+					parseResources(serviceInterfaces, resourceNode, base, resourceList, operations);
+				}
 			}
 		}
-		return serviceInterfaces;
+	}
+
+	private boolean containsMethods(Node item) {
+		NodeList list = item.getChildNodes();
+		for(int i=0; i<list.getLength(); i++) {
+			if(list.item(i).getNodeName().equals("method")) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private HashMap<String, WSElement> getInterfaceOperations(Node resourceNode) {
