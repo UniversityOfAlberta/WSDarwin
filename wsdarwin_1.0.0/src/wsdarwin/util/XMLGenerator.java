@@ -227,59 +227,69 @@ public class XMLGenerator {
 			HashSet<Resource> resource = new HashSet<Resource>();
 			resource.addAll(r.getResourceElements().values());
 			
-			for(Resource rr : resource) {
-				Element resourceElement = xmldoc.createElement("resource");
-				resourceElement.setAttribute("path", rr.getIdentifier());
-				resourcesElement.appendChild(resourceElement);
-			
-				HashSet<Method> methods = new HashSet<Method>();
-				methods.addAll(rr.getMethodElements().values());
-				for(Method m : methods) {
-					Element methodElement = xmldoc.createElement("method");
-					methodElement.setAttribute("id", m.getIdentifier());
-					methodElement.setAttribute("name", m.getName());
-					resourceElement.appendChild(methodElement);
-					
-					/* Request (limited to 1) */
-					Request request = m.getRequestElement();
-					Element requestElement = xmldoc.createElement("request");
-					methodElement.appendChild(requestElement);
-
-					HashSet<Param> param = new HashSet<Param>(); 
-					param.addAll(request.getParamElements().values());
-					for(Param par : param) {
-						Element paramElement = xmldoc.createElement("param");
-//							paramElement.setIdAttribute("required", par.isRequired());
-						paramElement.setAttribute("style", par.getStyle());
-						paramElement.setAttribute("type", XML_SCHEMA_NAMESPACE+par.getType());
-						paramElement.setAttribute("name", par.getIdentifier());
-						//System.out.println("(55) list Element: " + paramElement.getAttribute("name") + ", type: " + paramElement.getAttribute("type"));
-						requestElement.appendChild(paramElement);
-					}
-																	
-					/* Response (multiple possible) */
-					HashSet<Response> responses = new HashSet<Response>();
-					responses.addAll(m.getResponseElements().values());
-					for(Response resp : responses) {
-						Element responseElement = xmldoc.createElement("response");		
-						responseElement.setAttribute("status", Integer.toString(resp.getID()));
-						methodElement.appendChild(responseElement);
-					
-						HashSet<Representation> representation = new HashSet<Representation>();
-						representation.addAll(resp.getRepresentationElements().values());
-						for(Representation rep : representation) {
-							Element representationElement = xmldoc.createElement("representation");
-							representationElement.setAttribute("element", rep.getIdentifier());
-							representationElement.setAttribute("mediaType", rep.getMediaType());
-							responseElement.appendChild(representationElement);
-						}
-					}
-				}
-			}
+			addResourceElements(resource, resourcesElement, xmldoc);
 		}
 		
 		writeXML(domImpl, xmldoc, wadlFile.getIdentifier());
 		
 		return xmldoc;
+	}
+
+	private void addResourceElements(HashSet<Resource> resource,
+			Element resourcesElement, Document xmldoc) {
+		for(Resource rr : resource) {
+			Element resourceElement = xmldoc.createElement("resource");
+			resourceElement.setAttribute("path", rr.getIdentifier());
+			resourcesElement.appendChild(resourceElement);
+		
+			HashSet<Resource> resourceResources = new HashSet<Resource>();
+			resourceResources.addAll(rr.getResourceElements().values());
+			addResourceElements(resourceResources, resourceElement, xmldoc);
+			
+			HashSet<Method> methods = new HashSet<Method>();
+			methods.addAll(rr.getMethodElements().values());
+			for(Method m : methods) {
+				Element methodElement = xmldoc.createElement("method");
+				methodElement.setAttribute("id", m.getIdentifier());
+				methodElement.setAttribute("name", m.getName());
+				resourceElement.appendChild(methodElement);
+				
+				/* Request (limited to 1) */
+				Request request = m.getRequestElement();
+				Element requestElement = xmldoc.createElement("request");
+				methodElement.appendChild(requestElement);
+
+				HashSet<Param> param = new HashSet<Param>(); 
+				param.addAll(request.getParamElements().values());
+				for(Param par : param) {
+					Element paramElement = xmldoc.createElement("param");
+//						paramElement.setIdAttribute("required", par.isRequired());
+					paramElement.setAttribute("style", par.getStyle());
+					paramElement.setAttribute("type", XML_SCHEMA_NAMESPACE+par.getType());
+					paramElement.setAttribute("name", par.getIdentifier());
+					//System.out.println("(55) list Element: " + paramElement.getAttribute("name") + ", type: " + paramElement.getAttribute("type"));
+					requestElement.appendChild(paramElement);
+				}
+																
+				/* Response (multiple possible) */
+				HashSet<Response> responses = new HashSet<Response>();
+				responses.addAll(m.getResponseElements().values());
+				for(Response resp : responses) {
+					Element responseElement = xmldoc.createElement("response");		
+					responseElement.setAttribute("status", Integer.toString(resp.getID()));
+					methodElement.appendChild(responseElement);
+				
+					HashSet<Representation> representation = new HashSet<Representation>();
+					representation.addAll(resp.getRepresentationElements().values());
+					for(Representation rep : representation) {
+						Element representationElement = xmldoc.createElement("representation");
+						representationElement.setAttribute("element", rep.getIdentifier());
+						representationElement.setAttribute("mediaType", rep.getMediaType());
+						responseElement.appendChild(representationElement);
+					}
+				}
+			}
+		}
+		
 	}
 }

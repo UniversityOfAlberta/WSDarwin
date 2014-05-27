@@ -13,12 +13,12 @@ public class Resources implements WADLElement {
 
 	private String base;							// of type xsd:anyURI
 	private HashMap<String, Resource> resourceElements;
-	private HashMap<Resource, HashSet<Method>> changedResource;
+	private HashMap<Resource, HashSet<WADLElement>> changedResource;
 	
 	public Resources(String base) {
 		this.setIdentifier(base);
 		this.resourceElements = new HashMap<String, Resource>();
-		this.changedResource = new HashMap<Resource, HashSet<Method>>();
+		this.changedResource = new HashMap<Resource, HashSet<WADLElement>>();
 	}	
 	
 	public String getIdentifier() {

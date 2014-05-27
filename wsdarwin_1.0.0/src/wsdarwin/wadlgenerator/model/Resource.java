@@ -18,14 +18,18 @@ public class Resource implements WADLElement {
 	
 	private String path;
 	private HashMap<String, Method> methodElements;
+	private HashMap<String, Resource> resourceElements;
 	private HashMap<Method, Request> changedMethodRequest;
 	private HashMap<Method, HashSet<Response>> changedMethodResponse;
+	private HashMap<Resource, HashSet<WADLElement>> changedResources;
 
 	public Resource(String path) {
 		this.path = path;
 		this.methodElements = new HashMap<String, Method>();
+		this.resourceElements = new HashMap<String, Resource>();
 		this.changedMethodRequest = new HashMap<Method, Request>();
 		this.changedMethodResponse = new HashMap<Method, HashSet<Response>>();
+		this.changedResources = new HashMap<Resource, HashSet<WADLElement>>();
 	}
 	
 	public String getIdentifier() {
@@ -42,6 +46,14 @@ public class Resource implements WADLElement {
 
 	public void addMethodElement(String id, Method element) {
 		methodElements.put(id, element);
+	}
+	
+	public HashMap<String, Resource> getResourceElements() {
+		return resourceElements;
+	}
+
+	public void addResourceElement(String id, Resource element) {
+		resourceElements.put(id, element);
 	}
 	
 	@Override
@@ -74,23 +86,37 @@ public class Resource implements WADLElement {
 //		return "<resource> PATH="+path+", #methodElements="+methodElements.size();
 	}
 	
-	public HashSet<Method> compareToMerge(Resource resource) {
-		HashSet<Method> methodAdded = new HashSet<Method>();
+	public HashSet<WADLElement> compareToMerge(Resource resource) {
+		HashSet<WADLElement> elementsAdded = new HashSet<WADLElement>();
 
 		for(String id : resource.getMethodElements().keySet()) {
 			if(!this.getMethodElements().containsKey(id)) {
-				methodAdded.add(resource.getMethodElements().get(id));
+				elementsAdded.add(resource.getMethodElements().get(id));
 			} else {
 				changedMethodRequest.put(this.getMethodElements().get(id), this.getMethodElements().get(id).compareToMergeRequest(resource.getMethodElements().get(id)));
 				changedMethodResponse.put(this.getMethodElements().get(id), this.getMethodElements().get(id).compareToMergeResponse(resource.getMethodElements().get(id)));
 			}
 		}
-		return methodAdded;
+		for(String id : resource.getResourceElements().keySet()) {
+			if(!this.getResourceElements().containsKey(id)) {
+				elementsAdded.add(resource.getResourceElements().get(id));
+			} else {
+				changedResources.put(this.getResourceElements().get(id), this.getResourceElements().get(id).compareToMerge(resource.getResourceElements().get(id)));
+			}
+		}
+		return elementsAdded;
 	}
 
-	public void mergeResource(HashSet<Method> addedMethodElements) {
-		for(Method m : addedMethodElements) {
-			this.methodElements.put(m.getIdentifier(), m);
+	public void mergeResource(HashSet<WADLElement> addedElements) {
+		for(WADLElement e : addedElements) {
+			if (e instanceof Method) {
+				Method method = (Method)e;
+				this.methodElements.put(method.getIdentifier(), method);
+			}
+			else if(e instanceof Resource) {
+				Resource resource = (Resource)e;
+				this.resourceElements.put(resource.getIdentifier(), resource);
+			}
 		}	
 		// Request
 		for(Method m : changedMethodRequest.keySet()) {
@@ -99,6 +125,10 @@ public class Resource implements WADLElement {
 		// Response
 		for(Method m : changedMethodResponse.keySet()) {
 			m.mergeMethodResponses(changedMethodResponse.get(m));
+		}
+		
+		for(Resource r : changedResources.keySet()) {
+			r.mergeResource(changedResources.get(r));
 		}
 	}
 
