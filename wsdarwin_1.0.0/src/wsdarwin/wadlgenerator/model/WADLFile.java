@@ -118,6 +118,7 @@ public class WADLFile implements WADLElement {
         for(int i=1; i<analyzer.getResourcePath().length; i++) {
         	resourceElement = new Resource(analyzer.getResourcePath()[i]);
         	resource.addResourceElement(analyzer.getResourcePath()[i], resourceElement);
+        	resource = resourceElement;
         }
         
         if(resourceElement == null) {
