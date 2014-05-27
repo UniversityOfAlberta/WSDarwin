@@ -107,12 +107,6 @@ public class TestMainForWADLGeneration {
 		ArrayList<String> analyzed_WADLurls = gson.fromJson(newUppedFiles, ArrayList.class);
 		ArrayList<String> compare_WADLurls = gson.fromJson(compareWADLfiles, ArrayList.class);
 		
-		WADLFile helloworld = null;
-		
-		if (helloworld == null){
-			System.out.println("helloworld is null !");
-		}
-		
 		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyzed_WADLurls, "analyzeURLS");
 		String compare_wadl_merged_path_url = "";
 		
@@ -124,8 +118,8 @@ public class TestMainForWADLGeneration {
 			System.out.println("compare path: " + compare_wadl_merged_path_url);
 			
 			// parse the 2 wadl's into a wsdarwin.model and diff them
-			WADLParser parser1 = new WADLParser(new File(FILENAME_DIR_TWO + "twitterMerged.wadl"));
-			WADLParser parser2 = new WADLParser(new File(FILENAME_DIR_TWO + "twitterMerged2.wadl"));
+			WADLParser parser1 = new WADLParser(new File(FILENAME_DIR_TWO + "mergedFileA.wadl"));
+			WADLParser parser2 = new WADLParser(new File(FILENAME_DIR_TWO + "mergedFileB.wadl"));
 			
 			delta = parser1.getService().diff(parser2.getService());
 			
@@ -133,7 +127,6 @@ public class TestMainForWADLGeneration {
 			delta.printDelta(0);
 			
 			System.out.println("Diff finished");
-			System.out.println("Finished!!");
 		}
 		
 		ArrayList<String> returnArray = new ArrayList<String>();
@@ -226,7 +219,7 @@ public class TestMainForWADLGeneration {
 		return null;		
 	}
 	
-	public static void getURIs(ArrayList<String> url_list, ArrayList<String> uriList, ArrayList<String> requestsList){
+	public static void getURIs(ArrayList<String> url_list, ArrayList<String> uriListReference, ArrayList<String> requestsListReference){
 		ArrayList<String> apiLinks = new ArrayList<String>();
 		
 		for (int i = 0; i < url_list.size(); i++){
@@ -245,11 +238,101 @@ public class TestMainForWADLGeneration {
 		Iterator<String> it = apiLinks.iterator();
 		while(it.hasNext()){
 		    String line = it.next();
-		    requestsList.add(line);
+		    requestsListReference.add(line);
 			String[] tokens = line.split(" ");
-			uriList.add(tokens[2]);
+			uriListReference.add(tokens[2]);
 		}
 	}
+	
+	private static String analyzeURIs(ArrayList<String> uris,
+			HashMap<String, XSDFile> responses, RequestAnalyzer analyzer) {
+		String resourceBase = "";
+		if ( (uris != null) && (uris.size() > 0)){
+			resourceBase = analyzer.batchRequestAnalysis(uris);
+			
+			for(String methodName : analyzer.getMethodNamesFromBatch(uris)) {
+				responses.put(methodName, new XSDFile());
+			}
+		}
+		return resourceBase;
+	}
+	
+	private static void processRequests(ArrayList<String> requests,
+			HashMap<String, XSDFile> responses, RequestAnalyzer analyzer,
+			String resourceBase, XMLGenerator generator, WADLFile mergedWADL,
+			HashSet<XSDFile> grammarSet) throws MalformedURLException,
+			IOException, ParserConfigurationException {
+		for(String requestLine : requests) {
+			String[] tokens = requestLine.split(" ");
+			String id = "";
+			String methodName = "";
+			String urlLine = "";
+			if (tokens.length>1) {
+				id = tokens[0];
+				methodName = tokens[1];
+				urlLine = tokens[2];
+			}
+			analyzer.resetUriString(urlLine);
+			final String FILENAME_XML  = VENDOR+id+".json";
+			final String FILENAME_WADL = "late_WADLresponse"+id+".wadl";
+			final String FILENAME_XSD  = "response"+id+".xsd";
+			
+		    //System.out.println(" Request #"+id+"");
+		    
+		    // URLConnection
+			URL yahoo = new URL(urlLine);
+		    URLConnection yc = yahoo.openConnection();
+		    BufferedReader in = new BufferedReader(
+		    new InputStreamReader(yc.getInputStream()));
+		    String inputLine;
+
+		    //BufferedWriter out = new BufferedWriter(new FileWriter(new File(RESPONSE_DIR+FILENAME_XML)));
+		    BufferedWriter out = new BufferedWriter(new FileWriter(new File(RESPONSE_DIR_TWO+FILENAME_XML)));
+
+		    while ((inputLine = in.readLine()) != null) {
+		        out.write(inputLine);
+		        out.newLine();
+		    }
+		    in.close();
+		    out.close();
+		    
+		    Response2XSD xsdBuilder = new Response2XSD();
+		    
+			//xsdBuilder.buildXSDFromJSON(RESPONSE_DIR+FILENAME_XML, analyzer.getMethodID());
+		    xsdBuilder.buildXSDFromJSON(RESPONSE_DIR_TWO+FILENAME_XML, analyzer.getMethodID());
+		    
+		    XSDFile xsdFile = xsdBuilder.getXSDFile();
+			XSDFile mergedXSDFile = responses.get(analyzer.getMethodID());
+			
+			//xsdFilename = mergedXSDFile.getFilename();
+			//generator.createXSD(xsdFile);
+				
+			mergedXSDFile.compareToMerge(xsdFile);
+			
+		    //WADLFile newWADL = new WADLFile(FILENAME_DIR+FILENAME_WADL, urlLine, xsdBuilder.convertFromXSD(mergedXSDFile.getResponseType()));
+			WADLFile newWADL = new WADLFile(FILENAME_DIR_TWO +FILENAME_WADL, urlLine, xsdBuilder.convertFromXSD(mergedXSDFile.getResponseType()));
+			grammarSet.add(xsdFile);		// TODO later change to Identifier + XSDElement
+			newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
+		    generator.createWADL(newWADL);
+		    
+		    // Call diff&merge methods from sub-objects 
+		    mergedWADL.compareToMerge(newWADL);
+		    
+		    // Add the newly generated wadl's path to the list wadl_paths
+		    //wadl_paths.add(LOCALHOST_WADL_PATH+FILENAME_WADL);
+			
+		}
+	}
+	
+	private static String getWADLMergedFilename(String call_type) {
+		String mergedFileName = "";
+		if (call_type.equals("analyzeURLS")){
+			mergedFileName = "Merged.wadl";
+		} else if (call_type.equals("compareURLS")){
+			mergedFileName = "Merged2.wadl";
+		}
+		return mergedFileName;
+	}	
 	
 	/**
 	 * @param args
@@ -260,99 +343,27 @@ public class TestMainForWADLGeneration {
 			ArrayList<String> uris = new ArrayList<String>();
 			HashMap<String, XSDFile> responses = new HashMap<String, XSDFile>();
 			
-			
 			//ArrayList<String> wadl_paths = new ArrayList<String>();
 			
-			// processes 'uris' and 'requests', given apiLinks
+			// gets 'uris' and 'requests', given 'uris'
 			getURIs(url_list, uris, requests);
 			
 			RequestAnalyzer analyzer = new RequestAnalyzer();
-			String resourceBase = "";
-			if ( (uris != null) && (uris.size() > 0)){
-				resourceBase = analyzer.batchRequestAnalysis(uris);
-				
-				for(String methodName : analyzer.getMethodNamesFromBatch(uris)) {
-					responses.put(methodName, new XSDFile());
-				}
-			}
-
-			String xsdFilename = null;
+			String resourceBase = analyzeURIs(uris, responses, analyzer);
 
 			XMLGenerator generator = new XMLGenerator();
 	        //System.out.println("[Interface retrieval]");
 			
-			// create empty merged WADL file
-	        String mergedFileName = "";
-	        if (call_type.equals("analyzeURLS")){
-	        	mergedFileName = "Merged.wadl";
-	        } else if (call_type.equals("compareURLS")){
-	        	mergedFileName = "Merged2.wadl";
-	        }
-			WADLFile mergedWADL = new WADLFile(FILENAME_DIR_TWO+VENDOR+mergedFileName, null, null);
+	        String mergedWADLFileName = getWADLMergedFilename(call_type);
+	        
+	        // create empty merged WADL file
+			WADLFile mergedWADL = new WADLFile(FILENAME_DIR_TWO+VENDOR+mergedWADLFileName, null, null);
 			if(DEBUG) System.out.println("** Merged WADLFile: "+mergedWADL.getIdentifier()+" **");
 			HashSet<XSDFile> grammarSet = new HashSet<XSDFile>();
 			
 			// Looping over test queries
-			for(String requestLine : requests) {
-				String[] tokens = requestLine.split(" ");
-				String id = "";
-				String methodName = "";
-				String urlLine = "";
-				if (tokens.length>1) {
-					id = tokens[0];
-					methodName = tokens[1];
-					urlLine = tokens[2];
-				}
-				analyzer.resetUriString(urlLine);
-				final String FILENAME_XML  = VENDOR+id+".json";
-				final String FILENAME_WADL = "late_WADLresponse"+id+".wadl";
-				final String FILENAME_XSD  = "response"+id+".xsd";
-				
-		        //System.out.println(" Request #"+id+"");
-		        
-		        // URLConnection
-				URL yahoo = new URL(urlLine);
-		        URLConnection yc = yahoo.openConnection();
-		        BufferedReader in = new BufferedReader(
-                new InputStreamReader(yc.getInputStream()));
-		        String inputLine;
-
-		        //BufferedWriter out = new BufferedWriter(new FileWriter(new File(RESPONSE_DIR+FILENAME_XML)));
-		        BufferedWriter out = new BufferedWriter(new FileWriter(new File(RESPONSE_DIR_TWO+FILENAME_XML)));
-
-		        while ((inputLine = in.readLine()) != null) {
-		            out.write(inputLine);
-		            out.newLine();
-		        }
-		        in.close();
-		        out.close();
-		        
-		        Response2XSD xsdBuilder = new Response2XSD();
-		        
-				//xsdBuilder.buildXSDFromJSON(RESPONSE_DIR+FILENAME_XML, analyzer.getMethodID());
-		        xsdBuilder.buildXSDFromJSON(RESPONSE_DIR_TWO+FILENAME_XML, analyzer.getMethodID());
-		        
-		        XSDFile xsdFile = xsdBuilder.getXSDFile();
-				XSDFile mergedXSDFile = responses.get(analyzer.getMethodID());
-				
-				//xsdFilename = mergedXSDFile.getFilename();
-				//generator.createXSD(xsdFile);
-					
-				mergedXSDFile.compareToMerge(xsdFile);
-				
-		        //WADLFile newWADL = new WADLFile(FILENAME_DIR+FILENAME_WADL, urlLine, xsdBuilder.convertFromXSD(mergedXSDFile.getResponseType()));
-				WADLFile newWADL = new WADLFile(FILENAME_DIR_TWO +FILENAME_WADL, urlLine, xsdBuilder.convertFromXSD(mergedXSDFile.getResponseType()));
-				grammarSet.add(xsdFile);		// TODO later change to Identifier + XSDElement
-				newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
-		        generator.createWADL(newWADL);
-		        
-		        // Call diff&merge methods from sub-objects 
-		        mergedWADL.compareToMerge(newWADL);
-		        
-		        // Add the newly generated wadl's path to the list wadl_paths
-		        //wadl_paths.add(LOCALHOST_WADL_PATH+FILENAME_WADL);
-				
-			}
+			processRequests(requests, responses, analyzer, resourceBase,
+					generator, mergedWADL, grammarSet);
 			
 			// merge uploaded wadl file(s) (if any / can only merge one uploaded wadl file right now)
 			if ( (analyzedWADLurls != null) && (analyzedWADLurls.size() > 0)){
@@ -369,7 +380,7 @@ public class TestMainForWADLGeneration {
 			// Add the merged wadl's path to the list wadl_paths
 	        //wadl_paths.add(LOCALHOST_WADL_PATH+VENDOR+"Merged.wadl");
 	        
-	        String MERGED_WADL_PATH = LOCALHOST_WADL_PATH+VENDOR+mergedFileName;
+	        String MERGED_WADL_PATH = LOCALHOST_WADL_PATH+VENDOR+mergedWADLFileName;
 	        if (call_type.equals("analyzeURLS")){
 	        	wadl_one = mergedWADL;
 	        	return MERGED_WADL_PATH;
@@ -391,8 +402,6 @@ public class TestMainForWADLGeneration {
 			}
 		return null;
 	}
-	
-	
 
 }
 
