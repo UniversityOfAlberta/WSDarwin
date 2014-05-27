@@ -56,9 +56,6 @@ import java.io.*;
 
 @Path(value="/api")
 public class TestMainForWADLGeneration {
-
-	@Context private HttpServletRequest servletRequest;
-	//@Context private HttpServletContext servletContext;
 	
 	public static final Boolean DEBUG = true;
 	
@@ -73,7 +70,7 @@ public class TestMainForWADLGeneration {
 	// -------------------------------------------------------------------------
 	// web service directories
 	// eclipse's tomcat path
-	//private static final String PATH_PREFIX_TWO = "C:/Users/mihai/eclipse_workspace/wsdarwin_1.0.0/WebContent/files/icsm2014/"+VENDOR;
+	// private static final String PATH_PREFIX_TWO = "C:/Users/mihai/eclipse_workspace/wsdarwin_1.0.0/WebContent/files/icsm2014/"+VENDOR;
 	// tomcat path
 	private static final String PATH_PREFIX_TWO = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/"+VENDOR;
 	private static final String PATH_PREFIX_FILES = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
@@ -103,9 +100,7 @@ public class TestMainForWADLGeneration {
 	@GET
 	@Path("/analyze")
     public String singleURL(@QueryParam("newURLs") String newURLs, @QueryParam("newUppedFiles") String newUppedFiles, @QueryParam("sessionid") String sessionid, @QueryParam("type") String call_type, @QueryParam("compareURLs") String compareURLs, @QueryParam("compareWADLfiles") String compareWADLfiles) throws Exception {
-		//System.out.println("get aram is " + jsonObj );
 		
-		//Gson gson = new Gson();
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		ArrayList<String> analyze_URLs = gson.fromJson(newURLs, ArrayList.class);
 		ArrayList<String> compare_URLs = gson.fromJson(compareURLs, ArrayList.class);
@@ -152,11 +147,10 @@ public class TestMainForWADLGeneration {
 		} else {
 			returnArray.add(sessionid);
 		}
-		//System.out.println("the session id: " + returnArray.get(0));
 		
 		returnArray.add(analysis_wadl_merged_path_url);
 		returnArray.add(compare_wadl_merged_path_url);
-		System.out.println("call type is: " + call_type);
+
 		if (call_type.equals("compare")){
 			System.out.println("creating xml comparison file");
 			
@@ -176,43 +170,7 @@ public class TestMainForWADLGeneration {
 		
 		
 		
-		String ret = gson.toJson(returnArray);
-		
-		
-		//System.out.println( "gson.. " + abc );
-		//for (int k = 0; k < urls.size(); k++){
-			//System.out.println("gson.. " + urls.get(k));
-		//}
-		
-		/*File myFile = new File("C:/Users/mihai/jsonWADL.txt");
-        myFile.createNewFile();
-        FileOutputStream fOut = new FileOutputStream(myFile);
-        OutputStreamWriter myOutWriter =new OutputStreamWriter(fOut);
-        myOutWriter.append(jsonRet);
-        myOutWriter.close();
-        fOut.close();*/
-		
-		//JSONObject pilot = new JSONObject();
-		//pilot.put( "firstName", "John");
-        //pilot.put( "lastName", "Adams");
-        //System.out.println("pilot : " + pilot);
-
-		/*if (jsonObj == null){
-			System.out.println("URL PATH IS NOT DEFINED");
-		}
-		
-		
-	*/
-		 
-		 // to diff 2 files..
-		/*System.out.println("Diff started");
-*/
-		
-		/*
-		Gson gsonObj = new Gson();
-		getWadl(jsonObj);*/
-		
-		
+		String ret = gson.toJson(returnArray);		
 		return ret;
 	}	
 	
@@ -224,11 +182,73 @@ public class TestMainForWADLGeneration {
 	        lso.setByteStream(new FileOutputStream(new File(filename)));
 	        
 	        lss.write(xmldoc, lso);
-	        
-	        //Element root = xmldoc.get
-	        //System.out.println("root name ? " + getStringFromDocument(xmldoc) );
-	        //String jsonRet = gson.toJson( getStringFromDocument(xmldoc) );
-	        //System.out.println("THE FINAL XML: " + xmldoc.toString() );
+	}
+	
+	public static WADLFile getAnalyzedWADLfile(ArrayList<String> analyzedWADLurls) throws ParserConfigurationException, IOException {
+		for (int i = 0; i < analyzedWADLurls.size(); i++){
+			try {
+				System.out.println("ADDING ANALYZED URL: " + analyzedWADLurls.get(i));
+		        // URLConnection
+				URL yahoo = new URL(analyzedWADLurls.get(i));
+		        URLConnection yc = yahoo.openConnection();
+		        BufferedReader in = new BufferedReader(
+	            new InputStreamReader(yc.getInputStream()));
+		        String inputLine;
+		        
+		        //BufferedWriter out = new BufferedWriter(new FileWriter(new File(RESPONSE_DIR+FILENAME_XML)));
+		        String uppedWADLpath = UPLOADED_WADLS+"file"+i+".wadl";
+		        BufferedWriter out = new BufferedWriter(new FileWriter(new File(uppedWADLpath)));
+	
+		        while ((inputLine = in.readLine()) != null) {
+		            out.write(inputLine);
+		            out.newLine();
+		        }
+		        
+		        in.close();
+		        out.close();
+		        
+		        WADLFile uppedWADL = new WADLFile(uppedWADLpath);
+				try {
+					//System.out.println("<<< reading wadl >>>");
+					uppedWADL.readWADL();
+					//System.out.println("<<< finished reading wadl >>>");
+				} catch (SAXException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+		        return uppedWADL;
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		return null;		
+	}
+	
+	public static void getURIs(ArrayList<String> url_list, ArrayList<String> uriList, ArrayList<String> requestsList){
+		ArrayList<String> apiLinks = new ArrayList<String>();
+		
+		for (int i = 0; i < url_list.size(); i++){
+			if ( "".equals( url_list.get(i) ) ){
+				// its null
+			} else {
+				String proper_url = new String( i + " GET " + url_list.get(i) + "" );
+				apiLinks.add(proper_url);
+			}
+		}
+		
+		// Sample JSON links ( add json link here for debug )
+		//apiLinks.add(new String("005 GET https://api.github.com/users/mralexgray/repos"));
+		//apiLinks.add(new String("001 GET http://api.openweathermap.org/data/2.1/find/city?lat=55&lon=37&cnt=10"));
+		
+		Iterator<String> it = apiLinks.iterator();
+		while(it.hasNext()){
+		    String line = it.next();
+		    requestsList.add(line);
+			String[] tokens = line.split(" ");
+			uriList.add(tokens[2]);
+		}
 	}
 	
 	/**
@@ -240,66 +260,12 @@ public class TestMainForWADLGeneration {
 			ArrayList<String> uris = new ArrayList<String>();
 			HashMap<String, XSDFile> responses = new HashMap<String, XSDFile>();
 			
-			// Read request file BY FILE PATH:
-			//BufferedReader testIn = new BufferedReader(new FileReader(new File(PATH_PREFIX_TWO+"/request.txt")));
 			
-			// Read request file BY URL:
-			//URL requestURL = new URL(PATH_PREFIX_TWO+"/request.txt");
-			//BufferedReader testIn = new BufferedReader(new InputStreamReader(requestURL.openStream()));
+			//ArrayList<String> wadl_paths = new ArrayList<String>();
 			
-			//String line = testIn.readLine();
+			// processes 'uris' and 'requests', given apiLinks
+			getURIs(url_list, uris, requests);
 			
-			ArrayList<String> links = new ArrayList<String>();
-			ArrayList<String> wadl_paths = new ArrayList<String>();
-			WADLFile ret = null;
-			
-			//links.add(new String("005 GET https://api.github.com/users/mralexgray/repos"));
-			//links.add(new String("001 GET http://api.openweathermap.org/data/2.1/find/city?lat=55&lon=37&cnt=10"));
-			
-			// ===============================================================================================================================
-			// some api calls that return json
-			// https://api.github.com/users/penguinsource/repos
-			// https://api.github.com/users/mralexgray/repos
-			// https://api.github.com/users/fokaefs/repos
-			// https://api.github.com/users/mojombo
-			// https://api.github.com/users/willcodeforfoo
-			// 
-			// https://graph.facebook.com/oprescu3
-			// http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=HeyThere
-			// http://api.openweathermap.org/data/2.1/find/city?lat=55&lon=37&cnt=10
-			// doesnt work .. http://www.google.com/calendar	/feeds/developer-calendar@google.com/public/full?alt=json
-			// http://en.wikipedia.org/w/api.php?format=json&action=query&titles=Main%20Page&prop=revisions&rvprop=content&format=json
-			// http://www.biomedcentral.com/webapi/1.0/latest_articles.json
-			// http://api.artsholland.com/rest/production.json?per_page=5&page=4
-			// http://www.a3ultimate.com/API/Options/json/33916;3613214975,33916;3613214975,33916;3613214975,33916;3613214975
-			// ===============================================================================================================================
-			
-			for (int i = 0; i < url_list.size(); i++){
-				if ( "".equals( url_list.get(i) ) ){
-					//System.out.println("11 ITS NULL");
-				} else {
-					String proper_url = new String( i + " GET " + url_list.get(i) + "" );
-					links.add(proper_url);
-					//System.out.println(" --> " + proper_url);
-				}
-			}			
-			
-			Iterator<String> it = links.iterator();
-			
-			while(it.hasNext()){
-			    String line = it.next();
-				requests.add(line);
-				String[] tokens = line.split(" ");
-				uris.add(tokens[2]);
-			}
-			
-			/*
-			while(line != null) {
-				requests.add(line);
-				String[] tokens = line.split(" ");
-				uris.add(tokens[2]);
-				line = testIn.readLine();
-			}*/
 			RequestAnalyzer analyzer = new RequestAnalyzer();
 			String resourceBase = "";
 			if ( (uris != null) && (uris.size() > 0)){
@@ -316,7 +282,6 @@ public class TestMainForWADLGeneration {
 	        //System.out.println("[Interface retrieval]");
 			
 			// create empty merged WADL file
-			System.out.println("THE CALL_TYPE IS: !!! " + call_type);
 	        String mergedFileName = "";
 	        if (call_type.equals("analyzeURLS")){
 	        	mergedFileName = "Merged.wadl";
@@ -329,7 +294,6 @@ public class TestMainForWADLGeneration {
 			
 			// Looping over test queries
 			for(String requestLine : requests) {
-				//System.out.println(" THE REQUEST LINE: " + requestLine);
 				String[] tokens = requestLine.split(" ");
 				String id = "";
 				String methodName = "";
@@ -385,169 +349,33 @@ public class TestMainForWADLGeneration {
 		        // Call diff&merge methods from sub-objects 
 		        mergedWADL.compareToMerge(newWADL);
 		        
-		        
-		        //System.out.println(" wadl file: " + LOCALHOST_WADL_PATH+FILENAME_WADL);
 		        // Add the newly generated wadl's path to the list wadl_paths
-		        wadl_paths.add(LOCALHOST_WADL_PATH+FILENAME_WADL);
-		        
-				//requestLine = testIn.readLine();
-				//requestLine = it.next();
-				//System.out.println("-- > " + requestLine);
+		        //wadl_paths.add(LOCALHOST_WADL_PATH+FILENAME_WADL);
 				
 			}
 			
-			
-			// merging uploaded wadl files
-	        /*WADLFile uppedWADL = new WADLFile("C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter/uploadedWADL/file0.wadl");
-	        WADLFile uppedWADL2 = new WADLFile("C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter/uploadedWADL/file1.wadl");
-	        try {
-				//System.out.println("<<< reading wadl >>>");
-				uppedWADL.readWADL();
-				uppedWADL2.readWADL();
-				//System.out.println("<<< finished reading wadl >>>");
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-	        // Call diff&merge methods from sub-objects
-	        mergedWADL.compareToMerge(uppedWADL);
-	        mergedWADL.compareToMerge(uppedWADL2);*/
+			// merge uploaded wadl file(s) (if any / can only merge one uploaded wadl file right now)
 			if ( (analyzedWADLurls != null) && (analyzedWADLurls.size() > 0)){
-				//
-				//System.out.println("SIZE OF ANALYZED WADL URLS: " + analyzedWADLurls.size());
-				//System.out.println("SIZE OF ANALYZED WADL URLS: " + analyzedWADLurls.get(0));
-				for (int i = 0; i < analyzedWADLurls.size(); i++){
-					System.out.println("ADDING ANALYZED URL: " + analyzedWADLurls.get(i));
-			        // URLConnection
-					URL yahoo = new URL(analyzedWADLurls.get(i));
-			        URLConnection yc = yahoo.openConnection();
-			        BufferedReader in = new BufferedReader(
-		            new InputStreamReader(yc.getInputStream()));
-			        String inputLine;
-			        
-			        //BufferedWriter out = new BufferedWriter(new FileWriter(new File(RESPONSE_DIR+FILENAME_XML)));
-			        String uppedWADLpath = UPLOADED_WADLS+"file"+i+".wadl";
-			        BufferedWriter out = new BufferedWriter(new FileWriter(new File(uppedWADLpath)));
-		
-			        while ((inputLine = in.readLine()) != null) {
-			            out.write(inputLine);
-			            out.newLine();
-			        }
-			        
-			        in.close();
-			        out.close();
-			        
-			        WADLFile uppedWADL = new WADLFile(uppedWADLpath);
-					try {
-						//System.out.println("<<< reading wadl >>>");
-						uppedWADL.readWADL();
-						//System.out.println("<<< finished reading wadl >>>");
-					} catch (SAXException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-					System.out.println("-> Merging wadl with path: " + uppedWADLpath);
-			        // Call diff&merge methods from sub-objects
-			        mergedWADL.compareToMerge(uppedWADL);
-			        System.out.println("FILE MERGED !");
-				}
-			}
-			
-			//
-			
-			//InputStream inputStream = TestMainForWADLGeneration.class.getResourceAsStream("files/icsm2014/twitter/wadl/WADLResponse001.wadl");
-			/*
-			File randomWADLfile	= new File("C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/twitterMerged.wadl");
-			File randomWADLfile2= new File("C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/imdbMerged.wadl");
-			WADLParser parser3 = new WADLParser(randomWADLfile);
-			//WADLParser parser1 = new WADLParser(new File("files/icsm2014/twitter/wadl/WADLResponse001.wadl"));
-			System.out.println("=====> parser1:" + parser3);
-			if (randomWADLfile != null){
-				System.out.println("File opened");
-			}
-			if (parser3 != null){
-				System.out.println("WADLParser initiated");
-			}
-			
-			System.out.println("Diff started");
-			WADLParser parser1 = new WADLParser(randomWADLfile);
-			WADLParser parser2 = new WADLParser(randomWADLfile2);
-
-			Delta delta = parser1.getService().diff(parser2.getService());
-			
-			System.out.println("<<< reading delta >>>");
-			DeltaUtil.findMoveDeltas(delta);
-			delta.printDelta(0);
-			System.out.println("<<< finished reading delta >>>");
-			*/
-			
-
-			
-			/*
-			WADLFile deserialized = WADLFile.deserializeFile("C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/hey.ser");
-			if (deserialized != null){
-				System.out.println("WADLFile deserialized");
-			}*/
-			//}
-			
-
-			/*if (call_type.equals("compare")){
-				// READING MERGED WADL
-				System.out.println("<<< reading end merged wadl >>>");
+				WADLFile uppedWADL = getAnalyzedWADLfile(analyzedWADLurls);
 				
-				WADLFile no = new WADLFile("C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/twitterMerged3.wadl");
-				try {
-					System.out.println("<<< reading wadl >>>");
-					no.readWADL();
-					System.out.println("<<< finished reading wadl >>>");
-				} catch (SAXException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				System.out.println("End of run !");
-				
-				
-		        // Call diff&merge methods from sub-objects 
-		        mergedWADL.compareToMerge(no);
-			}*/
+		        // Call diff&merge methods from sub-objects
+		        mergedWADL.compareToMerge(uppedWADL);
+		        System.out.println("FILE MERGED !");
+			}
 			
 			// write merged WADL file only once
 			generator.createWADL(mergedWADL);
 			
-			//
-			/*for(String methodID : responses.keySet()) {
-				generator.createXSD(responses.get(methodID));
-			}*/
-			
-			// if BufferedReader is used (for URL and local file requests)
-			//testIn.close();
-			
-			/*System.out.println("");
-			System.out.println("[Comparison]");
-			Delta delta = mergedWADL.compare(mergedWADL);
-			delta.printDelta(0);*/			
-			
-			String MERGED_WADL_PATH = LOCALHOST_WADL_PATH+VENDOR+"Merged.wadl";
-			String MERGED_WADL_PATH_TWO = LOCALHOST_WADL_PATH+VENDOR+"Merged2.wadl";
-	        
 			// Add the merged wadl's path to the list wadl_paths
-	        wadl_paths.add(LOCALHOST_WADL_PATH+VENDOR+"Merged.wadl");
+	        //wadl_paths.add(LOCALHOST_WADL_PATH+VENDOR+"Merged.wadl");
 	        
-			//return wadl_paths;
-			//return mergedWADL;
-	        
-	        // returning a DOM Document
-			//Document xml_doc_merged = generator.createWADL(mergedWADL);
-			//return xml_doc_merged;
-	        //mergedWADL.serializeFile();
+	        String MERGED_WADL_PATH = LOCALHOST_WADL_PATH+VENDOR+mergedFileName;
 	        if (call_type.equals("analyzeURLS")){
 	        	wadl_one = mergedWADL;
 	        	return MERGED_WADL_PATH;
 	        } else if (call_type.equals("compareURLS")){
 	        	wadl_two = mergedWADL;
-	        	return MERGED_WADL_PATH_TWO;
+	        	return MERGED_WADL_PATH;
 	        }
 	        return "";
 			
@@ -563,5 +391,47 @@ public class TestMainForWADLGeneration {
 			}
 		return null;
 	}
+	
+	
 
 }
+
+// ===============================================================================================================================
+// some api calls that return json
+// https://api.github.com/users/penguinsource/repos
+// https://api.github.com/users/mralexgray/repos
+// https://api.github.com/users/fokaefs/repos
+// https://api.github.com/users/mojombo
+// https://api.github.com/users/willcodeforfoo
+// 
+// https://graph.facebook.com/oprescu3
+// http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=HeyThere
+// http://api.openweathermap.org/data/2.1/find/city?lat=55&lon=37&cnt=10
+// doesnt work .. http://www.google.com/calendar	/feeds/developer-calendar@google.com/public/full?alt=json
+// http://en.wikipedia.org/w/api.php?format=json&action=query&titles=Main%20Page&prop=revisions&rvprop=content&format=json
+// http://www.biomedcentral.com/webapi/1.0/latest_articles.json
+// http://api.artsholland.com/rest/production.json?per_page=5&page=4
+// http://www.a3ultimate.com/API/Options/json/33916;3613214975,33916;3613214975,33916;3613214975,33916;3613214975
+// ===============================================================================================================================
+
+
+
+
+// ********************************* junk code to review/use
+// merging uploaded wadl files
+/*WADLFile uppedWADL = new WADLFile("C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter/uploadedWADL/file0.wadl");
+WADLFile uppedWADL2 = new WADLFile("C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter/uploadedWADL/file1.wadl");
+try {
+	//System.out.println("<<< reading wadl >>>");
+	uppedWADL.readWADL();
+	uppedWADL2.readWADL();
+	//System.out.println("<<< finished reading wadl >>>");
+} catch (SAXException e) {
+	// TODO Auto-generated catch block
+	e.printStackTrace();
+}
+
+// Call diff&merge methods from sub-objects
+mergedWADL.compareToMerge(uppedWADL);
+mergedWADL.compareToMerge(uppedWADL2);*/
+//********************************* junk code to review/use
