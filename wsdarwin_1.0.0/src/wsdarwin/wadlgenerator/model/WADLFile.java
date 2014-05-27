@@ -112,11 +112,20 @@ public class WADLFile implements WADLElement {
         Resources resources = new Resources(resourceBase);
         resourcesElements.put(resourceBase, resources);
         
-        Resource resource = new Resource(analyzer.getResourcePath());
-        resources.addResourceElement(analyzer.getResourcePath(), resource);
+        Resource resource = new Resource(analyzer.getResourcePath()[0]);
+        resources.addResourceElement(analyzer.getResourcePath()[0], resource);
+        Resource resourceElement = null;
+        for(int i=1; i<analyzer.getResourcePath().length; i++) {
+        	resourceElement = new Resource(analyzer.getResourcePath()[i]);
+        	resource.addResourceElement(analyzer.getResourcePath()[i], resourceElement);
+        }
+        
+        if(resourceElement == null) {
+        	resourceElement = resource;
+        }
         
         Method method = new Method(methodName, analyzer.getMethodID());
-        resource.addMethodElement(analyzer.getMethodID(), method);
+        resourceElement.addMethodElement(analyzer.getMethodID(), method);
         
         Request request = new Request();
         method.addRequestElement(request);

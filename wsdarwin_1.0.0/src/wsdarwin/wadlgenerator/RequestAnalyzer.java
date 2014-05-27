@@ -175,13 +175,14 @@ public class RequestAnalyzer extends Uri {
 		return queryMap;
 	}
 	
-	public String getResourcePath() {
-		String[] pathTokens = getPathComponentsAfterBase(resourceBase);
+	public String[] getResourcePath() {
+		return getPathComponentsAfterBase(resourceBase);
+		/*String[] pathTokens = getPathComponentsAfterBase(resourceBase);
         String finalPath = "";
         for(int i=0; i<pathTokens.length-1; i++) {
         	finalPath += "/"+pathTokens[i];
         }
-        return finalPath;
+        return finalPath;*/
 	}
 	
 	public String getMethodID() {
