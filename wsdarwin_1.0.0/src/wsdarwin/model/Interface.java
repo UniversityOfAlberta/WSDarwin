@@ -27,9 +27,6 @@ public class Interface implements WSElement {
 		super();
 		this.address = address;
 		this.name = name;
-		if(name.equals("")) {
-			this.name = getResourcePath().substring(1,2).toUpperCase()+getResourcePath().substring(2);
-		}
 		this.operations = new HashMap<String, WSElement>();
 	}
 	
@@ -200,11 +197,11 @@ public class Interface implements WSElement {
 	}
 	
 	public String getResourcePath() {
-		return address.substring(address.lastIndexOf("/"));
+		return address.substring(address.indexOf("/"));
 	}
 	
 	public String getBase() {
-		return address.substring(0, address.lastIndexOf("/")-1);
+		return address.substring(0, address.indexOf("/")-1);
 	}
 
 }

@@ -557,12 +557,20 @@ public class WADLFile implements WADLElement {
 			HashMap<String, Resources> mapped = new HashMap<String, Resources>();
 			HashMap<String, Resources> added = new HashMap<String, Resources>();
 			HashMap<String, Resources> deleted = new HashMap<String, Resources>();
-
+			//mapByValue(file2);
 			mapByID(file2, mapped, added, deleted);
 			mapByStructure(file2, mapped, added, deleted);
 		}
 		return false;
 	}
+	
+	/*public void mapByValue(WADLFile file2) {
+		 MapDelta deltaParam = mapByValueParam(file2);
+		 MapDelta deltaElement = mapByValueResponse(file2);
+		 //removeDeuplicateMapDeltas();
+		 //System.out.println("Map by Value response " + mapDeltas.toString());
+		 iteratemap();
+	 }*/
 	
 	//Grammars do not have id so Map By Structure only for Resources
 	private void mapByStructure(WADLFile file2, HashMap<String, Resources> mapped, HashMap<String, Resources> added, HashMap<String, Resources> deleted) {

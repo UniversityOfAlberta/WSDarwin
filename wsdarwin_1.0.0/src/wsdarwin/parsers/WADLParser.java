@@ -65,8 +65,7 @@ public class WADLParser {
 		for (int i = 0; i < resourcesList.getLength(); i++) {
 			Node resourcesNode = resourcesList.item(i);
 			String base = resourcesNode.getAttributes()
-					.getNamedItem("base").getNodeValue().substring(0,resourcesNode.getAttributes()
-					.getNamedItem("base").getNodeValue().length()-1);
+					.getNamedItem("base").getNodeValue();
 			NodeList resourceList = document.getElementsByTagNameNS("*",
 					"resource");
 			HashMap<String, WSElement> operations = new HashMap<String, WSElement>();
@@ -97,7 +96,7 @@ public class WADLParser {
 				}
 				else if(resourceNode.getNodeName().equals("resource")) {
 					resourceList = resourceNode.getChildNodes();
-					base+="/"+resourceNode.getAttributes().getNamedItem("path").getNodeValue();
+					base+=resourceNode.getAttributes().getNamedItem("path").getNodeValue()+"/";
 					parseResources(serviceInterfaces, resourceNode, base, resourceList, operations);
 				}
 			}

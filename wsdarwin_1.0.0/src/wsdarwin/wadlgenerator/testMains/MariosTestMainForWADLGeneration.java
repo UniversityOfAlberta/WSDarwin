@@ -153,9 +153,9 @@ public class MariosTestMainForWADLGeneration {
 	}
 
 	private static void testComparison() {
-		WADLParser parser1 = new WADLParser(new File(FILENAME_DIR+"firstOne.wadl"));
-		WADLParser parser2 = new WADLParser(new File(FILENAME_DIR+"secondOne.wadl"));
-		Delta delta = parser1.getService().diff(parser2.getService());
+		WADLParser parser1 = new WADLParser(new File(FILENAME_DIR+"WADLResponse004.wadl"));
+		//WADLParser parser2 = new WADLParser(new File(FILENAME_DIR+"WADLResponse003.wadl"));
+		Delta delta = parser1.getService().diff(parser1.getService());
 		delta.printDelta(0);
 	}
 
