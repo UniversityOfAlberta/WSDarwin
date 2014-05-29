@@ -65,7 +65,7 @@ public class Param implements WADLElement {
 	}
 
 	public void setType(String type) {
-		System.out.println("-----------------> SETTINGS PARAM TYPE: " + type);
+		//System.out.println("-----------------> SETTINGS PARAM TYPE: " + type);
 		this.type = type;
 	}
 

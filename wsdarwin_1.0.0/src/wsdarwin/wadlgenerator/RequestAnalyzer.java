@@ -91,12 +91,12 @@ public class RequestAnalyzer extends Uri {
 	public HashMap<String, Param> analyzeParams() {		
 		HashMap<String, Param> paramElements = new HashMap<String, Param>();
 		Param param;
-		System.out.println("in-parameter analysis. length: " + queryParameters.length);
+		//System.out.println("in-parameter analysis. length: " + queryParameters.length);
 		for (int i = 0; i < queryParameters.length; i++) {
 			String type;
 			Object valueObject;
 			
-			System.out.println("query values[i] :" + queryValues[i] );
+			//System.out.println("query values[i] :" + queryValues[i] );
 			
 			if(queryValues[i].equals("")) {
 				valueObject = queryValues[i];
@@ -130,7 +130,7 @@ public class RequestAnalyzer extends Uri {
 				type = "string";
 			}
 			
-			System.out.println("ELEM TYPPE-> > " + type);
+			//System.out.println("ELEM TYPPE-> > " + type);
 			
 			param = new Param(queryParameters[i], type, valueObject, WADLFile.PARAM_STYLE, WADLFile.PARAM_REQUIRED);
 			paramElements.put(queryParameters[i], param);
