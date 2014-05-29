@@ -73,19 +73,20 @@ public class TestMainForWADLGeneration {
 	// private static final String PATH_PREFIX_TWO = "C:/Users/mihai/eclipse_workspace/wsdarwin_1.0.0/WebContent/files/icsm2014/"+VENDOR;
 	// tomcat path
 	private static final String PATH_PREFIX_TWO = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/"+VENDOR;
-	private static final String PATH_PREFIX_FILES = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
+	
 	//private static final String HOST_PATH = "localhost:8080/wsdarwin_1.0.0/";
 	
 	//private static final String PATH_PREFIX_TWO = HOST_PATH + "files/icsm2014/"+VENDOR;
 	private static final String FILENAME_DIR_TWO = PATH_PREFIX_TWO+"/wadl/";
-	private static final String WADL_PATH = PATH_PREFIX_FILES;
+	//private static final String WADL_PATH = PATH_PREFIX_FILES;
 	private static final String RESPONSE_DIR_TWO = PATH_PREFIX_TWO+"/responses/";
 	private static final String UPLOADED_WADLS = PATH_PREFIX_TWO+"/uploadedWADL/";
 
-	
+	private static final String PATH_PREFIX_FILES = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
 	private static final String LOCALHOST_FILES_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
+	//private static final String LOCALHOST_WADL_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
 	//private static final String LOCALHOST_WADL_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/";
-	private static final String LOCALHOST_WADL_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
+	
 	//private static final String LOCALHOST_WADL_PATH = PATH_PREFIX_TWO + "http://localhost:8080/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/";
 	
 	static WADLFile wadl_one;
@@ -112,12 +113,12 @@ public class TestMainForWADLGeneration {
 		ArrayList<String> analyze_WADLurls = gson.fromJson(newUppedFiles, ArrayList.class);
 		ArrayList<String> compare_WADLurls = gson.fromJson(compareWADLfiles, ArrayList.class);
 		ArrayList<String> returnArray = new ArrayList<String>();
-		
+		System.out.println(" -- > session id: " + sessionid);
 		String session_id = getSessionID(sessionid, returnArray);
 		//MergedWADL_A_ + session_id
 		
 		String filenameA = PATH_PREFIX_FILES + "wadlA" + session_id + ".wadl";
-		String localhostFilenameA = LOCALHOST_WADL_PATH + "wadlA" + session_id + ".wadl";
+		String localhostFilenameA = LOCALHOST_FILES_PATH + "wadlA" + session_id + ".wadl";
 		System.out.println("filename A: " + filenameA );
 		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
 		String compare_wadl_merged_path_url = "";
@@ -125,7 +126,7 @@ public class TestMainForWADLGeneration {
 		Delta delta = null;
 		if ( ( (compare_URLs != null) || (compare_WADLurls != null) ) && ( (compare_WADLurls.size() > 0) || (compare_URLs.size() > 0) ) ){
 			String filenameB = PATH_PREFIX_FILES + "wadlB" + session_id + ".wadl";
-			String localhostFilenameB = LOCALHOST_WADL_PATH + "wadlB" + session_id + ".wadl";
+			String localhostFilenameB = LOCALHOST_FILES_PATH + "wadlB" + session_id + ".wadl";
 			compare_wadl_merged_path_url = getWadl(compare_URLs, compare_WADLurls, "compareURLS", session_id, filenameB, localhostFilenameB);
 			System.out.println("");
 			System.out.println("analysis path: " + analysis_wadl_merged_path_url);
@@ -172,11 +173,18 @@ public class TestMainForWADLGeneration {
 	private String getSessionID(String sessionid, ArrayList<String> returnArray) {
 		String session_id = new String("_");	//session id
 		if (sessionid.equals("")){
-			String lettersToRandomize = "qwertyuioplkjhgfdsazxcvbnm";
-			session_id += randomString(lettersToRandomize ,11);
+			// #1 : random session numbers
+			//String lettersToRandomize = "qwertyuioplkjhgfdsazxcvbnm";
+			//session_id += randomString(lettersToRandomize ,11);
+			
+			// #2 : static session 
+			session_id += "static";
 			returnArray.add(session_id);
+			System.out.println("creating new session id: " + session_id);
 		} else {
 			returnArray.add(sessionid);
+			session_id = sessionid;
+			System.out.println("returning same session id: " + session_id);
 		}
 		return session_id;
 	}	
@@ -334,12 +342,12 @@ public class TestMainForWADLGeneration {
 		    mergedWADL.compareToMerge(newWADL);
 		    
 		    // Add the newly generated wadl's path to the list wadl_paths
-		    //wadl_paths.add(LOCALHOST_WADL_PATH+FILENAME_WADL);
+		    //wadl_paths.add(LOCALHOST_FILES_PATH+FILENAME_WADL);
 			
 		}
 	}
 	
-	private static String getWADLMergedFilename(String call_type) {
+	/*private static String getWADLMergedFilename(String call_type) {
 		String mergedFileName = "";
 		if (call_type.equals("analyzeURLS")){
 			mergedFileName = "mergedFileA.wadl";
@@ -347,7 +355,7 @@ public class TestMainForWADLGeneration {
 			mergedFileName = "mergedFileB.wadl";
 		}
 		return mergedFileName;
-	}
+	}*/
 	
 	/**
 	 * @param args
@@ -371,6 +379,26 @@ public class TestMainForWADLGeneration {
 			
 	        //String mergedWADLFileName = getWADLMergedFilename(call_type);
 	        
+			// (#1) If you want to use unique session ids:
+			/*WADLFile mergedWADL;
+			File f = new File(mergedWADLFileName);
+			if(f.exists() && !f.isDirectory()) {
+				System.out.println("A WADL FILE WITH filename " + mergedWADLFileName + " already exists. Reading it ! " );
+				mergedWADL = new WADLFile(mergedWADLFileName);
+				try {
+					System.out.println("<<< reading wadl >>>");
+					mergedWADL.readWADL();
+					System.out.println("<<< finished reading wadl >>>");
+				} catch (SAXException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				System.out.println("CREATING WADL FILE WITH filename " + mergedWADLFileName);
+				mergedWADL = new WADLFile(mergedWADLFileName, null, null);
+			}*/
+			
+			// (#2) No unique session ids ( no caching ) / overwrites the same files every time
 	        // create empty merged WADL file
 			WADLFile mergedWADL = new WADLFile(mergedWADLFileName, null, null);
 			if(DEBUG) System.out.println("** Merged WADLFile: "+mergedWADL.getIdentifier()+" **");
@@ -383,7 +411,6 @@ public class TestMainForWADLGeneration {
 			// merge uploaded wadl file(s) (if any / can only merge one uploaded wadl file right now)
 			if ( (analyze_WADLurls != null) && (analyze_WADLurls.size() > 0)){
 				WADLFile uppedWADL = getAnalyzeWADLfile(analyze_WADLurls);
-				
 		        // Call diff&merge methods from sub-objects
 		        mergedWADL.compareToMerge(uppedWADL);
 		        System.out.println("FILE MERGED !");
@@ -393,9 +420,9 @@ public class TestMainForWADLGeneration {
 			generator.createWADL(mergedWADL);
 			
 			// Add the merged wadl's path to the list wadl_paths
-	        //wadl_paths.add(LOCALHOST_WADL_PATH+VENDOR+"Merged.wadl");
+	        //wadl_paths.add(LOCALHOST_FILES_PATH+VENDOR+"Merged.wadl");
 	        
-	        //String MERGED_WADL_PATH = LOCALHOST_WADL_PATH+VENDOR+mergedWADLFileName;
+	        //String MERGED_WADL_PATH = LOCALHOST_FILES_PATH+VENDOR+mergedWADLFileName;
 	        if (call_type.equals("analyzeURLS")){
 	        	wadl_one = mergedWADL;
 	        	return localhostFilePath;
