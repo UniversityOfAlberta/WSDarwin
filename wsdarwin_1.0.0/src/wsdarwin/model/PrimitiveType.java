@@ -68,6 +68,9 @@ public class PrimitiveType implements IType {
 		return variableName;
 	}
 	
+	public Object getValue() {
+		return value;
+	}
 	
 	public void setVariableName(String variableName) {
 		this.variableName = variableName;

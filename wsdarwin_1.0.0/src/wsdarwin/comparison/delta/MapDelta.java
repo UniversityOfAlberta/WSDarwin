@@ -8,19 +8,19 @@ import org.w3c.dom.Element;
 
 import wsdarwin.model.WSElement;
 import wsdarwin.util.DeltaUtil;
+import wsdarwin.wadlgenerator.model.WADLElement;
 
 
 public class MapDelta extends Delta {
 	
-	private HashSet<WSElement> sources;
-	private HashSet<WSElement> targets;
+	private HashSet<WADLElement> sources;
+	private HashSet<WADLElement> targets;
 	private double mapScore;
 	
 
-	public MapDelta(WSElement source, WSElement target) {
-		super(source, target);
-		this.sources = new HashSet<WSElement>();
-		this.targets = new HashSet<WSElement>();
+	public MapDelta(WADLElement source, WADLElement target) {
+		this.sources = new HashSet<WADLElement>();
+		this.targets = new HashSet<WADLElement>();
 		this.sources.add(source);
 		this.targets.add(target);
 		this.mapScore = 0.0;
@@ -41,11 +41,11 @@ public class MapDelta extends Delta {
 
 
 
-	public HashSet<WSElement> getSources() {
+	public HashSet<WADLElement> getSources() {
 		return sources;
 	}
 	
-	public HashSet<WSElement> getTargets() {
+	public HashSet<WADLElement> getTargets() {
 		return targets;
 	}
 	

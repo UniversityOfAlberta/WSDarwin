@@ -1,5 +1,6 @@
 package wsdarwin.wadlgenerator.model.xsd;
 
+import java.util.HashMap;
 import java.util.TreeMap;
 
 import wsdarwin.wadlgenerator.model.WADLElement;
@@ -14,6 +15,7 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 	private TreeMap<String, Integer> typeFrequencies;
 	private TreeMap<Object, Integer> valueFrequencies;
 	private TreeMap<String, Object> type2valueMap;
+	private HashMap<XSDElement, Double> elementDistanceMap;
 	
 	public XSDElement(String name, XSDIType type, Object value) {
 		this.name = name;
@@ -22,6 +24,7 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 		this.typeFrequencies = new TreeMap<String, Integer>();
 		this.valueFrequencies = new TreeMap<Object, Integer>();
 		this.type2valueMap = new TreeMap<String, Object>();
+		this.elementDistanceMap = new HashMap<XSDElement, Double>();
 		/*this.addType2Value(type, value);
 		this.addTypeFrequency(type, 1);
 		this.addValueFrequency(value, 1);*/
@@ -107,6 +110,14 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 	
 	public void addType2Value(String type, Object value) {
 		this.type2valueMap.put(type, value);
+	}
+	
+	public HashMap<XSDElement, Double> getElementDistanceMap() {
+		return elementDistanceMap;
+	}
+
+	public void addElementDistanceMap(XSDElement element, Double diff) {
+		this.elementDistanceMap.put(element, diff);
 	}
 	
 	public String toString() {

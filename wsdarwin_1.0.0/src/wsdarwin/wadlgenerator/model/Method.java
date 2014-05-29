@@ -14,6 +14,7 @@ public class Method implements WADLElement {
 	private HashMap<Integer, Response> responseElements;
 	private HashMap<Request, HashSet<Param>> changedRequest;
 	private HashMap<Response, HashSet<Representation>> changedResponse;
+	private double score;
 
 	public Method(String name, String id) {
 		this.name = name;
@@ -54,6 +55,14 @@ public class Method implements WADLElement {
 
 	public void addResponseElement(int status, Response responseElement) {
 		this.responseElements.put(status, responseElement);
+	}
+	
+	public double getScore() {
+		return score;
+	}
+
+	public void setScore(double score) {
+		this.score = score;
 	}
 	
 	@Override

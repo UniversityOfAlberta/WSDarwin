@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import wsdarwin.model.ComplexType;
+import wsdarwin.model.IType;
+import wsdarwin.model.WSElement;
 import wsdarwin.wadlgenerator.model.WADLElement;
 
 public class XSDComplexType implements Comparable<XSDComplexType>, XSDIType{

@@ -11,6 +11,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -23,8 +25,10 @@ import org.xml.sax.SAXException;
 import wsdarwin.comparison.delta.*;
 import wsdarwin.model.*;
 import wsdarwin.util.DeltaUtil;
+import wsdarwin.util.LevenshteinDistance;
 import wsdarwin.util.XMLGenerator;
 import wsdarwin.wadlgenerator.RequestAnalyzer;
+import wsdarwin.wadlgenerator.model.xsd.XSDElement;
 import wsdarwin.wadlgenerator.model.xsd.XSDFile;
 
 public class WADLFile implements WADLElement {
@@ -35,6 +39,7 @@ public class WADLFile implements WADLElement {
 
 	private Grammars grammarsElements;
 	private HashMap<String, Resources> resourcesElements;
+	private HashSet<MapDelta> mapDeltas;
 
 	// still hard-coded see Annoki ToDo-List
 	/*public static final String 	RESOURCES_BASE = "http://maps.googleapis.com/maps/";
@@ -58,6 +63,7 @@ public class WADLFile implements WADLElement {
 		this.response = response;
 		this.grammarsElements = new Grammars();			
 		this.resourcesElements = new HashMap<String, Resources>();
+		this.mapDeltas = new HashSet<MapDelta>();
 	}
 
 	public WADLFile(String filename) {
@@ -65,6 +71,7 @@ public class WADLFile implements WADLElement {
 		this.wadlFilename = filename;
 		this.grammarsElements = new Grammars();			
 		this.resourcesElements = new HashMap<String, Resources>();
+		this.mapDeltas = new HashSet<MapDelta>();
 	}
 
 	public String getIdentifier() {
@@ -557,20 +564,458 @@ public class WADLFile implements WADLElement {
 			HashMap<String, Resources> mapped = new HashMap<String, Resources>();
 			HashMap<String, Resources> added = new HashMap<String, Resources>();
 			HashMap<String, Resources> deleted = new HashMap<String, Resources>();
-			//mapByValue(file2);
+			mapByValue(file2);
 			mapByID(file2, mapped, added, deleted);
 			mapByStructure(file2, mapped, added, deleted);
 		}
 		return false;
 	}
 	
-	/*public void mapByValue(WADLFile file2) {
+	public void mapByValue(WADLFile file2) {
 		 MapDelta deltaParam = mapByValueParam(file2);
 		 MapDelta deltaElement = mapByValueResponse(file2);
 		 //removeDeuplicateMapDeltas();
 		 //System.out.println("Map by Value response " + mapDeltas.toString());
 		 iteratemap();
-	 }*/
+	 }
+	
+	public MapDelta mapByValueParam(WADLFile file2){
+		 MapDelta delta = null;
+		 for (Resources resources : this.getResourcesElements().values()) {
+			 ArrayList<Delta> resourceDeltas = new ArrayList<Delta>();
+			 for (Resource resource : resources.getResourceElements().values()) {
+				 ArrayList<Delta> methodDeltas = new ArrayList<Delta>();
+				 for (Method method : resource.getMethodElements().values()) {
+					 ArrayList<Delta> paramDeltas = new ArrayList<Delta>();
+					 for(Param param : method.getRequestElement().getParamElements().values()){
+
+						 for(Resources resources2 : file2.getResourcesElements().values()){
+							 for(Resource resource2 : resources2.getResourceElements().values()){
+								 for(Method method2: resource2.getMethodElements().values()){
+									 int numOfParams1 = method.getRequestElement().getParamElements().size();
+									 int numOfParams2 = method2.getRequestElement().getParamElements().size();
+									 double scoreMax=5*numOfParams1*numOfParams2; 
+
+									 double paramScore=0;
+									 for(Param param2 : method2.getRequestElement().getParamElements().values()){
+										 param.map(param2);
+										 //paramScore = paramScore + param.getScore();
+
+										 //compare similar double values
+										 /*if(param.getValue() instanceof Double && param2.getValue() instanceof Double){
+											Double value1 = Double.parseDouble((String) param.getValue());
+											Double value2 = Double.parseDouble((String) param.getValue());
+											if(Math.abs(value1-value2)<0.001){
+												MapDelta paramDelta = new MapDelta(param, param2);
+												mapDeltas.add(paramDelta);
+												paramDeltas.add(paramDelta);
+											}
+										}
+
+										//compare by distance example: Edmonton+AB and Aedmonton%20%AB should be the same
+										if(param.getValue() instanceof String && param2.getValue() instanceof String){
+											double distance = LevenshteinDistance.getDistance((String)param.getValue(), (String)param2.getValue());
+											System.out.println("DISTANCE: " + distance);
+										}
+
+										if(param.getValue().equals(param2.getValue())){
+											//System.out.println("equal: " + param.getValue() + " AND " + param2.getValue());
+											MapDelta paramDelta = new MapDelta(param, param2);
+
+
+											mapDeltas.add(paramDelta);
+											paramDeltas.add(paramDelta);
+										} else {
+											System.out.println("not equal: "
+													+ param.getValue()
+													+ " AND "
+													+ param2.getValue());
+
+										}*/
+									 }
+
+									 //compare score
+									 double methodScore = ((scoreMax - paramScore)/scoreMax)*100;
+									 method.setScore(methodScore);
+									 //System.out.println("Mehtod Score = " + method.getScore() + "  " + method.getIdentifier() +  "   " + method2.getIdentifier());
+
+									 if (paramDeltas.size() != 0) {
+										 MapDelta methodDelta = new MapDelta(
+												 method, method2);
+										 methodDelta.addAllDeltas(paramDeltas);
+										 methodDeltas.add(methodDelta);
+										 mapDeltas.add(methodDelta);
+									 }
+								 }
+								 if (methodDeltas.size() != 0) {
+									 MapDelta resourceDelta = new MapDelta(
+											 resource, resource2);
+									 resourceDelta.addAllDeltas(methodDeltas);
+									 resourceDeltas.add(resourceDelta);
+									 mapDeltas.add(resourceDelta);
+								 }
+
+
+
+							 }
+							 if (resourceDeltas.size() != 0) {
+								 delta = new MapDelta(resources, resources2);
+								 delta.addAllDeltas(resourceDeltas);
+								 mapDeltas.add(delta);
+							 }
+						 }
+						 //System.out.println("NEW HASHMAP VALUES");
+						 HashMap<Param, Double> distance = param.getParamDistanceMap();
+						 double totalScore=0;
+						 for(Param p : distance.keySet()){
+							 //System.out.println("Param: " + param.getIdentifier() + "->" + p.getIdentifier() + " : " + distance.get(p));
+							 totalScore+=distance.get(p);
+						 }
+						// System.out.println("Total score = " + totalScore);
+
+					 }
+				 }
+			 }
+		 }
+
+		 if (delta != null) {
+			 //System.out.println("Map by Value " + delta.printDelta(0));
+		 }
+		 return delta;
+	 }
+
+
+	 public MapDelta mapByValueResponse(WADLFile file2){
+		 //System.out.println("MAPPING BY RESPONSEEEEEE");
+		 MapDelta delta = null;
+		 for(Resources resources : this.getResourcesElements().values()){
+			 ArrayList<Delta> resourceDeltas = new ArrayList<Delta>();
+			 for(Resource resource : resources.getResourceElements().values()){
+				 ArrayList<Delta> methodDeltas = new ArrayList<Delta>();
+				 for(Method method: resource.getMethodElements().values()){
+					 ArrayList<Delta> elementDeltas = new ArrayList<Delta>();
+					 for(Response response : method.getResponseElements().values()){
+						 for(Representation represent : response.getRepresentationElements().values()){
+							 HashMap<XSDElement, Object> map = new HashMap<XSDElement, Object>();
+							 getXSDElements(represent.getElement(), map);
+							 for(XSDElement xsd : map.keySet()){
+								 //for map elements
+								 for(Resources resources2 : file2.getResourcesElements().values()){
+									 for(Resource resource2 : resources2.getResourceElements().values()){
+										 for(Method method2: resource2.getMethodElements().values()){
+											 for(Response response2 : method2.getResponseElements().values()){
+												 for(Representation represent2 : response2.getRepresentationElements().values()){
+													 XSDElement element2 = null;
+													 HashMap<XSDElement, Object> map2 = new HashMap<XSDElement, Object>();
+													 getXSDElements(represent2.getElement(),map2);
+													 if (map.get(xsd) instanceof List) {
+														 List<Object> valueList = (List<Object>)map.get(xsd);
+														 for (Object value : valueList) {
+															 element2 = getXSDElementByValue(map2, value, xsd);
+														 }
+													 }
+													 else {
+														 element2 = getXSDElementByValue(map2, map.get(xsd), xsd);
+													 }
+													 if(element2 != null) {
+														 delta = new MapDelta(xsd, element2);
+														 elementDeltas.add(delta);
+														 mapDeltas.add(delta);
+													 }
+												 }
+												 if(elementDeltas.size()!=0){
+													 MapDelta methodDelta = new MapDelta(method, method2);
+													 methodDelta.addAllDeltas(elementDeltas);
+													 methodDeltas.add(methodDelta);
+													 mapDeltas.add(methodDelta);
+												 }
+											 }
+											 if(methodDeltas.size()!=0){
+												 MapDelta resourceDelta = new MapDelta(resource, resource2);
+												 resourceDelta.addAllDeltas(methodDeltas);
+												 resourceDeltas.add(resourceDelta);
+												 mapDeltas.add(resourceDelta);
+											 }
+										 }
+										 if(resourceDeltas.size()!=0){
+											 delta = new MapDelta(resources, resources2);
+											 delta.addAllDeltas(resourceDeltas);
+											 mapDeltas.add(delta);
+										 }
+
+									 }
+								 }
+								 HashMap<XSDElement, Double> distance = xsd.getElementDistanceMap();
+								 double totalScore = 0.0; 
+								 for(XSDElement xsdelement : distance.keySet()){
+									 totalScore+=distance.get(xsdelement);
+								 }
+								 //System.out.println("TOTAL SCORE FOR RESPONSEEEEEEEEEEEEE " + totalScore);
+							 }
+						 }
+					 }
+
+				 }
+			 }
+		 }
+		 if (delta != null) {
+			 System.out.println("Map by Value response " + mapDeltas.toString());
+		 }
+
+		 return delta;
+
+	 }
+	 
+	 private void iteratemap() {
+		 boolean i = true;
+		 for(MapDelta mapDelta : mapDeltas){
+			 //if(i){
+			 //System.out.println(mapDelta.toString());
+			 i = false;
+			 //}
+		 }
+	 }
+	 
+	 private void getXSDElements(ComplexType complexType, HashMap<XSDElement, Object> map) {
+		 //System.out.println();
+		 for(WSElement element : complexType.getChildren().values()){
+			 if(element instanceof PrimitiveType){
+				 PrimitiveType type = (PrimitiveType)element;
+				 XSDElement xsdElement = new XSDElement(type.getVariableName(), wsdarwin.wadlgenerator.model.xsd.XSDPrimitiveType.valueOf(type.getName()));
+				 map.put(xsdElement, type.getValue());
+			 }else{
+				 getXSDElements ((ComplexType) element, map);
+			 }
+		 }
+	 }
+
+	 private XSDElement getXSDElementByValue(HashMap<XSDElement, Object> map, Object value, XSDElement xsd) {
+		 for(XSDElement element : map.keySet()){
+			 //double score=0;
+			 if(element.getType() instanceof PrimitiveType){
+				 if(element.getValue() instanceof Integer && value instanceof Integer){
+					 int value1 = (int) value;
+					 int value2 = (int) element.getValue();
+					 boolean inclusion = false;
+					 double similarity;
+					 double diffInclusion;
+					 double diff = (double)(Math.max(value1, value2) - Math.min(value1, value2))/Math.max(value1, value2);
+					 similarity = (1-diff)*100;
+					 //element.addElementDistanceMap(element, diff);
+					 String values1 = Integer.toString(value1);
+					 String values2 = Integer.toString(value2);
+					 if(values1.contains(values2)||values2.contains(values1)){
+						 inclusion = true;
+					 }
+					 diffInclusion = similarity;
+					 if(inclusion){
+						 diffInclusion = (similarity + 50)/1.5;
+					 }
+					 xsd.addElementDistanceMap(element, similarity);
+					 //System.out.println(element.getName() + "\t" +element.getValue() + "\t" + xsd.getName() + "\t" + value + "\t" + similarity + "\t" + inclusion);
+				 }
+				 else if(element.getValue() instanceof Double && value instanceof Double){
+					 double value1 = (Double) value;
+					 double value2 = (Double) element.getValue();
+					 double diff = (Math.max(value1, value2) - Math.min(value1, value2))/Math.max(value1, value2);
+					 double similarity = (1-diff)*100;
+					 String values1 = Double.toString(value1);
+					 String values2 = Double.toString(value2);
+					 boolean inclusion = false;
+					 if(values1.contains(values2)||values2.contains(values1)){
+						 inclusion = true;
+					 }
+					 xsd.addElementDistanceMap(element, similarity);
+					 //System.out.println(element.getName() + "\t" +element.getValue() + "\t" + xsd.getName() + "\t" + value + "\t" + similarity +"\t"+inclusion);
+				 }
+
+				 else if(element.getValue() instanceof Set && value instanceof Double ){
+					 Set setelements = (Set)element.getValue();
+					 for(Object setelement : setelements){
+						 if(setelement instanceof Double){
+							 double value1 = (double) value;
+							 double value2 = ((Double) setelement).doubleValue();
+							 double diff = (Math.max(value1, value2) - Math.min(value1, value2))/Math.max(value1, value2);
+							 double similarity = (1-diff)*100;
+							 boolean inclusion = false;
+							 String values1 = Double.toString(value1);
+							 String values2 = Double.toString(value2);
+							 if(values1.contains(values2)||values2.contains(values1)){
+								 inclusion = true;
+							 }
+							 xsd.addElementDistanceMap(element, similarity);
+							 //System.out.println(element.getName() + "\t" +element.getValue() + "\t" + xsd.getName() + "\t" + value + "\t" + similarity + "\t" + inclusion);
+						 }
+						 else if (setelement instanceof Integer){
+							 double value1 = (double) value;
+							 double value2 = ((Integer) setelement).doubleValue();
+							 double diff = (Math.max(value1, value2) - Math.min(value1, value2))/Math.max(value1, value2);
+							 double similarity = (1-diff)*100;							 
+							 boolean inclusion = false;
+							 String values1 = Double.toString(value1);
+							 String values2 = Double.toString(value2);
+							 if(values1.contains(values2)||values2.contains(values1)){
+								 inclusion = true;
+							 }
+							 xsd.addElementDistanceMap(element, similarity);
+							 //System.out.println(element.getName() + "\t" +element.getValue() + "\t" + xsd.getName() + "\t" + value + "\t" + similarity + "\t" +inclusion);
+						 }
+
+					 }
+
+
+				 }
+				 //set string and integer
+				 else if(element.getValue() instanceof Set && value instanceof Integer ){
+					 Set setelements = (Set)element.getValue();
+					 for(Object setelement : setelements){
+						 if (setelement instanceof String){
+							 int value1 = (int) value;
+							 long value1long = new Long(value1);
+							 String value2 = (String) setelement;//2011-08-04
+					         value2 = value2.replaceAll("\\D+","");
+					         double similarity = 0.0;
+					         boolean inclusion = false;
+					         if(value2.length()>0){
+					        	 long value2long = Long.parseLong(value2);
+					        	 //compute distance and similarity
+					        	 double diff = (Math.max(value1long, value2long) - Math.min(value1long, value2long))/Math.max(value1long, value2long);
+								 similarity = (1-diff)*100;
+								 //inclusion
+								 String value1str = Long.toString(value1long);
+								 if(value1str.contains(value2) || value2.contains(value1str)){
+									 inclusion = true;
+								 }
+					         }
+					         xsd.addElementDistanceMap(element, similarity);
+							 //System.out.println(element.getName() + "\t" +element.getValue() + "\t" + xsd.getName() + "\t" + value + "\t" + similarity + "\t" + inclusion);
+						 }
+					 }
+
+				 }
+				 else if (element.getValue() instanceof Integer && value instanceof Set){
+					 Set setelements = (Set)value;
+					 for(Object setelement : setelements){
+						 if(setelement instanceof String){
+							 int value1 = (int) element.getValue();//20110804
+							 long value1long = new Long(value1);
+							 String value2 = (String) setelement;//2011-08-04
+					         value2 = value2.replaceAll("\\D+","");
+							 double similarity = 0.0;
+					         boolean inclusion = false;
+					         if(value2.length()>0){
+					        	 long value2long = Long.parseLong(value2);
+					        	 //compute distance and similarity
+					        	 double diff = (double)(Math.max(value1long, value2long) - Math.min(value1long, value2long))/(double)Math.max(value1long, value2long);
+								 similarity = (1-diff)*100;
+								 //inclusion
+								 String value1str = Long.toString(value1long);
+								 if(value1str.contains(value2) || value2.contains(value1str)){
+									 inclusion = true;
+								 }
+					         }
+					         xsd.addElementDistanceMap(element, similarity);
+							// System.out.println(element.getName() + "\t" +element.getValue() + "\t" + xsd.getName() + "\t" + value + "\t" + similarity + "\t" + inclusion);
+						
+							}
+					 }
+					 
+				 }
+				 else if (element.getValue() instanceof Set && value instanceof String){
+					 Set setelements = (Set)element.getValue();
+					 for(Object setelement : setelements){
+						 if(setelement instanceof String){
+							 String value1 = (String) value;
+							 String value2 = (String) setelement;
+							 boolean inclusion = false;
+							 double dist = LevenshteinDistance.getDistance(value1, value2);
+							 xsd.addElementDistanceMap(element, dist);
+							 if(value1.contains(value2) || value2.contains(value1)){
+								 inclusion = true;
+							 }
+							 //element.addElementDistanceMap(xsd, similarity);
+							 //System.out.println(element.getName() + "\t" +element.getValue() + "\t" + xsd.getName() + "\t" + value + "\t" + dist + "\t" + inclusion);
+						 }
+					 }
+				 }
+				 else if(element.getValue() instanceof String && value instanceof String){
+					 String value1 = (String) value;
+					 String value2 = (String) element.getValue();
+					 boolean inclusion = false;
+					 double dist = LevenshteinDistance.getDistance(value1, value2);
+					 xsd.addElementDistanceMap(element, dist);
+					 if(value1.contains(value2) || value2.contains(value1)){
+						 inclusion = true;
+					 }
+					 //element.addElementDistanceMap(xsd, similarity)
+					 //System.out.println(element.getName() + "\t" +element.getValue() + "\t" + xsd.getName() + "\t" + value + "\t" + dist + "\t" + inclusion);
+				 }
+				 else if(element.getValue() instanceof String && value instanceof Integer){
+					 String value1;
+					 double value2int = (int) value*1.0;
+					 long value1int;
+					 String str = (String) element.getValue();
+			         value1 = str.replaceAll("\\D+","");
+			         double similarity = 0.0;
+			         boolean inclusion = false;
+			         if(value1.length()>0){
+			        	 value1int = Long.parseLong(value1);
+			        	 //compute distance and similarity
+			        	 double diff = (Math.max(value1int, value2int) - Math.min(value1int, value2int))/Math.max(value1int, value2int);
+						 similarity = (1-diff)*100;
+						 //inclusion
+						 String value2 = Integer.toString((int) value);
+						 if(value1.contains(value2) || value2.contains(value1)){
+							 inclusion = true;
+						 }
+			         }
+			         xsd.addElementDistanceMap(element, similarity);
+					 //System.out.println(element.getName() + "\t" +element.getValue() + "\t" + xsd.getName() + "\t" + value + "\t" + similarity + "\t" + inclusion);
+				 }
+				 else if(element.getValue() instanceof Integer && value instanceof String){
+					 String value2 = (String) value;
+					 double value1int = (int)element.getValue()*1.0;
+					 long value2int;
+					 String str = (String) value2;
+			         value2 = str.replaceAll("\\D+","");
+			         double similarity=0.0;
+			         boolean inclusion=false;
+			         if(value2.length()>0){
+			        	 value2int = Long.parseLong(value2);
+			        	 //compute distance and similarity
+			        	 double diff = (Math.max(value1int, value2int) - Math.min(value1int, value2int))/Math.max(value1int, value2int);
+						 similarity = (1-diff)*100;
+						 //inclusion
+						 String value1 = Double.toString(value1int);
+						 if(value1.contains(value2) || value2.contains(value1)){
+							 inclusion = true;
+						 }
+			         }
+			         xsd.addElementDistanceMap(element, similarity);
+					 //System.out.println(element.getName() + "\t" +element.getValue() + "\t" + xsd.getName() + "\t" + value + "\t" + similarity + "\t" + inclusion);
+
+				 }
+				 
+
+				 /*if(element.getValue().equals(value)){ 
+					 return element;
+				 }*/
+			 }
+		 }
+		 double max=0;
+		 XSDElement maxEl=null;
+		 for(XSDElement el : xsd.getElementDistanceMap().keySet()) {
+			 if(xsd.getElementDistanceMap().get(el) > max) {
+				 max = xsd.getElementDistanceMap().get(el);
+				 maxEl = el;
+			 }
+		 }
+		 if (maxEl != null) {
+			System.out.println(maxEl.getName() + "\t" + maxEl.getValue() + "\t"
+					+ xsd.getName() + "\t" + value + "\t" + max);
+		}
+		 return maxEl;
+	 }
 	
 	//Grammars do not have id so Map By Structure only for Resources
 	private void mapByStructure(WADLFile file2, HashMap<String, Resources> mapped, HashMap<String, Resources> added, HashMap<String, Resources> deleted) {

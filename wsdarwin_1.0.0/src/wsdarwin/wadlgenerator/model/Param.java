@@ -1,13 +1,15 @@
 package wsdarwin.wadlgenerator.model;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.apache.commons.lang3.StringUtils;
+
 import wsdarwin.comparison.delta.*;
 import wsdarwin.model.WSElement;
 import wsdarwin.util.DeltaUtil;
+import wsdarwin.util.LevenshteinDistance;
 
 public class Param implements WADLElement {
 
@@ -18,6 +20,8 @@ public class Param implements WADLElement {
 	private HashMap<String, Integer> typeFrequencies;
 	private HashMap<Object, Integer> valueFrequencies;	// contains all of the individual values String:DRIVING, ...
 	private HashMap<String, Object>  type2valueMap;
+	
+	private HashMap<Param, Double> paramDistanceMap;
 
 	private String style;
 	private boolean required;			// default should be 'false', if nothing is specified 
@@ -39,6 +43,9 @@ public class Param implements WADLElement {
 		this.addTypeFrequency(type, 1);
 		this.addValueFrequency(value, 1);
 		this.addType2Value(type, value);
+		
+		this.paramDistanceMap = new HashMap<Param, Double>();
+		
 		this.options = new HashSet<Option>();
 	}
 	
@@ -136,6 +143,15 @@ public class Param implements WADLElement {
 	}
 	
 	
+	
+	public HashMap<Param, Double> getParamDistanceMap() {
+		return paramDistanceMap;
+	}
+
+	public void setParamDistanceMap(HashMap<Param, Double> paramDistanceMap) {
+		this.paramDistanceMap = paramDistanceMap;
+	}
+
 	/* Gets called by diff().
 	 * Check during diff&merge process if the values in valueFrequencies are 
 	 * enumerations. >> will be the <param><options>... part in the final WADL.
@@ -269,5 +285,37 @@ public class Param implements WADLElement {
 	public boolean mapElement(WADLElement element) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	public void map(Param param2) {
+		boolean map = false;
+		if(this.value instanceof String && param2.getValue() instanceof String){
+			String value1 = (String) this.value;
+			String value2 = (String) param2.getValue();
+			String[] dilimiterArray = new String[] {"\\+", ",", "||", "\\t","\\s", "%20","%", "\\."};
+			for(String dilimiter : dilimiterArray){
+				String [] value1Array = value1.split(dilimiter);
+				value1 = StringUtils.join (value1Array);
+				String [] value2Array = value2.split(dilimiter);
+				value2 = StringUtils.join (value2Array);
+			}
+			//compute the distance of these two parameter values;
+			double dist = LevenshteinDistance.getDistance(value1, value2);			
+			this.paramDistanceMap.put(param2, dist);
+			
+			
+		}else if(this.value instanceof Boolean && param2.getValue() instanceof Boolean){
+			this.paramDistanceMap.put(param2, 100.0);
+
+		}else if(this.value instanceof Integer && param2.getValue() instanceof Integer){
+			
+			int value1 = (int) this.value;
+			int value2 = (int) param2.getValue();
+			
+			double diff = Math.abs(value1 - value2);
+			double distance = (1-diff)*100;
+			this.paramDistanceMap.put(param2, distance);
+
+		}
 	}
 }

@@ -21,6 +21,10 @@ public abstract class Delta {
 		this.deltas = new ArrayList<Delta>();
 	}
 	
+	protected Delta() {
+		this.deltas = new ArrayList<Delta>();
+	}
+	
 	public void addDelta(Delta delta) {
 		this.deltas.add(delta);
 	}
