@@ -38,21 +38,33 @@ public class Operation implements WSElement {
 		this.name = name;
 		this.method = method;
 		this.pattern = pattern;
-		this.request = request;
-		if (requestMediaType.substring(requestMediaType
-				.lastIndexOf("/")).contains("xml")) {
-			this.requestMediaType = "Xml";
+		if (request != null) {
+			this.request = request;
 		}
 		else {
-			this.requestMediaType = "Json";
+			this.request = PrimitiveType.NULL_TYPE;
 		}
-		this.response = response;
-		if (responseMediaType
-				.substring(responseMediaType.lastIndexOf("/")).contains("xml")) {
-			this.responseMediaType = "Xml";
+		if (!requestMediaType.equals("")) {
+			if (requestMediaType.substring(requestMediaType.lastIndexOf("/"))
+					.contains("xml")) {
+				this.requestMediaType = "Xml";
+			} else {
+				this.requestMediaType = "Json";
+			}
+		}
+		if (response != null) {
+			this.response = response;
 		}
 		else {
-			this.responseMediaType = "Json";
+			this.response = PrimitiveType.NULL_TYPE;
+		}
+		if (!responseMediaType.equals("")) {
+			if (responseMediaType.substring(responseMediaType.lastIndexOf("/"))
+					.contains("xml")) {
+				this.responseMediaType = "Xml";
+			} else {
+				this.responseMediaType = "Json";
+			}
 		}
 	}
 

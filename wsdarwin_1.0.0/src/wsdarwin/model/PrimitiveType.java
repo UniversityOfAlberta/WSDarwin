@@ -18,6 +18,8 @@ public class PrimitiveType implements IType {
 	BOOLEAN,
 	URL;*/
 	
+	public static final PrimitiveType NULL_TYPE = new PrimitiveType("NULL_TYPE", "null");
+	
 	private String name;
 	private String variableName;
 	private Object value;

@@ -82,6 +82,10 @@ public class WADLParser {
 			Node resourceNode = resourceList.item(j);
 			if (resourceNode.getParentNode()
 					.equals(resourcesNode)) {
+				if(!base.endsWith("/")) {
+					base+="/";
+				}
+				base+=resourceNode.getAttributes().getNamedItem("path").getNodeValue();
 				if (containsMethods(resourceNode)) {
 					String id = "";
 					if (resourceNode.getAttributes().getNamedItem("id") != null) {
@@ -91,12 +95,14 @@ public class WADLParser {
 					Interface serviceInterface = new Interface(id, base);
 					operations.putAll(getInterfaceOperations(resourceNode));
 					serviceInterface.getChildren().putAll(operations);
-					serviceInterfaces.put(serviceInterface.getAddress(),
+					serviceInterfaces.put(serviceInterface.getName(),
 							serviceInterface);
+					base = serviceInterface.getBase();
+					operations = new HashMap<String, WSElement>();
 				}
 				else if(resourceNode.getNodeName().equals("resource")) {
 					resourceList = resourceNode.getChildNodes();
-					base+=resourceNode.getAttributes().getNamedItem("path").getNodeValue()+"/";
+					
 					parseResources(serviceInterfaces, resourceNode, base, resourceList, operations);
 				}
 			}
@@ -106,7 +112,7 @@ public class WADLParser {
 	private boolean containsMethods(Node item) {
 		NodeList list = item.getChildNodes();
 		for(int i=0; i<list.getLength(); i++) {
-			if(list.item(i).getNodeName().equals("method")) {
+			if(equalsIgnoreNamespace(list.item(i).getNodeName(),"method")) {
 				return true;
 			}
 		}
@@ -122,8 +128,8 @@ public class WADLParser {
 						.getAttributes().getNamedItem("id").getNodeValue(),
 						methodList.item(i).getAttributes().getNamedItem("name")
 								.getNodeValue(), "",
-						getInputTypeOfOperation(methodList.item(i)),
-						getOutputTypeOfOperation(methodList.item(i)));
+						getInputTypeOfOperation(methodList.item(i)), getInputMediaTypeOfOperation(methodList.item(i)),
+						getOutputTypeOfOperation(methodList.item(i)), getOutputMediaTypeOfOperation(methodList.item(i)));
 				operations.put(operation.getName(), operation);
 			}
 		}
@@ -133,7 +139,7 @@ public class WADLParser {
 	private IType getOutputTypeOfOperation(Node method) {
 		Node response = getMethodChild(method, "response");
 		IType iType = null;
-		if (true) {
+		if (!hasParam(response)) {
 			// TODO if request has parameters, else request has representation
 			NodeList responseChildren = response.getChildNodes();
 			for (int i = 0; i < responseChildren.getLength(); i++) {
@@ -161,7 +167,92 @@ public class WADLParser {
 				}
 			}
 		}
+		else {
+			iType = new ComplexType(method.getAttributes().getNamedItem("id")
+					.getNodeValue()
+					+ "ResponseType", method.getAttributes().getNamedItem("id")
+					.getNodeValue()
+					+ "Response");
+			NodeList requestChildren = response.getChildNodes();
+			for (int i = 0; i < requestChildren.getLength(); i++) {
+				// TODO check if param has options
+				if (equalsIgnoreNamespace(
+						requestChildren.item(i).getNodeName(), "param")) {
+					String elementName = requestChildren.item(i)
+							.getAttributes().getNamedItem("name")
+							.getNodeValue();
+					String elementType = requestChildren.item(i)
+							.getAttributes().getNamedItem("type")
+							.getNodeValue();
+					Node element = getElementNodeFromOperationElement(elementType);
+					Node type;
+					if (element != null && !element.hasChildNodes()) {
+						type = getTypeFromElement(elementType);
+					} else {
+						type = getTypeFromElement(elementName);
+					}
+					IType nestedType;
+					if (type != null) {
+						nestedType = getIType(type, elementName);
+					} else {
+						nestedType = getITypeFromElement(elementType, elementName);
+					}
+					iType.addElement(requestChildren.item(i).getAttributes()
+							.getNamedItem("name").getNodeValue(), nestedType);
+				}
+			}
+		}
 		return iType;
+	}
+
+	private boolean hasParam(Node response) {
+		NodeList responseChildren = response.getChildNodes();
+		for (int i = 0; i < responseChildren.getLength(); i++) {
+			if (equalsIgnoreNamespace(responseChildren.item(i)
+					.getNodeName(), "param")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private String getOutputMediaTypeOfOperation(Node method) {
+		Node response = getMethodChild(method, "response");
+		if (true) {
+			// TODO if request has parameters, else request has representation
+			NodeList responseChildren = response.getChildNodes();
+			for (int i = 0; i < responseChildren.getLength(); i++) {
+				if (equalsIgnoreNamespace(responseChildren.item(i)
+						.getNodeName(), "representation")) {
+					Node representation = responseChildren.item(i);
+					return representation.getAttributes().getNamedItem("mediaType").getNodeValue();
+				}
+			}
+		}
+		return "";
+	}
+	
+	private String getInputMediaTypeOfOperation(Node method) {
+		Node request = getMethodChild(method, "request");
+		boolean hasParam = false;
+		NodeList requestChildren = request.getChildNodes();
+		for (int i = 0; i < requestChildren.getLength(); i++) {
+			if (equalsIgnoreNamespace(
+					requestChildren.item(i).getNodeName(), "param")) {
+				hasParam = true;
+			}
+		}
+		if (!hasParam) {
+			// TODO if request has parameters, else request has representation
+			for (int i = 0; i < requestChildren.getLength(); i++) {
+				if (equalsIgnoreNamespace(requestChildren.item(i)
+						.getNodeName(), "representation")) {
+					Node representation = requestChildren.item(i);
+					return representation.getAttributes().getNamedItem("mediaType").getNodeValue();
+				}
+			}
+		}
+		return "";
 	}
 
 	private Node getElementFromRepresentation(String message) {
@@ -170,7 +261,8 @@ public class WADLParser {
 			if (equalsIgnoreNamespace(elements.item(i).getParentNode()
 					.getNodeName(), "schema")) {
 				if (equalsIgnoreNamespace(elements.item(i).getAttributes()
-						.getNamedItem("type").getNodeValue(), message)) {
+						.getNamedItem("name").getNodeValue(), message) || equalsIgnoreNamespace(elements.item(i).getAttributes()
+								.getNamedItem("type").getNodeValue(), message)) {
 					return elements.item(i);
 				}
 			}
@@ -189,7 +281,7 @@ public class WADLParser {
 	private IType getInputTypeOfOperation(Node method) {
 		Node request = getMethodChild(method, "request");
 		IType iType = null;
-		if (true) {
+		if (hasParam(request)) {
 			// TODO if request has parameters, else request has representation
 			iType = new ComplexType(method.getAttributes().getNamedItem("id")
 					.getNodeValue()
@@ -222,6 +314,33 @@ public class WADLParser {
 					}
 					iType.addElement(requestChildren.item(i).getAttributes()
 							.getNamedItem("name").getNodeValue(), nestedType);
+				}
+			}
+		}
+		else {
+			NodeList requestChildren = request.getChildNodes();
+			for (int i = 0; i < requestChildren.getLength(); i++) {
+				if (equalsIgnoreNamespace(requestChildren.item(i)
+						.getNodeName(), "representation")) {
+					Node representation = requestChildren.item(i);
+					String representationElementName = representation
+							.getAttributes().getNamedItem("element")
+							.getNodeValue();
+					Node element = getElementFromRepresentation(representationElementName);
+					Node type = null;
+					String elementName = "";
+					if (element != null) {
+						String elementType = getElementType(element);
+						elementName = getElementName(element);
+						type = getTypeFromElement(elementType);
+					} else {
+						// type = getTypeFromElement(messageElement);
+					}
+					if (type != null) {
+						iType = getIType(type, elementName);
+					} else {
+						iType = buildITypeFromElement(element, elementName);
+					}
 				}
 			}
 		}

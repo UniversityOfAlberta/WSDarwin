@@ -27,13 +27,16 @@ public class Interface implements WSElement {
 		super();
 		this.address = address;
 		this.name = name;
+		if(name.equals("")) {
+			this.name = address.substring(address.lastIndexOf("/")+1).substring(0,1).toUpperCase()+address.substring(address.lastIndexOf("/")).substring(2);
+		}
 		this.operations = new HashMap<String, WSElement>();
 	}
 	
 	public String getName() {
 		System.out.println(" === getName called: name: " + name + ", address: " + address + "  ===");
 		//return name;
-		return address;	// for WADL
+		return name;	// for WADL
 	}
 
 	public void setName(String name) {
@@ -177,7 +180,7 @@ public class Interface implements WSElement {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return getName();
+		return name;
 	}
 
 	public int getNumberOfTypes() {
@@ -201,7 +204,7 @@ public class Interface implements WSElement {
 	}
 	
 	public String getBase() {
-		return address.substring(0, address.indexOf("/")-1);
+		return address.substring(0, address.lastIndexOf("/")+1);
 	}
 
 }

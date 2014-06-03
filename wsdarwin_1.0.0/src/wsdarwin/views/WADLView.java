@@ -3,6 +3,8 @@ package wsdarwin.views;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +14,10 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.part.*;
 import org.eclipse.ui.wizards.IWizardDescriptor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -40,6 +45,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.junit.runner.Result;
 
 import wsdarwin.clientadaptation.ClientAdaptationRefactoring;
+import wsdarwin.clientadaptation.RESTClientAdaptationRefactoring;
 import wsdarwin.comparison.delta.AddDelta;
 import wsdarwin.comparison.delta.ChangeDelta;
 import wsdarwin.comparison.delta.DeleteDelta;
@@ -353,7 +359,7 @@ public class WADLView extends ViewPart {
 								WADLParser parser1 = new WADLParser(new File(oldWSDL));
 								WADLParser parser2 = new WADLParser(new File(newWSDL));
 								Delta delta = parser1.getService().diff(parser2.getService());
-								DeltaUtil.findMoveDeltas(delta);
+								//DeltaUtil.findMoveDeltas(delta);
 								diffTable = new Delta[] { delta };
 								monitor.worked(1);
 							} finally {
@@ -368,11 +374,13 @@ public class WADLView extends ViewPart {
 						MessageDialog.openError(PlatformUI.getWorkbench()
 								.getActiveWorkbenchWindow().getShell(),
 								"Error", e.getMessage());
+						e.printStackTrace();
 					} catch (InvocationTargetException e) {
 						Throwable realException = e.getTargetException();
 						MessageDialog.openError(PlatformUI.getWorkbench()
 								.getActiveWorkbenchWindow().getShell(),
 								"Error", realException.getMessage());
+						e.printStackTrace();
 					}
 					viewer.refresh();
 					// viewer.setContentProvider(new ViewContentProvider());
@@ -397,13 +405,28 @@ public class WADLView extends ViewPart {
 				changedOperationNames = getChangedOperations(changedOperationNames, diffTable[0]);
 				Map<MethodDeclaration, Delta> changedMethods = getChangedMethods(
 						changedOperationNames, oldCompilationUnit);
-				CompilationUnit newCompilationUnit = parseAST(newStub);
+				
+				HashMap<String, CompilationUnit> oldCompilationUnits = new HashMap<String, CompilationUnit>();
+				IPackageFragment oldPackageFragment = (IPackageFragment)oldStub.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+				HashMap<String, CompilationUnit> newCompilationUnits = new HashMap<String, CompilationUnit>();
+				IPackageFragment newPackageFragment = (IPackageFragment)newStub.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+				try {
+					for(ICompilationUnit unit : oldPackageFragment.getCompilationUnits()) {
+						oldCompilationUnits.put(unit.getElementName(), parseAST(unit));
+					}
+					for(ICompilationUnit unit : newPackageFragment.getCompilationUnits()) {
+						newCompilationUnits.put(unit.getElementName(), parseAST(unit));
+					}
+				} catch (JavaModelException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 
-				ClientAdaptationRefactoring refactoring = new ClientAdaptationRefactoring(
-						oldCompilationUnit, newCompilationUnit,
-						(TypeDeclaration) oldCompilationUnit.types().get(0),
-						(TypeDeclaration) newCompilationUnit.types().get(0),
-						changedMethods);
+				RESTClientAdaptationRefactoring refactoring = new RESTClientAdaptationRefactoring(parseAST(oldStub), parseAST(newStub),
+						oldCompilationUnits, newCompilationUnits,
+						(TypeDeclaration) oldCompilationUnits.get(oldStub.getElementName()).types().get(0),
+						(TypeDeclaration) newCompilationUnits.get(newStub.getElementName()).types().get(0),
+						changedMethods, diffTable[0]);
 				MyRefactoringWizard wizard = new MyRefactoringWizard(
 						refactoring);
 				RefactoringWizardOpenOperation op = new RefactoringWizardOpenOperation(
@@ -421,7 +444,7 @@ public class WADLView extends ViewPart {
 		adaptClient.setImageDescriptor(PlatformUI.getWorkbench()
 				.getSharedImages()
 				.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
-		adaptClient.setEnabled(false);
+		adaptClient.setEnabled(true);
 		
 		runTests = new Action() {
 			public void run() {
@@ -468,24 +491,41 @@ public class WADLView extends ViewPart {
 			Map<String, Delta> changedOperationNames,
 			CompilationUnit compilationUnit) {
 		Map<MethodDeclaration, Delta> changedMethods = new HashMap<MethodDeclaration, Delta>();
-		List<TypeDeclaration> types = compilationUnit.types();
-		TypeDeclaration typeDeclaration = types.get(0);
-		MethodDeclaration[] methods = typeDeclaration.getMethods();
-		for (int i = 0; i < methods.length; i++) {
-			String name = containsKeyIgnoreCase(changedOperationNames,
-					methods[i].getName().getIdentifier());
-			if (name != null) {
-				changedMethods.put(methods[i], changedOperationNames.get(name));
+		List<TypeDeclaration> types = new ArrayList<TypeDeclaration>();
+		types.addAll(compilationUnit.types());
+		List<TypeDeclaration> firstLevelTypes = compilationUnit.types();
+		for(TypeDeclaration type : firstLevelTypes) {
+			getTypeDeclarations(type, types);
+		}
+		for (TypeDeclaration typeDeclaration : types) {
+			MethodDeclaration[] methods = typeDeclaration.getMethods();
+			for (int i = 0; i < methods.length; i++) {
+				String name = containsKeyIgnoreCase(changedOperationNames,
+						methods[i].getName().getIdentifier());
+				if (name != null) {
+					changedMethods.put(methods[i],
+							changedOperationNames.get(name));
+				}
 			}
 		}
 		System.out.println();
 		return changedMethods;
 	}
 
+	private void getTypeDeclarations(
+			TypeDeclaration type, List<TypeDeclaration> types) {
+		types.addAll(Arrays.asList(type.getTypes()));
+		for(TypeDeclaration innerType : type.getTypes()) {
+			getTypeDeclarations(innerType, types);
+		}
+	}
+
 	private String containsKeyIgnoreCase(
 			Map<String, Delta> changedOperationNames, String identifier) {
 		for (String key : changedOperationNames.keySet()) {
-			if (key.equalsIgnoreCase(identifier)) {
+			Operation operation = (Operation)changedOperationNames.get(key).getSource();
+			String methodName = "get"+operation.getResponseMediaType()+"as"+operation.getResponse().getName();
+			if (methodName.equalsIgnoreCase(identifier)) {
 				return key;
 			}
 		}
@@ -525,8 +565,11 @@ public class WADLView extends ViewPart {
 	private Map<String, Delta> getChangedOperations(
 			Map<String, Delta> changedOperationNames, Delta delta) {
 		if (delta.getSource() instanceof Operation) {
-			changedOperationNames.put(
-					((Operation) delta.getSource()).getName(), delta);
+			if (delta instanceof ChangeDelta) {
+				Operation operation = (Operation)delta.getSource();
+				String responseTypeName = operation.getResponse().getName().substring(0,1).toUpperCase()+operation.getResponse().getName().substring(1);
+				changedOperationNames.put("get"+operation.getRequestMediaType()+"As"+responseTypeName, delta);
+			}
 		} else if (!delta.getDeltas().isEmpty()) {
 			for (Delta deltaChild : delta.getDeltas()) {
 				changedOperationNames.putAll(getChangedOperations(
