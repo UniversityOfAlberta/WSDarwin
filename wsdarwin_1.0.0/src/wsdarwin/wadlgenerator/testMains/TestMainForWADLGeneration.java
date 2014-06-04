@@ -474,6 +474,14 @@ public class TestMainForWADLGeneration {
 // https://api.github.com/users/mojombo
 // https://api.github.com/users/willcodeforfoo
 // 
+// API calls with only one resource:
+//
+// https://api.github.com/users
+// https://api.github.com/repositories
+// https://graph.facebook.com/seinfeld
+// https://graph.facebook.com/arresteddevelopment
+//
+//
 // https://graph.facebook.com/oprescu3
 // http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=HeyThere
 // http://api.openweathermap.org/data/2.1/find/city?lat=55&lon=37&cnt=10
