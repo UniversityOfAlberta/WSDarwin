@@ -43,6 +43,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import wsdarwin.comparison.delta.Delta;
+import wsdarwin.comparison.delta.MapDelta;
 import wsdarwin.parsers.WADLParser;
 import wsdarwin.util.DeltaUtil;
 import wsdarwin.util.XMLGenerator;
@@ -81,7 +82,7 @@ public class TestMainForWADLGeneration {
 	//private static final String WADL_PATH = PATH_PREFIX_FILES;
 	private static final String RESPONSE_DIR_TWO = PATH_PREFIX_TWO+"/responses/";
 	private static final String UPLOADED_WADLS = PATH_PREFIX_TWO+"/uploadedWADL/";
-
+	
 	private static final String PATH_PREFIX_FILES = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
 	private static final String LOCALHOST_FILES_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
 	//private static final String LOCALHOST_WADL_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
@@ -91,6 +92,8 @@ public class TestMainForWADLGeneration {
 	
 	static WADLFile wadl_one;
 	static WADLFile wadl_two;
+	static WADLFile testA = null;
+	static WADLFile testB = null;
 	
 	public String randomString(String chars, int length) {
 		  Random rand = new Random();
@@ -137,7 +140,7 @@ public class TestMainForWADLGeneration {
 			WADLParser parser2 = new WADLParser(new File(filenameB));
 			
 			delta = parser1.getService().diff(parser2.getService());
-			
+						
 			//DeltaUtil.findMoveDeltas(delta);
 			delta.printDelta(0);
 			//System.out.println("Diff finished");
@@ -163,7 +166,17 @@ public class TestMainForWADLGeneration {
 			returnArray.add(LOCALHOST_FILES_PATH + "deltaComparison.xml");
 	    }
 		
+		/*System.out.println(" = = = = = = ");
+		System.out.println("wadl files A and B exist  ? " + testA.getIdentifier() + " AND " + testB.getIdentifier() );
 		
+		testA.mapElement(testB);
+		HashSet<MapDelta> bset = testB.getMapDeltas();
+		HashSet<MapDelta> aset = testA.getMapDeltas();
+		//for (int i = 0; i < abc.size(); i++){
+			System.out.println("<><><> " + aset );
+			System.out.println("<><><> " + bset );
+		//}
+		delta.printDelta(0);*/
 		
 		String ret = gson.toJson(returnArray);		
 		return ret;
@@ -224,6 +237,7 @@ public class TestMainForWADLGeneration {
 		        out.close();
 		        
 		        WADLFile uppedWADL = new WADLFile(uppedWADLpath);
+		        
 				try {
 					//System.out.println("<<< reading wadl >>>");
 					uppedWADL.readWADL();
@@ -283,7 +297,7 @@ public class TestMainForWADLGeneration {
 	private static void processRequests(ArrayList<String> requests,
 			HashMap<String, XSDFile> responses, RequestAnalyzer analyzer,
 			String resourceBase, XMLGenerator generator, WADLFile mergedWADL,
-			HashSet<XSDFile> grammarSet) throws MalformedURLException,
+			HashSet<XSDFile> grammarSet, String mergedWADLFileName) throws MalformedURLException,
 			IOException, ParserConfigurationException {
 		for(String requestLine : requests) {
 			String[] tokens = requestLine.split(" ");
@@ -297,8 +311,11 @@ public class TestMainForWADLGeneration {
 			}
 			analyzer.resetUriString(urlLine);
 			final String FILENAME_XML  = VENDOR+id+".json";
-			final String FILENAME_WADL = "late_WADLresponse"+id+".wadl";
-			final String FILENAME_XSD  = "response"+id+".xsd";
+			final String FILENAME_WADL = "NEW_late_WADLresponse"+id+".wadl";
+			final String FILENAME_XSD  = "NEW_response"+id+".xsd";
+			System.out.println("-->the response name is " + FILENAME_XSD);
+			System.out.println("-->the filename of the wadl file is " + FILENAME_WADL);
+			System.out.println("-->the filename of the xml file is " + FILENAME_XML);
 			
 		    //System.out.println(" Request #"+id+"");
 		    
@@ -406,7 +423,7 @@ public class TestMainForWADLGeneration {
 			
 			// Looping over test queries
 			processRequests(requests, responses, analyzer, resourceBase,
-					generator, mergedWADL, grammarSet);
+					generator, mergedWADL, grammarSet, mergedWADLFileName);
 			
 			// merge uploaded wadl file(s) (if any / can only merge one uploaded wadl file right now)
 			if ( (analyze_WADLurls != null) && (analyze_WADLurls.size() > 0)){
@@ -425,9 +442,11 @@ public class TestMainForWADLGeneration {
 	        //String MERGED_WADL_PATH = LOCALHOST_FILES_PATH+VENDOR+mergedWADLFileName;
 	        if (call_type.equals("analyzeURLS")){
 	        	wadl_one = mergedWADL;
+	        	testA = mergedWADL;
 	        	return localhostFilePath;
 	        } else if (call_type.equals("compareURLS")){
 	        	wadl_two = mergedWADL;
+	        	testB = mergedWADL;
 	        	return localhostFilePath;
 	        }
 	        return "";
@@ -455,6 +474,14 @@ public class TestMainForWADLGeneration {
 // https://api.github.com/users/mojombo
 // https://api.github.com/users/willcodeforfoo
 // 
+// API calls with only one resource:
+//
+// https://api.github.com/users
+// https://api.github.com/repositories
+// https://graph.facebook.com/seinfeld
+// https://graph.facebook.com/arresteddevelopment
+//
+//
 // https://graph.facebook.com/oprescu3
 // http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=HeyThere
 // http://api.openweathermap.org/data/2.1/find/city?lat=55&lon=37&cnt=10

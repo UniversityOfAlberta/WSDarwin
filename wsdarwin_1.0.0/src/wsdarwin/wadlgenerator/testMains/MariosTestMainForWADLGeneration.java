@@ -17,10 +17,7 @@ import java.util.HashSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.xml.sax.SAXException;
-
 import wsdarwin.comparison.delta.Delta;
-import wsdarwin.comparison.delta.MapDelta;
 import wsdarwin.parsers.WADLParser;
 import wsdarwin.util.XMLGenerator;
 import wsdarwin.wadlgenerator.RequestAnalyzer;
@@ -44,15 +41,8 @@ public class MariosTestMainForWADLGeneration {
 
 	public static void main(String[] args) {
 		testGeneration();
-		//testComparison();
-	}
+		testComparison();
 
-	private static void testMapping(WADLFile file1, WADLFile file2) {
-		file1.mapElement(file2);
-		for(MapDelta delta : file1.getMapDeltas()) {
-			delta.printDelta(0);
-		}
-		
 	}
 
 	private static void testGeneration() {
@@ -130,7 +120,7 @@ public class MariosTestMainForWADLGeneration {
 		        grammarSet.add(xsdFile);		// TODO later change to Identifier + XSDElement
 		        newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
 		        generator.createWADL(newWADL);
-		        testMapping(mergedWADL, newWADL);
+
 		        // Call diff&merge methods from sub-objects 
 		        mergedWADL.compareToMerge(newWADL);
 		        
@@ -165,7 +155,7 @@ public class MariosTestMainForWADLGeneration {
 
 	private static void testComparison() {
 		WADLParser parser1 = new WADLParser(new File(FILENAME_DIR+"WADLResponse001.wadl"));
-		WADLParser parser2 = new WADLParser(new File(FILENAME_DIR+"WADLResponse002.wadl"));
+		//WADLParser parser2 = new WADLParser(new File(FILENAME_DIR+"WADLResponse002.wadl"));
 		Delta delta = parser1.getService().diff(parser1.getService());
 		delta.printDelta(0);
 	}

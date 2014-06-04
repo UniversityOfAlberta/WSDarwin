@@ -68,16 +68,5 @@ public enum XSDPrimitiveType implements XSDIType{
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	public static XSDPrimitiveType fromString(String type) {
-	    if (type != null) {
-	      for (XSDPrimitiveType primitiveType : XSDPrimitiveType.values()) {
-	        if (type.equalsIgnoreCase(primitiveType.type)) {
-	          return primitiveType;
-	        }
-	      }
-	    }
-	    return null;
-	  }
 
 }
