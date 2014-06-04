@@ -145,14 +145,14 @@ public class Response2XSD {
 				if (list.get(0) instanceof String) {
 					String value = (String) list.get(0);
 					if (Pattern.matches("^[-+]?\\d*$", value)
-							&& value.length() <= 10) {
+							&& Integer.parseInt(value)<=Integer.MAX_VALUE && Integer.parseInt(value)>=Integer.MIN_VALUE) {
 						XSDElement listElement = new XSDElement("item",
 								XSDPrimitiveType.INT);
 						listElement.setMinOccurs(0);
 						listElement.setMaxOccurs("unbounded");
 						listType.addElement(listElement);
 					} else if (Pattern.matches("^[-+]?\\d*$", value)
-							&& value.length() <= 19) {
+							&& Long.parseLong(value)<=Long.MAX_VALUE && Long.parseLong(value)>=Long.MIN_VALUE) {
 						XSDElement listElement = new XSDElement("item",
 								XSDPrimitiveType.LONG);
 						listElement.setMinOccurs(0);
@@ -200,10 +200,10 @@ public class Response2XSD {
 			if(value.equals("")) {
 				element = new XSDElement(s,XSDPrimitiveType.STRING,value);
 			}
-			else if (Pattern.matches("^[-+]?\\d*$", value) && value.length()<=10) {
+			else if (Pattern.matches("^[-+]?\\d*$", value) && Integer.parseInt(value)<=Integer.MAX_VALUE && Integer.parseInt(value)>=Integer.MIN_VALUE) {
 				element = new XSDElement(s,
 						XSDPrimitiveType.INT, Integer.parseInt(value));
-			} else if (Pattern.matches("^[-+]?\\d*$", value) && value.length()<=19) {
+			} else if (Pattern.matches("^[-+]?\\d*$", value) && Long.parseLong(value)<=Long.MAX_VALUE && Long.parseLong(value)>=Long.MIN_VALUE) {
 				element = new XSDElement(s,
 						XSDPrimitiveType.LONG, Long.parseLong(value));
 			} else if (Pattern.matches(

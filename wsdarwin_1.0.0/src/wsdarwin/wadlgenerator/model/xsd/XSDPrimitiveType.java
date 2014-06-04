@@ -4,16 +4,13 @@ import java.util.HashSet;
 
 import wsdarwin.wadlgenerator.model.WADLElement;
 
-public enum XSDPrimitiveType implements XSDIType{
-	
-	INT ("int"),
-	STRING ("string"),
-	DOUBLE ("double"),
-	BOOLEAN ("boolean"),
-	LONG ("long");
-	
+public enum XSDPrimitiveType implements XSDIType {
+
+	INT("int"), STRING("string"), DOUBLE("double"), BOOLEAN("boolean"), LONG(
+			"long");
+
 	private String type;
-	
+
 	XSDPrimitiveType(String type) {
 		this.type = type;
 	}
@@ -30,20 +27,14 @@ public enum XSDPrimitiveType implements XSDIType{
 		return false;
 	}
 
-	/*@Override
-	public Delta compare(WSElement element) {
-		XSDPrimitiveType type = null;
-		if(element instanceof XSDPrimitiveType) {
-			type = (XSDPrimitiveType)element;
-		}
-		else {
-			return null;
-		}
-		if(!type.getName().equals(this.getName())) {
-			return new ChangeDelta(this, type, "type", this.getName(), type.getName());
-		}
-		return new MatchDelta(this, type);
-	}*/
+	/*
+	 * @Override public Delta compare(WSElement element) { XSDPrimitiveType type
+	 * = null; if(element instanceof XSDPrimitiveType) { type =
+	 * (XSDPrimitiveType)element; } else { return null; }
+	 * if(!type.getName().equals(this.getName())) { return new ChangeDelta(this,
+	 * type, "type", this.getName(), type.getName()); } return new
+	 * MatchDelta(this, type); }
+	 */
 
 	@Override
 	public String getName() {
@@ -66,6 +57,17 @@ public enum XSDPrimitiveType implements XSDIType{
 	@Override
 	public String getIdentifier() {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static XSDPrimitiveType fromString(String type) {
+		if (type != null) {
+			for (XSDPrimitiveType primitiveType : XSDPrimitiveType.values()) {
+				if (type.equalsIgnoreCase(primitiveType.type)) {
+					return primitiveType;
+				}
+			}
+		}
 		return null;
 	}
 
