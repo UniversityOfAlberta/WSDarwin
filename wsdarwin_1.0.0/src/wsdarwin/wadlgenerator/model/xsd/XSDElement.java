@@ -36,6 +36,7 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 		this.typeFrequencies = new TreeMap<String, Integer>();
 		this.valueFrequencies = new TreeMap<Object, Integer>();
 		this.type2valueMap = new TreeMap<String, Object>();
+		this.elementDistanceMap = new HashMap<XSDElement, Double>();
 	}
 
 	public int getMinOccurs() {

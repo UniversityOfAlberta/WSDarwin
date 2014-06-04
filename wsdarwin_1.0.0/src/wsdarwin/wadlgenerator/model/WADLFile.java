@@ -30,6 +30,7 @@ import wsdarwin.util.XMLGenerator;
 import wsdarwin.wadlgenerator.RequestAnalyzer;
 import wsdarwin.wadlgenerator.model.xsd.XSDElement;
 import wsdarwin.wadlgenerator.model.xsd.XSDFile;
+import wsdarwin.wadlgenerator.model.xsd.XSDPrimitiveType;
 
 public class WADLFile implements WADLElement {
 
@@ -110,6 +111,10 @@ public class WADLFile implements WADLElement {
 		return wadlFilename;
 		//		return "<application>/[WADLFile]: FILENAME="+wadlFilename+", #Grammars="+grammarsElements.getIncludedGrammars().size()
 		//				+", #resourcesElements="+resourcesElements.size();
+	}
+
+	public HashSet<MapDelta> getMapDeltas() {
+		return mapDeltas;
 	}
 
 	public void buildWADL(HashSet<XSDFile> xsdFilenames, RequestAnalyzer analyzer, String resourceBase, String methodName, int status) {
@@ -655,8 +660,6 @@ public class WADLFile implements WADLElement {
 									 mapDeltas.add(resourceDelta);
 								 }
 
-
-
 							 }
 							 if (resourceDeltas.size() != 0) {
 								 delta = new MapDelta(resources, resources2);
@@ -686,21 +689,26 @@ public class WADLFile implements WADLElement {
 
 
 	 public MapDelta mapByValueResponse(WADLFile file2){
-		 //System.out.println("MAPPING BY RESPONSEEEEEE");
+		 System.out.println("MAPPING BY RESPONSEEEEEE");
 		 MapDelta delta = null;
 		 for(Resources resources : this.getResourcesElements().values()){
 			 ArrayList<Delta> resourceDeltas = new ArrayList<Delta>();
+			 System.out.println("resource deltas level 1 " + resources);
 			 for(Resource resource : resources.getResourceElements().values()){
 				 ArrayList<Delta> methodDeltas = new ArrayList<Delta>();
+				 System.out.println("resource deltas level 2 " + resource);
 				 for(Method method: resource.getMethodElements().values()){
 					 ArrayList<Delta> elementDeltas = new ArrayList<Delta>();
+					 System.out.println("resource deltas level 3 " + method);
 					 for(Response response : method.getResponseElements().values()){
 						 for(Representation represent : response.getRepresentationElements().values()){
 							 HashMap<XSDElement, Object> map = new HashMap<XSDElement, Object>();
 							 getXSDElements(represent.getElement(), map);
+							 System.out.println("resource deltas level 4 " + represent);
 							 for(XSDElement xsd : map.keySet()){
 								 //for map elements
 								 for(Resources resources2 : file2.getResourcesElements().values()){
+									 System.out.println("resource deltas level 5 " + resources);
 									 for(Resource resource2 : resources2.getResourceElements().values()){
 										 for(Method method2: resource2.getMethodElements().values()){
 											 for(Response response2 : method2.getResponseElements().values()){
@@ -728,12 +736,14 @@ public class WADLFile implements WADLElement {
 													 methodDelta.addAllDeltas(elementDeltas);
 													 methodDeltas.add(methodDelta);
 													 mapDeltas.add(methodDelta);
+													 System.out.println("ADDING MAP DELTA method " + methodDelta);
 												 }
 											 }
 											 if(methodDeltas.size()!=0){
 												 MapDelta resourceDelta = new MapDelta(resource, resource2);
 												 resourceDelta.addAllDeltas(methodDeltas);
 												 resourceDeltas.add(resourceDelta);
+												 System.out.println("ADDING MAP DELTA resource " + resourceDelta);
 												 mapDeltas.add(resourceDelta);
 											 }
 										 }
@@ -741,6 +751,7 @@ public class WADLFile implements WADLElement {
 											 delta = new MapDelta(resources, resources2);
 											 delta.addAllDeltas(resourceDeltas);
 											 mapDeltas.add(delta);
+											 System.out.println("ADDING MAP DELTA ALL " + delta);
 										 }
 
 									 }
@@ -781,7 +792,7 @@ public class WADLFile implements WADLElement {
 		 for(WSElement element : complexType.getChildren().values()){
 			 if(element instanceof PrimitiveType){
 				 PrimitiveType type = (PrimitiveType)element;
-				 XSDElement xsdElement = new XSDElement(type.getVariableName(), wsdarwin.wadlgenerator.model.xsd.XSDPrimitiveType.valueOf(type.getName()));
+				 XSDElement xsdElement = new XSDElement(type.getVariableName(), XSDPrimitiveType.fromString(type.getName()));
 				 map.put(xsdElement, type.getValue());
 			 }else{
 				 getXSDElements ((ComplexType) element, map);
