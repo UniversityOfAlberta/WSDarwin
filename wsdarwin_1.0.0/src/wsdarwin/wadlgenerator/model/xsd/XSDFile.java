@@ -26,7 +26,7 @@ public class XSDFile implements WADLElement {
 
 	private HashMap<String, XSDIType> types;
 	private HashMap<String, XSDElement> elements;
-	private XSDComplexType responseType;
+	private XSDElement responseElement;
 
 	public XSDFile(HashMap<String, XSDIType> types,
 			HashMap<String, XSDElement> elements) {
@@ -59,12 +59,12 @@ public class XSDFile implements WADLElement {
 		return elements;
 	}
 
-	public XSDComplexType getResponseType() {
-		return responseType;
+	public XSDElement getResponseElement() {
+		return responseElement;
 	}
 
-	public void setResponseType(XSDComplexType responseType) {
-		this.responseType = responseType;
+	public void setResponseElement(XSDElement responseType) {
+		this.responseElement = responseType;
 	}
 
 	public ArrayList<String> sortedElementAndTypeNames() {
@@ -152,7 +152,7 @@ public class XSDFile implements WADLElement {
 			}
 		}
 		
-		responseType = findResponseType();
+		responseElement = findResponseType();
 		
 		System.out.println("<<< END OF READING THE XSD OF THE FILE >>>");
 	
@@ -204,7 +204,7 @@ public class XSDFile implements WADLElement {
 				this.addElement(element.getName(), element);
 			}
 		}
-		responseType = findResponseType();
+		responseElement = findResponseType();
 	}
 		
 	}*/
@@ -237,8 +237,8 @@ public class XSDFile implements WADLElement {
 	}
 
 	public void compareToMerge(XSDFile file) {
-		if(this.responseType == null && file.responseType != null) {
-			this.setResponseType(file.getResponseType());
+		if(this.responseElement == null && file.responseElement != null) {
+			this.setResponseElement(file.getResponseElement());
 		}
 		HashSet<XSDElement> elementsAdded = new HashSet<XSDElement>();
 		HashSet<XSDIType> typesAdded = new HashSet<XSDIType>();
@@ -415,23 +415,23 @@ public class XSDFile implements WADLElement {
 		}
 	}*/
 
-	public XSDComplexType findResponseType() {
+	public XSDElement findResponseType() {
 		boolean hasParent = false;
-		for (XSDIType type1 : this.types.values()) {
-			for (XSDIType type2 : this.types.values()) {
-				if (type2 instanceof XSDComplexType) {
-					XSDComplexType xSDComplexType = (XSDComplexType) type2;
+		for (XSDElement element1 : this.elements.values()) {
+			for (XSDElement element2 : this.elements.values()) {
+				if (element2.getType() instanceof XSDComplexType) {
+					XSDComplexType xSDComplexType = (XSDComplexType) element2.getType();
 					for (XSDElement element : xSDComplexType.getElements()
 							.values()) {
-						if (element.getType().equals(type1)) {
+						if (element.getType().equals(element1.getType())) {
 							hasParent = true;
 						}
 					}
 				}
 			}
 			if (!hasParent) {
-				if (type1 instanceof XSDComplexType) {
-					return (XSDComplexType)type1;
+				if (element1.getType() instanceof XSDComplexType) {
+					return element1;
 				}
 			} else {
 				hasParent = false;

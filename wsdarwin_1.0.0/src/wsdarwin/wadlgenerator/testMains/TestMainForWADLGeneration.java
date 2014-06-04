@@ -350,7 +350,7 @@ public class TestMainForWADLGeneration {
 			mergedXSDFile.compareToMerge(xsdFile);
 			
 		    //WADLFile newWADL = new WADLFile(FILENAME_DIR+FILENAME_WADL, urlLine, xsdBuilder.convertFromXSD(mergedXSDFile.getResponseType()));
-			WADLFile newWADL = new WADLFile(FILENAME_DIR_TWO +FILENAME_WADL, urlLine, xsdBuilder.convertFromXSD(mergedXSDFile.getResponseType()));
+			WADLFile newWADL = new WADLFile(FILENAME_DIR_TWO +FILENAME_WADL, urlLine, mergedXSDFile.getResponseElement());
 			grammarSet.add(xsdFile);		// TODO later change to Identifier + XSDElement
 			newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
 		    generator.createWADL(newWADL);

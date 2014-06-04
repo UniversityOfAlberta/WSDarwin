@@ -7,18 +7,21 @@ import wsdarwin.comparison.delta.*;
 import wsdarwin.model.ComplexType;
 import wsdarwin.model.WSElement;
 import wsdarwin.util.DeltaUtil;
+import wsdarwin.wadlgenerator.model.xsd.XSDElement;
 
 
 public class Representation implements WADLElement {
 
 	private String mediaType;
-	private ComplexType element;					// TODO will be changed to an XSD element
+	private XSDElement element;					// TODO will be changed to an XSD element
 
-	public Representation(String mediaType, ComplexType element) {
+	public Representation(String mediaType, XSDElement element) {
 		setMediaType(mediaType);
 		setIdentifier(element);
 		this.element = element;
 	}
+	
+	
 
 	public String getMediaType() {
 		return mediaType;
@@ -28,11 +31,11 @@ public class Representation implements WADLElement {
 		this.mediaType = mediaType;
 	}
 
-	public ComplexType getElement() {
+	public XSDElement getElement() {
 		return element;
 	}
 
-	public void setElement(ComplexType element) {
+	public void setElement(XSDElement element) {
 		this.element = element;
 	}
 
@@ -43,7 +46,7 @@ public class Representation implements WADLElement {
 	 * Main identifier is the element-attribute. For comparison both mediaType and element get compared.
 	 * @param element
 	 */
-	public void setIdentifier(ComplexType element) {
+	public void setIdentifier(XSDElement element) {
 		this.element = element;
 	}
 
@@ -153,17 +156,17 @@ public class Representation implements WADLElement {
 
 	@Override
 	public boolean mapElement(WADLElement element) {
-		HashMap<String, ComplexType> mapped = new HashMap<String, ComplexType>();
-		HashMap<String, ComplexType> added = new HashMap<String, ComplexType>();
-		HashMap<String, ComplexType> deleted = new HashMap<String, ComplexType>();
+		HashMap<String, XSDElement> mapped = new HashMap<String, XSDElement>();
+		HashMap<String, XSDElement> added = new HashMap<String, XSDElement>();
+		HashMap<String, XSDElement> deleted = new HashMap<String, XSDElement>();
 		mapByID(element, mapped, added, deleted);
 		mapByStructure(element, mapped, added, deleted);
 		return false;
 	}
 
-	private void mapByStructure(WADLElement element, HashMap<String, ComplexType> mapped, HashMap<String, ComplexType> added, HashMap<String, ComplexType> deleted) {
-		HashMap<String, ComplexType> notAdded = new HashMap<String, ComplexType>();
-		HashMap<String, ComplexType> notDeleted = new HashMap<String, ComplexType>();
+	private void mapByStructure(WADLElement element, HashMap<String, XSDElement> mapped, HashMap<String, XSDElement> added, HashMap<String, XSDElement> deleted) {
+		HashMap<String, XSDElement> notAdded = new HashMap<String, XSDElement>();
+		HashMap<String, XSDElement> notDeleted = new HashMap<String, XSDElement>();
 		
 		for(String complexTypeName : added.keySet()){
 			for(String complexTypeName2 : deleted.keySet()){
@@ -186,7 +189,7 @@ public class Representation implements WADLElement {
 
 	}
 
-	private void mapByID(WADLElement element, HashMap<String, ComplexType> mapped, HashMap<String, ComplexType> added, HashMap<String, ComplexType> deleted) {
+	private void mapByID(WADLElement element, HashMap<String, XSDElement> mapped, HashMap<String, XSDElement> added, HashMap<String, XSDElement> deleted) {
 		if(element instanceof Representation){
 			Representation representation = (Representation)element;
 			String complexTypeName = this.element.getName();

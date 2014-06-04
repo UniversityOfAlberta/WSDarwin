@@ -18,6 +18,7 @@ import java.util.HashSet;
 import javax.xml.parsers.ParserConfigurationException;
 
 import wsdarwin.comparison.delta.Delta;
+import wsdarwin.comparison.delta.MapDelta;
 import wsdarwin.parsers.WADLParser;
 import wsdarwin.util.XMLGenerator;
 import wsdarwin.wadlgenerator.RequestAnalyzer;
@@ -41,8 +42,15 @@ public class MariosTestMainForWADLGeneration {
 
 	public static void main(String[] args) {
 		testGeneration();
-		testComparison();
+		//testComparison();
 
+	}
+	
+	private static void testMapping(WADLFile file1, WADLFile file2) {
+		file1.mapElement(file2);
+		for(MapDelta delta : file1.getMapDeltas()) {
+			delta.printDelta(0);
+		}
 	}
 
 	private static void testGeneration() {
@@ -115,12 +123,13 @@ public class MariosTestMainForWADLGeneration {
 				
 				mergedXSDFile.compareToMerge(xsdFile);
 				
-		        WADLFile newWADL = new WADLFile(FILENAME_DIR+FILENAME_WADL, urlLine, xsdBuilder.convertFromXSD(mergedXSDFile.getResponseType()));
+		        WADLFile newWADL = new WADLFile(FILENAME_DIR+FILENAME_WADL, urlLine, mergedXSDFile.getResponseElement());
 		        
 		        grammarSet.add(xsdFile);		// TODO later change to Identifier + XSDElement
 		        newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
 		        generator.createWADL(newWADL);
 
+		        testMapping(mergedWADL, newWADL);
 		        // Call diff&merge methods from sub-objects 
 		        mergedWADL.compareToMerge(newWADL);
 		        

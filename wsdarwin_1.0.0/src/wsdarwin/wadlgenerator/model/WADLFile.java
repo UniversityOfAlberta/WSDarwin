@@ -28,6 +28,7 @@ import wsdarwin.util.DeltaUtil;
 import wsdarwin.util.LevenshteinDistance;
 import wsdarwin.util.XMLGenerator;
 import wsdarwin.wadlgenerator.RequestAnalyzer;
+import wsdarwin.wadlgenerator.model.xsd.XSDComplexType;
 import wsdarwin.wadlgenerator.model.xsd.XSDElement;
 import wsdarwin.wadlgenerator.model.xsd.XSDFile;
 import wsdarwin.wadlgenerator.model.xsd.XSDPrimitiveType;
@@ -36,7 +37,7 @@ public class WADLFile implements WADLElement {
 
 	private String wadlFilename;
 	private String requestURI;
-	private ComplexType response;
+	private XSDElement response;
 
 	private Grammars grammarsElements;
 	private HashMap<String, Resources> resourcesElements;
@@ -57,7 +58,7 @@ public class WADLFile implements WADLElement {
 //	TODO implement support for multiple namespaces
 
 	public WADLFile(String filename,
-			String requestURI, ComplexType response) {
+			String requestURI, XSDElement response) {
 
 		this.wadlFilename = filename;
 		this.requestURI = requestURI;
@@ -703,8 +704,11 @@ public class WADLFile implements WADLElement {
 					 for(Response response : method.getResponseElements().values()){
 						 for(Representation represent : response.getRepresentationElements().values()){
 							 HashMap<XSDElement, Object> map = new HashMap<XSDElement, Object>();
-							 getXSDElements(represent.getElement(), map);
-							 System.out.println("resource deltas level 4 " + represent);
+							 if (represent.getElement().getType() instanceof XSDComplexType) {
+								getXSDElements(
+										(XSDComplexType)represent.getElement().getType(), map);
+							}
+							System.out.println("resource deltas level 4 " + represent);
 							 for(XSDElement xsd : map.keySet()){
 								 //for map elements
 								 for(Resources resources2 : file2.getResourcesElements().values()){
@@ -715,8 +719,13 @@ public class WADLFile implements WADLElement {
 												 for(Representation represent2 : response2.getRepresentationElements().values()){
 													 XSDElement element2 = null;
 													 HashMap<XSDElement, Object> map2 = new HashMap<XSDElement, Object>();
-													 getXSDElements(represent2.getElement(),map2);
-													 if (map.get(xsd) instanceof List) {
+													 if (represent2.getElement().getType() instanceof XSDComplexType) {
+														getXSDElements(
+																(XSDComplexType)represent2
+																		.getElement().getType(),
+																map2);
+													}
+													if (map.get(xsd) instanceof List) {
 														 List<Object> valueList = (List<Object>)map.get(xsd);
 														 for (Object value : valueList) {
 															 element2 = getXSDElementByValue(map2, value, xsd);
@@ -787,15 +796,13 @@ public class WADLFile implements WADLElement {
 		 }
 	 }
 	 
-	 private void getXSDElements(ComplexType complexType, HashMap<XSDElement, Object> map) {
+	 private void getXSDElements(XSDComplexType complexType, HashMap<XSDElement, Object> map) {
 		 //System.out.println();
-		 for(WSElement element : complexType.getChildren().values()){
-			 if(element instanceof PrimitiveType){
-				 PrimitiveType type = (PrimitiveType)element;
-				 XSDElement xsdElement = new XSDElement(type.getVariableName(), XSDPrimitiveType.fromString(type.getName()));
-				 map.put(xsdElement, type.getValue());
+		 for(XSDElement element : complexType.getElements().values()){
+			 if(element.getType() instanceof XSDPrimitiveType){
+				 map.put(element, element.getValue());
 			 }else{
-				 getXSDElements ((ComplexType) element, map);
+				 getXSDElements ((XSDComplexType) element.getType(), map);
 			 }
 		 }
 	 }
