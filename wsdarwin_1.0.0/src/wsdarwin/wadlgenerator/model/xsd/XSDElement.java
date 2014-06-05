@@ -2,6 +2,7 @@ package wsdarwin.wadlgenerator.model.xsd;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.TreeMap;
 
 import wsdarwin.wadlgenerator.model.WADLElement;
@@ -39,6 +40,7 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 	public XSDElement(String name, XSDIType type) {
 		this.name = name;
 		this.type = type;
+		this.value = new HashSet<Object>();
 		this.typeFrequencies = new TreeMap<String, Integer>();
 		this.valueFrequencies = new TreeMap<Object, Integer>();
 		this.type2valueMap = new TreeMap<String, Object>();
@@ -86,7 +88,12 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 	}
 
 	public void addValue(Object value) {
-		this.value.add(value);
+		if(value instanceof List) {
+			this.value.addAll((List<Object>)value);
+		}
+		else {
+			this.value.add(value);
+		}
 	}
 
 	public TreeMap<String, Integer> getTypeFrequencies() {

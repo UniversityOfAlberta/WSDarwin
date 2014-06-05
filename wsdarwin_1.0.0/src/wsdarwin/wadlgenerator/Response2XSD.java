@@ -150,7 +150,13 @@ public class Response2XSD {
 	private XSDElement processJSONChildren(String s, Object object) {
 		XSDElement element = null;
 		if(object instanceof Map) {
-			XSDComplexType type = new XSDComplexType(s + "Type", s);
+			XSDComplexType type = null;
+			if(xsdFile.getTypes().containsKey(s+"Type")) {
+				type = (XSDComplexType)xsdFile.getTypes().get(s+"Type");
+			}
+			else {
+				type = new XSDComplexType(s + "Type", s);
+			}
 			element = new XSDElement(
 					s, type);
 			Map<String,Object> map = (Map<String,Object>)object;
@@ -161,53 +167,67 @@ public class Response2XSD {
 			xsdFile.addType(type.getName(), type);
 		}
 		else if(object instanceof List) {
-			XSDComplexType listType = new XSDComplexType(s+"ListType", s);
+			XSDComplexType listType = null;
+			if(xsdFile.getTypes().containsKey(s+"ListType")) {
+				listType = (XSDComplexType)xsdFile.getTypes().get(s+"ListType");
+			}
+			else {
+				listType = new XSDComplexType(s + "ListType", s);
+			}
 			List<Object> list = (List<Object>)object;
-			if (!list.isEmpty()) {
-				if (list.get(0) instanceof String) {
-					String value = (String) list.get(0);
+			for(Object listObject : list) {
+				if (listObject instanceof String) {
+					String value = (String) listObject;
 					if (Pattern.matches("^[-+]?\\d*$", value)
-							&& Integer.parseInt(value)<=Integer.MAX_VALUE && Integer.parseInt(value)>=Integer.MIN_VALUE) {
-						XSDElement listElement = new XSDElement("item",
+							&& value.length() <= 10) {
+						XSDElement listElement = new XSDElement(listType.getName()+"-item",
 								XSDPrimitiveType.INT, Integer.parseInt(value));
 						listElement.setMinOccurs(0);
 						listElement.setMaxOccurs("unbounded");
 						listType.addElement(listElement);
 					} else if (Pattern.matches("^[-+]?\\d*$", value)
-							&& Long.parseLong(value)<=Long.MAX_VALUE && Long.parseLong(value)>=Long.MIN_VALUE) {
-						XSDElement listElement = new XSDElement("item",
+							&& value.length() <= 19) {
+						XSDElement listElement = new XSDElement(listType.getName()+"-item",
 								XSDPrimitiveType.LONG, Long.parseLong(value));
 						listElement.setMinOccurs(0);
 						listElement.setMaxOccurs("unbounded");
 						listType.addElement(listElement);
 					} else if (Pattern.matches(
 							"^[-+]?[0-9]+[.]?[0-9]*([eE][-+]?[0-9]+)?$", value)) {
-						XSDElement listElement = new XSDElement("item",
+						XSDElement listElement = new XSDElement(listType.getName()+"-item",
 								XSDPrimitiveType.DOUBLE, Double.parseDouble(value));
 						listElement.setMinOccurs(0);
 						listElement.setMaxOccurs("unbounded");
 						listType.addElement(listElement);
 					} else if (Pattern.matches("true|false", value)) {
-						XSDElement listElement = new XSDElement("item",
+						XSDElement listElement = new XSDElement(listType.getName()+"-item",
 								XSDPrimitiveType.BOOLEAN, Boolean.parseBoolean(value));
 						listElement.setMinOccurs(0);
 						listElement.setMaxOccurs("unbounded");
 						listType.addElement(listElement);
 					} else {
-						XSDElement listElement = new XSDElement("item",
+						XSDElement listElement = new XSDElement(listType.getName()+"-item",
 								XSDPrimitiveType.STRING, value);
 						listElement.setMinOccurs(0);
 						listElement.setMaxOccurs("unbounded");
 						listType.addElement(listElement);
 					}
-				} else if (list.get(0) instanceof Map) {
-					Map<String, Object> map = (Map<String, Object>) list.get(0);
+				}
+				else if(listObject instanceof Double) {
+					XSDElement listElement = new XSDElement(listType.getName()+"-item",
+							XSDPrimitiveType.DOUBLE, listObject);
+					listElement.setMinOccurs(0);
+					listElement.setMaxOccurs("unbounded");
+					listType.addElement(listElement);
+				}
+				else if (listObject instanceof Map) {
+					Map<String, Object> map = (Map<String, Object>) listObject;
 					XSDComplexType type = getTypeFromJSONNode(map, s + "ItemType", "");
 					XSDElement xsdElement = new XSDElement(
 							lowerFirstLetter(type.getNameWithoutType()), type);
 					xsdFile.addElement(xsdElement.getName(), xsdElement);
 					xsdFile.addType(type.getName(), type);
-					XSDElement listElement = new XSDElement("item", type);
+					XSDElement listElement = new XSDElement(s + "ItemType-item", type);
 					listElement.setMinOccurs(0);
 					listElement.setMaxOccurs("unbounded");
 					listType.addElement(listElement);
@@ -222,10 +242,10 @@ public class Response2XSD {
 			if(value.equals("")) {
 				element = new XSDElement(s,XSDPrimitiveType.STRING,value);
 			}
-			else if (Pattern.matches("^[-+]?\\d*$", value) && Integer.parseInt(value)<=Integer.MAX_VALUE && Integer.parseInt(value)>=Integer.MIN_VALUE) {
+			else if (Pattern.matches("^[-+]?\\d*$", value) && value.length()<=10) {
 				element = new XSDElement(s,
 						XSDPrimitiveType.INT, Integer.parseInt(value));
-			} else if (Pattern.matches("^[-+]?\\d*$", value) && Long.parseLong(value)<=Long.MAX_VALUE && Long.parseLong(value)>=Long.MIN_VALUE) {
+			} else if (Pattern.matches("^[-+]?\\d*$", value) && value.length()<=19) {
 				element = new XSDElement(s,
 						XSDPrimitiveType.LONG, Long.parseLong(value));
 			} else if (Pattern.matches(

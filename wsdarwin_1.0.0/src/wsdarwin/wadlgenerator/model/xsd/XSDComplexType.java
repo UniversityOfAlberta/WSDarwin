@@ -50,7 +50,12 @@ public class XSDComplexType implements Comparable<XSDComplexType>, XSDIType{
 	
 	public void addElement(XSDElement element) {
 		if (element != null) {
-			elements.put(element.getName(), element);
+			if (elements.containsKey(element.getName())) {
+				elements.get(element.getName()).addValue(element.getValue());
+			}
+			else {
+				elements.put(element.getName(), element);
+			}
 		}
 	}
 	
