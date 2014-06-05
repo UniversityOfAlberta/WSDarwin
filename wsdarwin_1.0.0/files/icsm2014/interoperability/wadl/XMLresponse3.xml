@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GeocodeResponse>
+ <status>OK</status>
+ <result>
+  <type>airport</type>
+  <type>transit_station</type>
+  <type>establishment</type>
+  <formatted_address>Thessaloniki International Airport (SKG), Ethniki Odos Aerodromiou Thessalonikis, Thessaloniki 55103, Greece</formatted_address>
+  <address_component>
+   <long_name>Thessaloniki International Airport</long_name>
+   <short_name>Thessaloniki International Airport</short_name>
+   <type>establishment</type>
+  </address_component>
+  <address_component>
+   <long_name>Ethniki Odos Aerodromiou Thessalonikis</long_name>
+   <short_name>EO Aerodromiou Thessalonikis</short_name>
+   <type>route</type>
+  </address_component>
+  <address_component>
+   <long_name>Thessaloniki</long_name>
+   <short_name>Thessaloniki</short_name>
+   <type>locality</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Thermi</long_name>
+   <short_name>Thermi</short_name>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Thessaloniki</long_name>
+   <short_name>Thessaloniki</short_name>
+   <type>administrative_area_level_3</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Central Macedonia</long_name>
+   <short_name>Central Macedonia</short_name>
+   <type>administrative_area_level_2</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Makedonia Thraki</long_name>
+   <short_name>Makedonia Thraki</short_name>
+   <type>administrative_area_level_1</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Greece</long_name>
+   <short_name>GR</short_name>
+   <type>country</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>55103</long_name>
+   <short_name>55103</short_name>
+   <type>postal_code</type>
+  </address_component>
+  <geometry>
+   <location>
+    <lat>40.5238784</lat>
+    <lng>22.9764090</lng>
+   </location>
+   <location_type>APPROXIMATE</location_type>
+   <viewport>
+    <southwest>
+     <lat>40.5055110</lat>
+     <lng>22.9543155</lng>
+    </southwest>
+    <northeast>
+     <lat>40.5343778</lat>
+     <lng>22.9927940</lng>
+    </northeast>
+   </viewport>
+   <bounds>
+    <southwest>
+     <lat>40.5055110</lat>
+     <lng>22.9543155</lng>
+    </southwest>
+    <northeast>
+     <lat>40.5343778</lat>
+     <lng>22.9927940</lng>
+    </northeast>
+   </bounds>
+  </geometry>
+ </result>
+</GeocodeResponse>

@@ -1,0 +1,68 @@
+{
+   "results" : [
+      {
+         "address_components" : [
+            {
+               "long_name" : "10620",
+               "short_name" : "10620",
+               "types" : [ "street_number" ]
+            },
+            {
+               "long_name" : "Jasper Avenue Northwest",
+               "short_name" : "Jasper Ave NW",
+               "types" : [ "route" ]
+            },
+            {
+               "long_name" : "Downtown",
+               "short_name" : "Downtown",
+               "types" : [ "neighborhood", "political" ]
+            },
+            {
+               "long_name" : "Edmonton",
+               "short_name" : "Edmonton",
+               "types" : [ "locality", "political" ]
+            },
+            {
+               "long_name" : "Division No. 11",
+               "short_name" : "Division No. 11",
+               "types" : [ "administrative_area_level_2", "political" ]
+            },
+            {
+               "long_name" : "Alberta",
+               "short_name" : "AB",
+               "types" : [ "administrative_area_level_1", "political" ]
+            },
+            {
+               "long_name" : "Canada",
+               "short_name" : "CA",
+               "types" : [ "country", "political" ]
+            },
+            {
+               "long_name" : "T5J 2A3",
+               "short_name" : "T5J 2A3",
+               "types" : [ "postal_code" ]
+            }
+         ],
+         "formatted_address" : "10620 Jasper Avenue Northwest, Edmonton, AB T5J 2A3, Canada",
+         "geometry" : {
+            "location" : {
+               "lat" : 53.54112629999999,
+               "lng" : -113.50337920
+            },
+            "location_type" : "ROOFTOP",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 53.54247528029150,
+                  "lng" : -113.5020302197085
+               },
+               "southwest" : {
+                  "lat" : 53.53977731970850,
+                  "lng" : -113.5047281802915
+               }
+            }
+         },
+         "types" : [ "street_address" ]
+      }
+   ],
+   "status" : "OK"
+}

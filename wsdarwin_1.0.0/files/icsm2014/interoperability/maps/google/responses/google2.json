@@ -1,0 +1,78 @@
+{
+   "results" : [
+      {
+         "address_components" : [
+            {
+               "long_name" : "11027",
+               "short_name" : "11027",
+               "types" : [ "street_number" ]
+            },
+            {
+               "long_name" : "87 Avenue Northwest",
+               "short_name" : "87 Ave NW",
+               "types" : [ "route" ]
+            },
+            {
+               "long_name" : "Garneau",
+               "short_name" : "Garneau",
+               "types" : [ "neighborhood", "political" ]
+            },
+            {
+               "long_name" : "Edmonton",
+               "short_name" : "Edmonton",
+               "types" : [ "locality", "political" ]
+            },
+            {
+               "long_name" : "Division No. 11",
+               "short_name" : "Division No. 11",
+               "types" : [ "administrative_area_level_2", "political" ]
+            },
+            {
+               "long_name" : "Alberta",
+               "short_name" : "AB",
+               "types" : [ "administrative_area_level_1", "political" ]
+            },
+            {
+               "long_name" : "Canada",
+               "short_name" : "CA",
+               "types" : [ "country", "political" ]
+            },
+            {
+               "long_name" : "T6G 0X7",
+               "short_name" : "T6G 0X7",
+               "types" : [ "postal_code" ]
+            }
+         ],
+         "formatted_address" : "11027 87 Avenue Northwest, Edmonton, AB T6G 0X7, Canada",
+         "geometry" : {
+            "bounds" : {
+               "northeast" : {
+                  "lat" : 53.52291080,
+                  "lng" : -113.51642250
+               },
+               "southwest" : {
+                  "lat" : 53.52289980,
+                  "lng" : -113.51642260
+               }
+            },
+            "location" : {
+               "lat" : 53.52289980,
+               "lng" : -113.51642260
+            },
+            "location_type" : "RANGE_INTERPOLATED",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 53.52425428029149,
+                  "lng" : -113.5150735697085
+               },
+               "southwest" : {
+                  "lat" : 53.52155631970849,
+                  "lng" : -113.5177715302915
+               }
+            }
+         },
+         "types" : [ "street_address" ]
+      }
+   ],
+   "status" : "OK"
+}

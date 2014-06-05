@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns:tns="file:/Users/blerinabazelli/Documents/workspace/HTML2WADL/files/icsm2013/interoperability/maps/bing/xsd/merged_Locations.xsd" targetNamespace="file:/Users/blerinabazelli/Documents/workspace/HTML2WADL/files/icsm2013/interoperability/maps/bing/xsd/merged_Locations.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="address" type="tns:addressType"/>
+<xs:complexType name="addressType">
+<xs:sequence>
+<xs:element name="addressLine" type="xs:string"/>
+<xs:element name="postalCode" type="xs:string"/>
+<xs:element name="adminDistrict2" type="xs:string"/>
+<xs:element name="adminDistrict" type="xs:string"/>
+<xs:element name="locality" type="xs:string"/>
+<xs:element name="formattedAddress" type="xs:string"/>
+<xs:element name="countryRegion" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="bbox" type="tns:bboxListType"/>
+<xs:complexType name="bboxListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="bboxListType-item" type="xs:double"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="coordinates" type="tns:coordinatesListType"/>
+<xs:complexType name="coordinatesListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="coordinatesListType-item" type="xs:double"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="geocodePoints" type="tns:geocodePointsListType"/>
+<xs:element name="geocodePointsItem" type="tns:geocodePointsItemType"/>
+<xs:complexType name="geocodePointsItemType">
+<xs:sequence>
+<xs:element name="calculationMethod" type="xs:string"/>
+<xs:element name="type" type="xs:string"/>
+<xs:element name="usageTypes" type="tns:usageTypesListType"/>
+<xs:element name="coordinates" type="tns:coordinatesListType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="geocodePointsListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="geocodePointsItemType-item" type="tns:geocodePointsItemType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="LocationsResponseType">
+<xs:sequence>
+<xs:element name="statusCode" type="xs:int"/>
+<xs:element name="statusDescription" type="xs:string"/>
+<xs:element name="authenticationResultCode" type="xs:string"/>
+<xs:element name="traceId" type="xs:string"/>
+<xs:element name="brandLogoUri" type="xs:string"/>
+<xs:element name="copyright" type="xs:string"/>
+<xs:element name="resourceSets" type="tns:resourceSetsListType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="matchCodes" type="tns:matchCodesListType"/>
+<xs:complexType name="matchCodesListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="matchCodesListType-item" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="point" type="tns:pointType"/>
+<xs:complexType name="pointType">
+<xs:sequence>
+<xs:element name="type" type="xs:string"/>
+<xs:element name="coordinates" type="tns:coordinatesListType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="resources" type="tns:resourcesListType"/>
+<xs:element name="resourceSets" type="tns:resourceSetsListType"/>
+<xs:element name="resourceSetsItem" type="tns:resourceSetsItemType"/>
+<xs:complexType name="resourceSetsItemType">
+<xs:sequence>
+<xs:element name="resources" type="tns:resourcesListType"/>
+<xs:element name="estimatedTotal" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="resourceSetsListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="resourceSetsItemType-item" type="tns:resourceSetsItemType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="resourcesItem" type="tns:resourcesItemType"/>
+<xs:complexType name="resourcesItemType">
+<xs:sequence>
+<xs:element name="__type" type="xs:string"/>
+<xs:element name="point" type="tns:pointType"/>
+<xs:element name="matchCodes" type="tns:matchCodesListType"/>
+<xs:element name="address" type="tns:addressType"/>
+<xs:element name="bbox" type="tns:bboxListType"/>
+<xs:element name="name" type="xs:string"/>
+<xs:element name="confidence" type="xs:string"/>
+<xs:element name="entityType" type="xs:string"/>
+<xs:element name="geocodePoints" type="tns:geocodePointsListType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="resourcesListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="resourcesItemType-item" type="tns:resourcesItemType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="response" type="tns:LocationsResponseType"/>
+<xs:element name="usageTypes" type="tns:usageTypesListType"/>
+<xs:complexType name="usageTypesListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="usageTypesListType-item" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>

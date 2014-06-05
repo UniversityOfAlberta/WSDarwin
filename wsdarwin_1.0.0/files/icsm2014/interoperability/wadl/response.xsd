@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="file:/C:/Users/Marios/WSDarwin/HTML2WADL/files/icsm2013/interoperability/wadl/response.xsd"
+	xmlns:tns="file:/C:/Users/Marios/WSDarwin/HTML2WADL/files/icsm2013/interoperability/wadl/response.xsd">
+	<element name="address_component" type="tns:address_componentType" />
+	<complexType name="address_componentType">
+		<sequence>
+			<element name="long_name" type="string" />
+			<element name="type" type="string" />
+			<element name="short_name" type="string" />
+		</sequence>
+	</complexType>
+	<element name="geocodeResponse" type="tns:GeocodeResponseType" />
+	<complexType name="GeocodeResponseType">
+		<sequence>
+			<element name="result" type="tns:resultType" />
+			<element name="status" type="string" />
+		</sequence>
+	</complexType>
+	<element name="geometry" type="tns:geometryType" />
+	<complexType name="geometryType">
+		<sequence>
+			<element name="viewport" type="tns:viewportType" />
+			<element name="location_type" type="string" />
+			<element name="location" type="tns:locationType" />
+		</sequence>
+	</complexType>
+	<element name="location" type="tns:locationType" />
+	<complexType name="locationType">
+		<sequence>
+			<element name="lng" type="double" />
+			<element name="lat" type="double" />
+		</sequence>
+	</complexType>
+	<element name="northeast" type="tns:northeastType" />
+	<complexType name="northeastType">
+		<sequence>
+			<element name="lng" type="double" />
+			<element name="lat" type="double" />
+		</sequence>
+	</complexType>
+	<element name="result" type="tns:resultType" />
+	<complexType name="resultType">
+		<sequence>
+			<element name="formatted_address" type="string" />
+			<element name="address_component" type="tns:address_componentType" />
+			<element name="type" type="string" />
+			<element name="geometry" type="tns:geometryType" />
+		</sequence>
+	</complexType>
+	<element name="southwest" type="tns:southwestType" />
+	<complexType name="southwestType">
+		<sequence>
+			<element name="lng" type="double" />
+			<element name="lat" type="double" />
+		</sequence>
+	</complexType>
+	<element name="viewport" type="tns:viewportType" />
+	<complexType name="viewportType">
+		<sequence>
+			<element name="southwest" type="tns:southwestType" />
+			<element name="northeast" type="tns:northeastType" />
+		</sequence>
+	</complexType>
+</schema>

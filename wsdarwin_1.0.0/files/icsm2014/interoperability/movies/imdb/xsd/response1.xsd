@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns:tns="file:/Users/blerinabazelli/Documents/workspace/HTML2WADL/files/icsm2013/interoperability/movies/imdb/xsd/response1.xsd" targetNamespace="file:/Users/blerinabazelli/Documents/workspace/HTML2WADL/files/icsm2013/interoperability/movies/imdb/xsd/response1.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="actors" type="tns:actorsListType"/>
+<xs:complexType name="actorsListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="actorsListType-item" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="also_known_as" type="tns:also_known_asListType"/>
+<xs:complexType name="also_known_asListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="also_known_asListType-item" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="country" type="tns:countryListType"/>
+<xs:complexType name="countryListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="countryListType-item" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="directors" type="tns:directorsListType"/>
+<xs:complexType name="directorsListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="directorsListType-item" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="genres" type="tns:genresListType"/>
+<xs:complexType name="genresListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="genresListType-item" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="language" type="tns:languageListType"/>
+<xs:complexType name="languageListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="languageListType-item" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="moviesResponseType">
+<xs:sequence>
+<xs:element name="genres" type="tns:genresListType"/>
+<xs:element name="runtime" type="tns:runtimeListType"/>
+<xs:element name="type" type="xs:string"/>
+<xs:element name="country" type="tns:countryListType"/>
+<xs:element name="title" type="xs:string"/>
+<xs:element name="rating_count" type="xs:int"/>
+<xs:element name="imdb_url" type="xs:string"/>
+<xs:element name="also_known_as" type="tns:also_known_asListType"/>
+<xs:element name="imdb_id" type="xs:string"/>
+<xs:element name="release_date" type="xs:int"/>
+<xs:element name="plot_simple" type="xs:string"/>
+<xs:element name="poster" type="xs:string"/>
+<xs:element name="year" type="xs:int"/>
+<xs:element name="actors" type="tns:actorsListType"/>
+<xs:element name="writers" type="tns:writersListType"/>
+<xs:element name="rating" type="xs:double"/>
+<xs:element name="language" type="tns:languageListType"/>
+<xs:element name="filming_locations" type="xs:string"/>
+<xs:element name="rated" type="xs:string"/>
+<xs:element name="directors" type="tns:directorsListType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="response" type="tns:moviesResponseType"/>
+<xs:element name="runtime" type="tns:runtimeListType"/>
+<xs:complexType name="runtimeListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="runtimeListType-item" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="writers" type="tns:writersListType"/>
+<xs:complexType name="writersListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="writersListType-item" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>

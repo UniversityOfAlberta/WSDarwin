@@ -33,21 +33,26 @@ public class MariosTestMainForWADLGeneration {
 	 */
 	public static final Boolean DEBUG = true;
 	
-	private static final String VENDOR = "github";
-	private static final String PATH_PREFIX = "files/icsm2014/"+VENDOR;
+	private static final String VENDOR = "imdb";
+	private static final String PATH_PREFIX = "files/icsm2014/interoperability/movies/"+VENDOR;
 	
 	private static final String FILENAME_DIR = PATH_PREFIX+"/wadl/";
 	private static final String XSD_DIR = PATH_PREFIX+"/xsd/";
 	private static final String RESPONSE_DIR = PATH_PREFIX+"/responses/";
 
 	public static void main(String[] args) {
-		testGeneration();
+		//testGeneration();
 		//testComparison();
+		testMapping();
 
 	}
 	
-	private static void testMapping(WADLFile file1, WADLFile file2) {
-		file1.mapElement(file2);
+	private static void testMapping() {
+		String filename1 = "files/icsm2014/interoperability/movies/imdb/wadl/imdbMerged.ser";
+		String filename2 = "files/icsm2014/interoperability/movies/rottenTomatoes/wadl/rottenTomatoesMerged.ser";		
+		WADLFile file1 = WADLFile.deserializeFile(filename1);
+		WADLFile file2 = WADLFile.deserializeFile(filename2);
+		file1.mapByValue(file2);
 		for(MapDelta delta : file1.getMapDeltas()) {
 			delta.printDelta(0);
 		}
@@ -102,7 +107,7 @@ public class MariosTestMainForWADLGeneration {
 		        System.out.println(" Request #"+id+"");
 		        
 		        // URLConnection
-				URL yahoo = new URL(urlLine);
+				/*URL yahoo = new URL(urlLine);
 		        URLConnection yc = yahoo.openConnection();
 		        BufferedReader in = new BufferedReader(
                     new InputStreamReader(yc.getInputStream()));
@@ -114,7 +119,7 @@ public class MariosTestMainForWADLGeneration {
 		            out.newLine();
 		        }
 		        in.close();
-		        out.close();
+		        out.close();*/
 		        Response2XSD xsdBuilder = new Response2XSD();
 	        
 				xsdBuilder.buildXSDFromJSON(RESPONSE_DIR+FILENAME_XML, analyzer.getMethodID());
@@ -128,8 +133,6 @@ public class MariosTestMainForWADLGeneration {
 		        grammarSet.add(xsdFile);		// TODO later change to Identifier + XSDElement
 		        newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
 		        generator.createWADL(newWADL);
-
-		        testMapping(mergedWADL, newWADL);
 		        // Call diff&merge methods from sub-objects 
 		        mergedWADL.compareToMerge(newWADL);
 		        
@@ -139,7 +142,7 @@ public class MariosTestMainForWADLGeneration {
 			}
 			// write merged WADL file only once
 			generator.createWADL(mergedWADL);
-			//mergedWADL.serializeFile();
+			mergedWADL.serializeFile();
 			/*for(String methodID : responses.keySet()) {
 				generator.createXSD(responses.get(methodID));
 			}*/

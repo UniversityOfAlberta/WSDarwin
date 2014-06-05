@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<application xmlns:tns="http://www.w3.org/2001/XMLSchema" xmlns:xs="http://www.w3.org/2001/XMLSchema" tns:schemaLocation="http://wadl.dev.java.net/2009/02 files/icsm2013/interoperability/maps/google/xsd//merged_geocode.xsd" xmlns="http://wadl.dev.java.net/2009/02">
+<grammars>
+<include href="files/icsm2013/interoperability/maps/google/xsd//merged_geocode.xsd"/>
+</grammars>
+<resources base="maps.googleapis.com/">
+<resource path="/maps/api">
+<method id="geocode" name="GET">
+<request>
+<param name="address" style="query" type="tns:string"/>
+<param name="sensor" style="query" type="tns:boolean"/>
+</request>
+<response status="200">
+<representation element="geocodeResponseType" mediaType="application/json"/>
+</response>
+</method>
+</resource>
+</resources>
+</application>

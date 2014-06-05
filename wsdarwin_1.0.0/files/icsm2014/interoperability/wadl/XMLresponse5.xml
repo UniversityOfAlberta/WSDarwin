@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GeocodeResponse>
+ <status>OK</status>
+ <result>
+  <type>street_address</type>
+  <formatted_address>10620 Jasper Avenue Northwest, Edmonton, AB T5J 2A3, Canada</formatted_address>
+  <address_component>
+   <long_name>10620</long_name>
+   <short_name>10620</short_name>
+   <type>street_number</type>
+  </address_component>
+  <address_component>
+   <long_name>Jasper Avenue Northwest</long_name>
+   <short_name>Jasper Ave NW</short_name>
+   <type>route</type>
+  </address_component>
+  <address_component>
+   <long_name>Downtown</long_name>
+   <short_name>Downtown</short_name>
+   <type>neighborhood</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Edmonton</long_name>
+   <short_name>Edmonton</short_name>
+   <type>locality</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Division No. 11</long_name>
+   <short_name>Division No. 11</short_name>
+   <type>administrative_area_level_2</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Alberta</long_name>
+   <short_name>AB</short_name>
+   <type>administrative_area_level_1</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Canada</long_name>
+   <short_name>CA</short_name>
+   <type>country</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>T5J 2A3</long_name>
+   <short_name>T5J 2A3</short_name>
+   <type>postal_code</type>
+  </address_component>
+  <geometry>
+   <location>
+    <lat>53.5411263</lat>
+    <lng>-113.5033792</lng>
+   </location>
+   <location_type>ROOFTOP</location_type>
+   <viewport>
+    <southwest>
+     <lat>53.5397773</lat>
+     <lng>-113.5047282</lng>
+    </southwest>
+    <northeast>
+     <lat>53.5424753</lat>
+     <lng>-113.5020302</lng>
+    </northeast>
+   </viewport>
+  </geometry>
+ </result>
+</GeocodeResponse>

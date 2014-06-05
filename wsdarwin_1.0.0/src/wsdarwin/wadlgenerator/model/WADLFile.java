@@ -690,42 +690,29 @@ public class WADLFile implements WADLElement {
 
 
 	 public MapDelta mapByValueResponse(WADLFile file2){
-		 System.out.println("MAPPING BY RESPONSEEEEEE");
+		//System.out.println("MAPPING BY RESPONSEEEEEE");
 		 MapDelta delta = null;
 		 for(Resources resources : this.getResourcesElements().values()){
 			 ArrayList<Delta> resourceDeltas = new ArrayList<Delta>();
-			 System.out.println("resource deltas level 1 " + resources);
 			 for(Resource resource : resources.getResourceElements().values()){
 				 ArrayList<Delta> methodDeltas = new ArrayList<Delta>();
-				 System.out.println("resource deltas level 2 " + resource);
 				 for(Method method: resource.getMethodElements().values()){
 					 ArrayList<Delta> elementDeltas = new ArrayList<Delta>();
-					 System.out.println("resource deltas level 3 " + method);
 					 for(Response response : method.getResponseElements().values()){
 						 for(Representation represent : response.getRepresentationElements().values()){
 							 HashMap<XSDElement, Object> map = new HashMap<XSDElement, Object>();
-							 if (represent.getElement().getType() instanceof XSDComplexType) {
-								getXSDElements(
-										(XSDComplexType)represent.getElement().getType(), map);
-							}
-							System.out.println("resource deltas level 4 " + represent);
+							 getXSDElements((XSDComplexType)represent.getElement().getType(), map);
 							 for(XSDElement xsd : map.keySet()){
 								 //for map elements
 								 for(Resources resources2 : file2.getResourcesElements().values()){
-									 System.out.println("resource deltas level 5 " + resources);
 									 for(Resource resource2 : resources2.getResourceElements().values()){
 										 for(Method method2: resource2.getMethodElements().values()){
 											 for(Response response2 : method2.getResponseElements().values()){
 												 for(Representation represent2 : response2.getRepresentationElements().values()){
 													 XSDElement element2 = null;
 													 HashMap<XSDElement, Object> map2 = new HashMap<XSDElement, Object>();
-													 if (represent2.getElement().getType() instanceof XSDComplexType) {
-														getXSDElements(
-																(XSDComplexType)represent2
-																		.getElement().getType(),
-																map2);
-													}
-													if (map.get(xsd) instanceof List) {
+													 getXSDElements((XSDComplexType)represent2.getElement().getType(),map2);
+													 if (map.get(xsd) instanceof List) {
 														 List<Object> valueList = (List<Object>)map.get(xsd);
 														 for (Object value : valueList) {
 															 element2 = getXSDElementByValue(map2, value, xsd);
@@ -745,14 +732,12 @@ public class WADLFile implements WADLElement {
 													 methodDelta.addAllDeltas(elementDeltas);
 													 methodDeltas.add(methodDelta);
 													 mapDeltas.add(methodDelta);
-													 System.out.println("ADDING MAP DELTA method " + methodDelta);
 												 }
 											 }
 											 if(methodDeltas.size()!=0){
 												 MapDelta resourceDelta = new MapDelta(resource, resource2);
 												 resourceDelta.addAllDeltas(methodDeltas);
 												 resourceDeltas.add(resourceDelta);
-												 System.out.println("ADDING MAP DELTA resource " + resourceDelta);
 												 mapDeltas.add(resourceDelta);
 											 }
 										 }
@@ -760,7 +745,6 @@ public class WADLFile implements WADLElement {
 											 delta = new MapDelta(resources, resources2);
 											 delta.addAllDeltas(resourceDeltas);
 											 mapDeltas.add(delta);
-											 System.out.println("ADDING MAP DELTA ALL " + delta);
 										 }
 
 									 }
@@ -810,7 +794,7 @@ public class WADLFile implements WADLElement {
 	 private XSDElement getXSDElementByValue(HashMap<XSDElement, Object> map, Object value, XSDElement xsd) {
 		 for(XSDElement element : map.keySet()){
 			 //double score=0;
-			 if(element.getType() instanceof PrimitiveType){
+			 if(element.getType() instanceof XSDPrimitiveType){
 				 if(element.getValue() instanceof Integer && value instanceof Integer){
 					 int value1 = (int) value;
 					 int value2 = (int) element.getValue();

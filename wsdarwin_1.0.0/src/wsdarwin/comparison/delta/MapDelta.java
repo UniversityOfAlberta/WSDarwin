@@ -52,8 +52,8 @@ public class MapDelta extends Delta {
 	@Override
 	public void printDelta(int level) {
 		String deltaText = DeltaUtil.indent(level);
-		deltaText += "Map\t"+source.getClass().getSimpleName()+"\t";
-		deltaText += this.getSource().toString()+" -> "+this.getTarget().toString()+"\n";
+		deltaText += "Map\t"+sources.iterator().next().getClass().getSimpleName()+"\t";
+		deltaText += sources.iterator().next().toString()+" -> "+targets.iterator().next().toString()+"\n";
 		System.out.println(deltaText);
 		if(!this.getDeltas().isEmpty()) {
 			level++;

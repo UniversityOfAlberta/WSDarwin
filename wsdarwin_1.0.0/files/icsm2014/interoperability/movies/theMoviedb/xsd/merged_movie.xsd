@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns:tns="file:/Users/blerinabazelli/Documents/workspace/HTML2WADL/files/icsm2013/interoperability/movies/theMoviedb/xsd/merged_movie.xsd" targetNamespace="file:/Users/blerinabazelli/Documents/workspace/HTML2WADL/files/icsm2013/interoperability/movies/theMoviedb/xsd/merged_movie.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:complexType name="movieResponseType">
+<xs:sequence>
+<xs:element name="results" type="tns:resultsListType"/>
+<xs:element name="page" type="xs:int"/>
+<xs:element name="total_pages" type="xs:int"/>
+<xs:element name="total_results" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="response" type="tns:movieResponseType"/>
+<xs:element name="results" type="tns:resultsListType"/>
+<xs:element name="resultsItem" type="tns:resultsItemType"/>
+<xs:complexType name="resultsItemType">
+<xs:sequence>
+<xs:element name="id" type="xs:int"/>
+<xs:element name="title" type="xs:string"/>
+<xs:element name="vote_average" type="xs:double"/>
+<xs:element name="backdrop_path" type="xs:string"/>
+<xs:element name="release_date" type="xs:string"/>
+<xs:element name="original_title" type="xs:string"/>
+<xs:element name="vote_count" type="xs:int"/>
+<xs:element name="adult" type="xs:boolean"/>
+<xs:element name="poster_path" type="xs:string"/>
+<xs:element name="popularity" type="xs:double"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="resultsListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="resultsItemType-item" type="tns:resultsItemType"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>

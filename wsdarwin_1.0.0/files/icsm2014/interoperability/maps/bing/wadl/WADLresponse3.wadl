@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<application xmlns:tns="http://www.w3.org/2001/XMLSchema" xmlns:xs="http://www.w3.org/2001/XMLSchema" tns:schemaLocation="http://wadl.dev.java.net/2009/02 files/icsm2013/interoperability/maps/bing/xsd//merged_Locations.xsd" xmlns="http://wadl.dev.java.net/2009/02">
+<grammars>
+<include href="files/icsm2013/interoperability/maps/bing/xsd//merged_Locations.xsd"/>
+</grammars>
+<resources base="dev.virtualearth.net/">
+<resource path="/REST/v1">
+<method id="Locations" name="GET">
+<request>
+<param name="CountryRegion" style="query" type="tns:string"/>
+<param name="key" style="query" type="tns:string"/>
+<param name="addressLine" style="query" type="tns:string"/>
+</request>
+<response status="200">
+<representation element="LocationsResponseType" mediaType="application/json"/>
+</response>
+</method>
+</resource>
+</resources>
+</application>

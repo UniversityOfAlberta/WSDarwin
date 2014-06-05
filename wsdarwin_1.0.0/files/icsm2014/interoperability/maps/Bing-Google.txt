@@ -1,0 +1,22 @@
+Change	WADLFile	files/icsm2013/interoperability/maps/bing/wadl/bingMerged.wadl -> files/icsm2013/interoperability/maps/google/wadl/googleMerged.wadl
+	Add	Resources		 -> maps.googleapis.com/
+		Add	Resource		 -> /maps/api
+			Add	Method		 -> geocode (GET)
+				Add	Request		 -> Request
+					Add	Param		 -> sensor
+					Add	Param		 -> address
+				Add	Response		 -> 200
+					Add	Representation		 -> geocodeResponseType
+	Delete	Resources	dev.virtualearth.net/ -> 	
+		Delete	Resource	/REST/v1 -> 	
+			Delete	Method	Locations (GET) -> 	
+				Delete	Request	Request -> 	
+					Delete	Param	addressLine -> 	
+					Delete	Param	postalCode -> 	
+					Delete	Param	CountryRegion -> 	
+					Delete	Param	adminDistrict -> 	
+					Delete	Param	locality -> 	
+					Delete	Param	key -> 	
+					Delete	Param	maxResults -> 	
+				Delete	Response	200 -> 	
+					Delete	Representation	LocationsResponseType -> 	

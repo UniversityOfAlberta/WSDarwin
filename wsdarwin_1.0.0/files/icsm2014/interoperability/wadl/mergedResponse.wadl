@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://wadl.dev.java.net/2009/02" xmlns:tns="http://www.w3.org/2001/XMLSchema" xmlns:xs="http://www.w3.org/2001/XMLSchema" tns:schemaLocation="http://wadl.dev.java.net/2009/02 files/icsm2013/interoperability/wadl/response.xsd">
+	<grammars>
+		<include href="files/icsm2013/interoperability/wadl/response15.xsd"/>
+		<include href="files/icsm2013/interoperability/wadl/response2.xsd"/>
+		<include href="files/icsm2013/interoperability/wadl/response3.xsd"/>
+	</grammars>
+	<resources base="http://maps.googleapis.com/mapsGoogle/">
+		<resource path="apiGoogle">
+			<method id="geocodeGoogle" name="GET">
+				<request>
+					<param name="addressGoogle" style="query" type="tns:string"/>
+					<param name="sensor" style="query" type="tns:boolean"/>
+				</request>
+				<response status="200">
+					<representation element="GeocodeResponseType" mediaType="application/xml"/>
+				</response>
+			</method>
+		</resource>
+	</resources>
+</application>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GeocodeResponse>
+ <status>OK</status>
+ <result>
+  <type>university</type>
+  <type>establishment</type>
+  <formatted_address>University of Alberta, 116 St, Edmonton, AB T6G 2R3, Canada</formatted_address>
+  <address_component>
+   <long_name>University of Alberta</long_name>
+   <short_name>University of Alberta</short_name>
+   <type>establishment</type>
+  </address_component>
+  <address_component>
+   <long_name>116 St</long_name>
+   <short_name>116 St</short_name>
+   <type>route</type>
+  </address_component>
+  <address_component>
+   <long_name>Edmonton</long_name>
+   <short_name>Edmonton</short_name>
+   <type>locality</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Division No. 11</long_name>
+   <short_name>Division No. 11</short_name>
+   <type>administrative_area_level_2</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Alberta</long_name>
+   <short_name>AB</short_name>
+   <type>administrative_area_level_1</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Canada</long_name>
+   <short_name>CA</short_name>
+   <type>country</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>T6G 2R3</long_name>
+   <short_name>T6G 2R3</short_name>
+   <type>postal_code</type>
+  </address_component>
+  <geometry>
+   <location>
+    <lat>53.5234543</lat>
+    <lng>-113.5259951</lng>
+   </location>
+   <location_type>APPROXIMATE</location_type>
+   <viewport>
+    <southwest>
+     <lat>53.5163253</lat>
+     <lng>-113.5328886</lng>
+    </southwest>
+    <northeast>
+     <lat>53.5307849</lat>
+     <lng>-113.5149782</lng>
+    </northeast>
+   </viewport>
+   <bounds>
+    <southwest>
+     <lat>53.5163253</lat>
+     <lng>-113.5328886</lng>
+    </southwest>
+    <northeast>
+     <lat>53.5307849</lat>
+     <lng>-113.5149782</lng>
+    </northeast>
+   </bounds>
+  </geometry>
+ </result>
+ <result>
+  <formatted_address>University of Alberta, Edmonton, AB T6G 2G1, Canada</formatted_address>
+  <address_component>
+   <long_name>University of Alberta</long_name>
+   <short_name>University of Alberta</short_name>
+   <type>neighborhood</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>University of Alberta</long_name>
+   <short_name>University of Alberta</short_name>
+   <type>establishment</type>
+  </address_component>
+  <address_component>
+   <long_name>Edmonton</long_name>
+   <short_name>Edmonton</short_name>
+   <type>locality</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Division No. 11</long_name>
+   <short_name>Division No. 11</short_name>
+   <type>administrative_area_level_2</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Alberta</long_name>
+   <short_name>AB</short_name>
+   <type>administrative_area_level_1</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Canada</long_name>
+   <short_name>CA</short_name>
+   <type>country</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>T6G 2G1</long_name>
+   <short_name>T6G 2G1</short_name>
+   <type>postal_code</type>
+  </address_component>
+  <geometry>
+   <location>
+    <lat>53.5250152</lat>
+    <lng>-113.5211816</lng>
+   </location>
+   <location_type>APPROXIMATE</location_type>
+   <viewport>
+    <southwest>
+     <lat>53.5236887</lat>
+     <lng>-113.5224545</lng>
+    </southwest>
+    <northeast>
+     <lat>53.5263867</lat>
+     <lng>-113.5197566</lng>
+    </northeast>
+   </viewport>
+   <bounds>
+    <southwest>
+     <lat>53.5249504</lat>
+     <lng>-113.5213207</lng>
+    </southwest>
+    <northeast>
+     <lat>53.5251250</lat>
+     <lng>-113.5208904</lng>
+    </northeast>
+   </bounds>
+  </geometry>
+ </result>
+</GeocodeResponse>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="file:/C:/Users/Marios/WSDarwin/HTML2WADL/files/icsm2013/interoperability/JSON.xsd"
+	xmlns:tns="file:/C:/Users/Marios/WSDarwin/HTML2WADL/files/icsm2013/interoperability/JSON.xsd">
+	<xs:element name="response" type="tns:ResponseType" />
+	<xs:complexType name="ResponseType">
+		<xs:sequence>
+			<xs:element name="dt" type="xs:string" />
+			<xs:element name="u" type="xs:string" />
+			<xs:element name="d" type="xs:string" />
+			<xs:element name="t" type="tns:tListType" />
+			<xs:element name="a" type="xs:string" />
+			<xs:element name="n" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="t" type="tns:tListType" />
+	<xs:simpleType name="tListType">
+		<xs:list itemType="xs:string" />
+	</xs:simpleType>
+</xs:schema>

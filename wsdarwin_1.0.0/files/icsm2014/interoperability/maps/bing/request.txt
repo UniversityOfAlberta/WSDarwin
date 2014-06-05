@@ -1,0 +1,1 @@
+1 GET https://dev.virtualearth.net/REST/v1/Locations.json?CountryRegion=CA&adminDistrict=AB&locality=Edmonton&addressLine=8619%20111St.%20Edmonton,%20AB&postalCode=t6g2w1&key=Ap0-Tp0CE-_Mz_7eAT2eREJxtwJo5i7LsOBnjTDjjAO3Yv02BWLndtsvtNsQnCsL

@@ -1,15 +1,20 @@
 package wsdarwin.wadlgenerator.model.xsd;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.TreeMap;
 
 import wsdarwin.wadlgenerator.model.WADLElement;
 
 public class XSDElement implements Comparable<XSDElement>, WADLElement{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7524658800708759113L;
 	private String name;
 	private XSDIType type;
-	private Object value;
+	private HashSet<Object> value;
 	private int minOccurs;
 	private String maxOccurs;
 	private TreeMap<String, Integer> typeFrequencies;
@@ -20,7 +25,8 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 	public XSDElement(String name, XSDIType type, Object value) {
 		this.name = name;
 		this.type = type;
-		this.value = value;
+		this.value = new HashSet<Object>();
+		this.value.add(value);
 		this.typeFrequencies = new TreeMap<String, Integer>();
 		this.valueFrequencies = new TreeMap<Object, Integer>();
 		this.type2valueMap = new TreeMap<String, Object>();
@@ -71,11 +77,16 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 	}
 	
 	public Object getValue() {
-		return value;
+		if (value.size()==1) {
+			return value.iterator().next();
+		}
+		else {
+			return value;
+		}
 	}
 
-	public void setValue(Object value) {
-		this.value = value;
+	public void addValue(Object value) {
+		this.value.add(value);
 	}
 
 	public TreeMap<String, Integer> getTypeFrequencies() {

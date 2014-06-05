@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns:tns="file:/Users/blerinabazelli/Documents/workspace/HTML2WADL/files/icsm2013/interoperability/maps/google/xsd/merged_geocode.xsd" targetNamespace="file:/Users/blerinabazelli/Documents/workspace/HTML2WADL/files/icsm2013/interoperability/maps/google/xsd/merged_geocode.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="address_components" type="tns:address_componentsListType"/>
+<xs:element name="address_componentsItem" type="tns:address_componentsItemType"/>
+<xs:complexType name="address_componentsItemType">
+<xs:sequence>
+<xs:element name="long_name" type="xs:int"/>
+<xs:element name="types" type="tns:typesListType"/>
+<xs:element name="short_name" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="address_componentsListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="address_componentsItemType-item" type="tns:address_componentsItemType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="geocodeResponseType">
+<xs:sequence>
+<xs:element name="results" type="tns:resultsListType"/>
+<xs:element name="status" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="geometry" type="tns:geometryType"/>
+<xs:complexType name="geometryType">
+<xs:sequence>
+<xs:element name="viewport" type="tns:viewportType"/>
+<xs:element name="location_type" type="xs:string"/>
+<xs:element name="location" type="tns:locationType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="location" type="tns:locationType"/>
+<xs:complexType name="locationType">
+<xs:sequence>
+<xs:element name="lng" type="xs:double"/>
+<xs:element name="lat" type="xs:double"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="northeast" type="tns:northeastType"/>
+<xs:complexType name="northeastType">
+<xs:sequence>
+<xs:element name="lng" type="xs:double"/>
+<xs:element name="lat" type="xs:double"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="response" type="tns:geocodeResponseType"/>
+<xs:element name="results" type="tns:resultsListType"/>
+<xs:element name="resultsItem" type="tns:resultsItemType"/>
+<xs:complexType name="resultsItemType">
+<xs:sequence>
+<xs:element name="address_components" type="tns:address_componentsListType"/>
+<xs:element name="formatted_address" type="xs:string"/>
+<xs:element name="types" type="tns:typesListType"/>
+<xs:element name="geometry" type="tns:geometryType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="resultsListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="resultsItemType-item" type="tns:resultsItemType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="southwest" type="tns:southwestType"/>
+<xs:complexType name="southwestType">
+<xs:sequence>
+<xs:element name="lng" type="xs:double"/>
+<xs:element name="lat" type="xs:double"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="types" type="tns:typesListType"/>
+<xs:complexType name="typesListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="typesListType-item" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="viewport" type="tns:viewportType"/>
+<xs:complexType name="viewportType">
+<xs:sequence>
+<xs:element name="southwest" type="tns:southwestType"/>
+<xs:element name="northeast" type="tns:northeastType"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>

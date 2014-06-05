@@ -169,33 +169,33 @@ public class Response2XSD {
 					if (Pattern.matches("^[-+]?\\d*$", value)
 							&& Integer.parseInt(value)<=Integer.MAX_VALUE && Integer.parseInt(value)>=Integer.MIN_VALUE) {
 						XSDElement listElement = new XSDElement("item",
-								XSDPrimitiveType.INT);
+								XSDPrimitiveType.INT, Integer.parseInt(value));
 						listElement.setMinOccurs(0);
 						listElement.setMaxOccurs("unbounded");
 						listType.addElement(listElement);
 					} else if (Pattern.matches("^[-+]?\\d*$", value)
 							&& Long.parseLong(value)<=Long.MAX_VALUE && Long.parseLong(value)>=Long.MIN_VALUE) {
 						XSDElement listElement = new XSDElement("item",
-								XSDPrimitiveType.LONG);
+								XSDPrimitiveType.LONG, Long.parseLong(value));
 						listElement.setMinOccurs(0);
 						listElement.setMaxOccurs("unbounded");
 						listType.addElement(listElement);
 					} else if (Pattern.matches(
 							"^[-+]?[0-9]+[.]?[0-9]*([eE][-+]?[0-9]+)?$", value)) {
 						XSDElement listElement = new XSDElement("item",
-								XSDPrimitiveType.DOUBLE);
+								XSDPrimitiveType.DOUBLE, Double.parseDouble(value));
 						listElement.setMinOccurs(0);
 						listElement.setMaxOccurs("unbounded");
 						listType.addElement(listElement);
 					} else if (Pattern.matches("true|false", value)) {
 						XSDElement listElement = new XSDElement("item",
-								XSDPrimitiveType.BOOLEAN);
+								XSDPrimitiveType.BOOLEAN, Boolean.parseBoolean(value));
 						listElement.setMinOccurs(0);
 						listElement.setMaxOccurs("unbounded");
 						listType.addElement(listElement);
 					} else {
 						XSDElement listElement = new XSDElement("item",
-								XSDPrimitiveType.STRING);
+								XSDPrimitiveType.STRING, value);
 						listElement.setMinOccurs(0);
 						listElement.setMaxOccurs("unbounded");
 						listType.addElement(listElement);

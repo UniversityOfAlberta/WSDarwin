@@ -1,0 +1,83 @@
+{
+	"total": 2,
+	"movies": [
+		{
+			"id": "771037147",
+			"title": "Soul Surfer",
+			"year": 2011,
+			"mpaa_rating": "PG",
+			"runtime": 106,
+			"critics_consensus": "There's an amazing true story at the heart of Soul Surfer -- and unfortunately, it's drowned by waves of Hollywood cheese.",
+			"release_dates": {
+				"theater": "2011-04-08",
+				"dvd": "2011-08-02"
+			},
+			"ratings": {
+				"critics_rating": "Rotten",
+				"critics_score": 45,
+				"audience_rating": "Upright",
+				"audience_score": 77
+			},
+			"synopsis": "Bethany (AnnaSophia Robb) was born to surf. A natural talent who took to the waves at a young age, she was leading an idyllic life on Kauai, participating in national surf competitions with her best friend Alana (Lorraine Nicholson), when everything changed. On Halloween morning, a 14-foot tiger shark came out of nowhere and seemed to shatter all her dreams. Soul Surfer reveals Bethany's fight to recover from her ordeal and how she grappled with the question of her future. Strengthened by the love of her parents, Tom (Dennis Quaid) and Cheri (Helen Hunt), and supported by her youth group leader Sara (Carrie Underwood), Bethany refuses to give in or give up, and begins a bold return to the water. -- (C) Official Site",
+			"posters": {
+				"thumbnail": "http://content8.flixster.com/movie/11/15/57/11155754_mob.jpg",
+				"profile": "http://content8.flixster.com/movie/11/15/57/11155754_pro.jpg",
+				"detailed": "http://content8.flixster.com/movie/11/15/57/11155754_det.jpg",
+				"original": "http://content8.flixster.com/movie/11/15/57/11155754_ori.jpg"
+			},
+			"abridged_cast": [
+				{
+					"name": "Annasophia Robb",
+					"id": "162659139",
+					"characters": [
+						"Bethany Hamilton"
+					]
+				},
+				{
+					"name": "Dennis Quaid",
+					"id": "162655527",
+					"characters": [
+						"Tom Hamilton"
+					]
+				},
+				{
+					"name": "Helen Hunt",
+					"id": "162666056",
+					"characters": [
+						"Cheri Hamilton"
+					]
+				},
+				{
+					"name": "Lorraine Nicholson",
+					"id": "770826867",
+					"characters": [
+						"Alana Blanchard"
+					]
+				},
+				{
+					"name": "Carrie Underwood",
+					"id": "770909703",
+					"characters": [
+						"Sarah Hill"
+					]
+				}
+			],
+			"alternate_ids": {
+				"imdb": "1596346"
+			},
+			"links": {
+				"self": "http://api.rottentomatoes.com/api/public/v1.0/movies/771037147.json",
+				"alternate": "http://www.rottentomatoes.com/m/soul_surfer/",
+				"cast": "http://api.rottentomatoes.com/api/public/v1.0/movies/771037147/cast.json",
+				"clips": "http://api.rottentomatoes.com/api/public/v1.0/movies/771037147/clips.json",
+				"reviews": "http://api.rottentomatoes.com/api/public/v1.0/movies/771037147/reviews.json",
+				"similar": "http://api.rottentomatoes.com/api/public/v1.0/movies/771037147/similar.json"
+			}
+		}
+	],
+	"links": {
+		"self": "http://api.rottentomatoes.com/api/public/v1.0/movies.json?q=Soul+Surfer&page_limit=1&page=1",
+		"next": "http://api.rottentomatoes.com/api/public/v1.0/movies.json?q=Soul+Surfer&page_limit=1&page=2"
+	},
+	"link_template": "http://api.rottentomatoes.com/api/public/v1.0/movies.json?q={search-term}&page_limit={results-per-page}&page={page-number}"
+}

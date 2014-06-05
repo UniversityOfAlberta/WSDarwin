@@ -1,0 +1,79 @@
+{
+   "results" : [
+      {
+         "address_components" : [
+            {
+               "long_name" : "11302",
+               "short_name" : "11302",
+               "types" : [ "street_number" ]
+            },
+            {
+               "long_name" : "103 Avenue Northwest",
+               "short_name" : "103 Ave NW",
+               "types" : [ "route" ]
+            },
+            {
+               "long_name" : "Oliver",
+               "short_name" : "Oliver",
+               "types" : [ "neighborhood", "political" ]
+            },
+            {
+               "long_name" : "Edmonton",
+               "short_name" : "Edmonton",
+               "types" : [ "locality", "political" ]
+            },
+            {
+               "long_name" : "Division No. 11",
+               "short_name" : "Division No. 11",
+               "types" : [ "administrative_area_level_2", "political" ]
+            },
+            {
+               "long_name" : "Alberta",
+               "short_name" : "AB",
+               "types" : [ "administrative_area_level_1", "political" ]
+            },
+            {
+               "long_name" : "Canada",
+               "short_name" : "CA",
+               "types" : [ "country", "political" ]
+            },
+            {
+               "long_name" : "T5K 1P6",
+               "short_name" : "T5K 1P6",
+               "types" : [ "postal_code" ]
+            }
+         ],
+         "formatted_address" : "11302 103 Avenue Northwest, Edmonton, AB T5K 1P6, Canada",
+         "geometry" : {
+            "bounds" : {
+               "northeast" : {
+                  "lat" : 53.54463500000001,
+                  "lng" : -113.5157960
+               },
+               "southwest" : {
+                  "lat" : 53.54462410,
+                  "lng" : -113.51579610
+               }
+            },
+            "location" : {
+               "lat" : 53.54463500000001,
+               "lng" : -113.51579610
+            },
+            "location_type" : "RANGE_INTERPOLATED",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 53.54597853029151,
+                  "lng" : -113.5144470697085
+               },
+               "southwest" : {
+                  "lat" : 53.54328056970851,
+                  "lng" : -113.5171450302915
+               }
+            }
+         },
+         "partial_match" : true,
+         "types" : [ "street_address" ]
+      }
+   ],
+   "status" : "OK"
+}

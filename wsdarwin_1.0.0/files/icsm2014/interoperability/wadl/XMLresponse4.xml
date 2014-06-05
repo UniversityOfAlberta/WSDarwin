@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GeocodeResponse>
+ <status>OK</status>
+ <result>
+  <type>street_address</type>
+  <formatted_address>8619 111 Street Northwest, Edmonton, AB T6G, Canada</formatted_address>
+  <address_component>
+   <long_name>8619</long_name>
+   <short_name>8619</short_name>
+   <type>street_number</type>
+  </address_component>
+  <address_component>
+   <long_name>111 Street Northwest</long_name>
+   <short_name>111 St NW</short_name>
+   <type>route</type>
+  </address_component>
+  <address_component>
+   <long_name>Garneau</long_name>
+   <short_name>Garneau</short_name>
+   <type>neighborhood</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Edmonton</long_name>
+   <short_name>Edmonton</short_name>
+   <type>locality</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Division No. 11</long_name>
+   <short_name>Division No. 11</short_name>
+   <type>administrative_area_level_2</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Alberta</long_name>
+   <short_name>AB</short_name>
+   <type>administrative_area_level_1</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>Canada</long_name>
+   <short_name>CA</short_name>
+   <type>country</type>
+   <type>political</type>
+  </address_component>
+  <address_component>
+   <long_name>T6G</long_name>
+   <short_name>T6G</short_name>
+   <type>postal_code</type>
+  </address_component>
+  <geometry>
+   <location>
+    <lat>53.5226400</lat>
+    <lng>-113.5174530</lng>
+   </location>
+   <location_type>ROOFTOP</location_type>
+   <viewport>
+    <southwest>
+     <lat>53.5212910</lat>
+     <lng>-113.5188020</lng>
+    </southwest>
+    <northeast>
+     <lat>53.5239890</lat>
+     <lng>-113.5161040</lng>
+    </northeast>
+   </viewport>
+  </geometry>
+ </result>
+</GeocodeResponse>

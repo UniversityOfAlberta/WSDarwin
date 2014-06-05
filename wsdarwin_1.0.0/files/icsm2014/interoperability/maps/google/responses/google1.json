@@ -1,0 +1,68 @@
+{
+   "results" : [
+      {
+         "address_components" : [
+            {
+               "long_name" : "8619",
+               "short_name" : "8619",
+               "types" : [ "street_number" ]
+            },
+            {
+               "long_name" : "111 Street Northwest",
+               "short_name" : "111 St NW",
+               "types" : [ "route" ]
+            },
+            {
+               "long_name" : "Garneau",
+               "short_name" : "Garneau",
+               "types" : [ "neighborhood", "political" ]
+            },
+            {
+               "long_name" : "Edmonton",
+               "short_name" : "Edmonton",
+               "types" : [ "locality", "political" ]
+            },
+            {
+               "long_name" : "Division No. 11",
+               "short_name" : "Division No. 11",
+               "types" : [ "administrative_area_level_2", "political" ]
+            },
+            {
+               "long_name" : "Alberta",
+               "short_name" : "AB",
+               "types" : [ "administrative_area_level_1", "political" ]
+            },
+            {
+               "long_name" : "Canada",
+               "short_name" : "CA",
+               "types" : [ "country", "political" ]
+            },
+            {
+               "long_name" : "T6G",
+               "short_name" : "T6G",
+               "types" : [ "postal_code" ]
+            }
+         ],
+         "formatted_address" : "8619 111 Street Northwest, Edmonton, AB T6G, Canada",
+         "geometry" : {
+            "location" : {
+               "lat" : 53.522640,
+               "lng" : -113.5174530
+            },
+            "location_type" : "ROOFTOP",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 53.52398898029150,
+                  "lng" : -113.5161040197085
+               },
+               "southwest" : {
+                  "lat" : 53.52129101970850,
+                  "lng" : -113.5188019802915
+               }
+            }
+         },
+         "types" : [ "street_address" ]
+      }
+   ],
+   "status" : "OK"
+}

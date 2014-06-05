@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns:tns="file:/Users/blerinabazelli/Documents/workspace/HTML2WADL/files/icsm2013/interoperability/movies/rottenTomatoes/xsd/merged_movies.xsd" targetNamespace="file:/Users/blerinabazelli/Documents/workspace/HTML2WADL/files/icsm2013/interoperability/movies/rottenTomatoes/xsd/merged_movies.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="abridged_cast" type="tns:abridged_castListType"/>
+<xs:element name="abridged_castItem" type="tns:abridged_castItemType"/>
+<xs:complexType name="abridged_castItemType">
+<xs:sequence>
+<xs:element name="id" type="xs:int"/>
+<xs:element name="name" type="xs:string"/>
+<xs:element name="characters" type="tns:charactersListType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="abridged_castListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="abridged_castItemType-item" type="tns:abridged_castItemType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="alternate_ids" type="tns:alternate_idsType"/>
+<xs:complexType name="alternate_idsType">
+<xs:sequence>
+<xs:element name="imdb" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="characters" type="tns:charactersListType"/>
+<xs:complexType name="charactersListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="charactersListType-item" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="links" type="tns:linksType"/>
+<xs:complexType name="linksType">
+<xs:sequence>
+<xs:element name="alternate" type="xs:string"/>
+<xs:element name="reviews" type="xs:string"/>
+<xs:element name="cast" type="xs:string"/>
+<xs:element name="next" type="xs:string"/>
+<xs:element name="self" type="xs:string"/>
+<xs:element name="clips" type="xs:string"/>
+<xs:element name="similar" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="movies" type="tns:moviesListType"/>
+<xs:element name="moviesItem" type="tns:moviesItemType"/>
+<xs:complexType name="moviesItemType">
+<xs:sequence>
+<xs:element name="alternate_ids" type="tns:alternate_idsType"/>
+<xs:element name="critics_consensus" type="xs:string"/>
+<xs:element name="runtime" type="xs:int"/>
+<xs:element name="links" type="tns:linksType"/>
+<xs:element name="release_dates" type="tns:release_datesType"/>
+<xs:element name="id" type="xs:int"/>
+<xs:element name="title" type="xs:string"/>
+<xs:element name="synopsis" type="xs:string"/>
+<xs:element name="abridged_cast" type="tns:abridged_castListType"/>
+<xs:element name="year" type="xs:int"/>
+<xs:element name="mpaa_rating" type="xs:string"/>
+<xs:element name="posters" type="tns:postersType"/>
+<xs:element name="ratings" type="tns:ratingsType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="moviesListType">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="moviesItemType-item" type="tns:moviesItemType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="moviesResponseType">
+<xs:sequence>
+<xs:element name="total" type="xs:int"/>
+<xs:element name="movies" type="tns:moviesListType"/>
+<xs:element name="links" type="tns:linksType"/>
+<xs:element name="link_template" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="posters" type="tns:postersType"/>
+<xs:complexType name="postersType">
+<xs:sequence>
+<xs:element name="thumbnail" type="xs:string"/>
+<xs:element name="detailed" type="xs:string"/>
+<xs:element name="original" type="xs:string"/>
+<xs:element name="profile" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="ratings" type="tns:ratingsType"/>
+<xs:complexType name="ratingsType">
+<xs:sequence>
+<xs:element name="critics_score" type="xs:int"/>
+<xs:element name="critics_rating" type="xs:string"/>
+<xs:element name="audience_score" type="xs:int"/>
+<xs:element name="audience_rating" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="release_dates" type="tns:release_datesType"/>
+<xs:complexType name="release_datesType">
+<xs:sequence>
+<xs:element name="dvd" type="xs:string"/>
+<xs:element name="theater" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="response" type="tns:moviesResponseType"/>
+</xs:schema>

@@ -1,0 +1,5 @@
+http://maps.googleapis.com/maps/api/geocode/xml?address=University+of+Alberta,+Edmonton,+AB&sensor=false
+http://maps.googleapis.com/maps/api/geocode/xml?address=Downtown,+Edmonton,+AB&sensor=false
+http://maps.googleapis.com/maps/api/geocode/xml?address=Thessaloniki+International+Airport,+Thermi,+Thessaloniki,+Greece&sensor=false
+http://maps.googleapis.com/maps/api/geocode/xml?address=8619+111+St+NW,+Edmonton,+AB&sensor=false
+http://maps.googleapis.com/maps/api/geocode/xml?address=10620+Jasper+Avenue+Northwest+Edmonton&sensor=false

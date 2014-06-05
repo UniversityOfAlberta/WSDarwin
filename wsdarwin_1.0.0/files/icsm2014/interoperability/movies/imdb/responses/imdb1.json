@@ -1,0 +1,57 @@
+[
+	{
+		"runtime": [
+			"USA: 106 min"
+		],
+		"rating": 6.9,
+		"genres": [
+			"Biography",
+			"Drama",
+			"Sport"
+		],
+		"rated": "PG",
+		"language": [
+			"English"
+		],
+		"title": "Soul Surfer",
+		"filming_locations": "Hawaii, USA",
+		"poster": "http://ia.media-imdb.com/images/M/MV5BMTU2MDg0OTYyM15BMl5BanBnXkFtZTcwMjg5MjY0NA@@._V1._SY317_.jpg",
+		"imdb_url": "http://www.imdb.com/title/tt1596346/",
+		"writers": [
+			"Sean McNamara",
+			"Deborah Schwartz"
+		],
+		"imdb_id": "tt1596346",
+		"directors": [
+			"Sean McNamara"
+		],
+		"rating_count": 16894,
+		"actors": [
+			"AnnaSophia Robb",
+			"Helen Hunt",
+			"Dennis Quaid",
+			"Lorraine Nicholson",
+			"Kevin Sorbo",
+			"Carrie Underwood",
+			"Ross Thomas",
+			"Chris Brochu",
+			"Sonya Balmores",
+			"Jeremy Sumpter",
+			"Craig T. Nelson",
+			"Branscombe Richmond",
+			"Cody Gomes",
+			"Titus Kinimaka",
+			"John Philbin"
+		],
+		"plot_simple": "A teenage surfer girl summons the courage to go back into the ocean after losing an arm in a shark attack.",
+		"year": 2011,
+		"country": [
+			"USA"
+		],
+		"type": "M",
+		"release_date": 20110408,
+		"also_known_as": [
+			"Soul Surfer - Coragem de Viver"
+		]
+	}
+]
