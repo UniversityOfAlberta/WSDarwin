@@ -1,0 +1,30 @@
+# Customises the list of options given by the GenericObjectEditor
+# for various superclasses.
+#
+# Version: $Revision: 194 $
+
+# Packages with MultiLabelClassifier implementations
+meka.classifiers.multilabel.MultilabelClassifier=\
+ meka.classifiers.multilabel,\
+ meka.classifiers.multilabel.meta,\
+ meka.classifiers.multitarget,\
+ meka.classifiers.multitarget.meta
+
+# Packages with MultiTargetClassifier implementations
+meka.classifiers.multitarget.MultiTargetClassifier=\
+ meka.classifiers.multitarget,\
+ meka.classifiers.multitarget.meta
+
+# Packages with SemisupervisedClassifier implementations
+meka.classifiers.multilabel.SemisupervisedClassifier=\
+ meka.classifiers.multilabel,\
+ meka.classifiers.multilabel.meta
+ 
+# Lists the Classifier-Packages that should be added to WEKA's
+# GenericObjectEditor
+weka.classifiers.Classifier=\
+ meka.classifiers.multilabel,\
+ meka.classifiers.multilabel.meta,\
+ meka.classifiers.multitarget,\
+ meka.classifiers.multitarget.meta
+ 
