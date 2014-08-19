@@ -3,8 +3,6 @@
 <html>
 
 <head>
-
-<!-- <LINK REL="SHORTCUT ICON" HREF="http://pokemonpacific.com/images/PikachuSprite.gif" /> -->
 <!-- css sheets -->
 <link rel=stylesheet href="<?= $GLOBALS['baseURL']; ?>css/first.css" type="text/CSS">
 <link rel=stylesheet href="<?= $GLOBALS['baseURL']; ?>css/diffview.css" type="text/CSS">
@@ -44,22 +42,6 @@ function parseXml(xml) {
       alert("cannot parse xml string!");
    return dom;
 }
-
-	$(document).ready(function(){
-		//alert('dfdsdf');
-		//$("#wadlOutput").html("#include file=\"http://localhost:8080/wsdarwin_1.0.0/twitterMerged.wadl\"");
-		//var cont = "<iframe src=\"http://localhost:8080/wsdarwin_1.0.0/twitterMerged.wadl\" width=800 height=500></iframe>";
-		//$("#wadlOutput").html(cont);
-		//$("#wadlOutput").load("http://www.google.com/", function(){alert('Done deal');});
-		//alert('dfdsdf');
-
-		//var xotree = new XML.ObjTree();
-   		var url = "http://localhost:8080/wsdarwin_1.0.0/twitterMerged.wadl";
-   		var url2 = "C:/Users/mihai/eclipse_workspace/wsdarwin_1.0.0/WebContent/twitterMerged.wadl";
-   	});
-
-
-
 </script>
 
 </head>
@@ -76,22 +58,6 @@ function parseXml(xml) {
 
 	<div class='fields_input'>
 		<button onClick="addURLField()"> Add URL </button>
-
-		<!--
-		<form action="upload_file.php" method="post"
-		enctype="multipart/form-data">
-		<label for="file">Filename:</label>
-		<input type="file" name="file" id="file"><br>
-		<input type="submit" name="submit" value="Submit">
-		</form>
-			 -->
-
-		
-		<!--
-		<span>
-		Upload a WADL File<input id='filesAnalyze' type='file' placeholder='Upload'></input>
-		</span>
-		-->
 
 		Select images: <input id='files' type="file" multiple>
 		<input type="submit">
@@ -127,7 +93,7 @@ function parseXml(xml) {
 			    	for (var i = 0; i < resp['filepaths'].length; i++){
 			    		uppedWADLurls.push(resp['filepaths'][i]);
 			    	}
-			    	//console.log("URLS added: " + uppedWADLurls);
+
 			    }
 			}
 
@@ -143,35 +109,14 @@ function parseXml(xml) {
 		    xhr.send(formData);
 
 		}, false);
-
-		/*function var_dump(obj) {
-		    var out = '';
-		    for (var i in obj) {
-		        out += i + ": " + obj[i] + "\n";
-		    }
-		    console.log(out);
-		}*/
 		</script>
 
 		<div id='fieldUrlDiv' class='fieldUrlDiv'>
 			<script type="text/javascript"> addURLField(); </script>
 		</div>
-		
-		<!--
-		<div class='areaUrlDiv'>
-			<textarea class='textarea' name='textarea' id='textarea' placeholder='Enter one URL per line'></textarea>
-		</div>
-		-->
 
 	</div>
 	<div class='middleRegion'>
-	<!--
-	<div class='requestDetails'>
-		<div id='urlRequestDiv' class='urlRequestDiv'>
-			Hello There. Parameter Analysis goes here.
-		</div>
-	</div>
-	-->
 
 	<div id='compareDiv' class='compareDiv'>
 		<button class='showCompareBtn' id='showCompareBtn' onClick="showCompareOptions()">+ Show Compare Tool</button>
@@ -183,20 +128,20 @@ function parseXml(xml) {
 
 			<script>
 				document.getElementById('filesCompare').addEventListener('change', function(e) {
-				    //var file = this.files[0];
-				    console.log("files length: " + this.files.length);
 				    var xhr = new XMLHttpRequest();
 				    //xhr.file = file; // not necessary if you create scopes like this
 				    xhr.addEventListener('progress', function(e) {
 				        var done = e.position || e.loaded, total = e.totalSize || e.total;
 				        console.log('xhr progress: ' + (Math.floor(done/total*1000)/10) + '%');
 				    }, false);
+
 				    if ( xhr.upload ) {
 				        xhr.upload.onprogress = function(e) {
 				            var done = e.position || e.loaded, total = e.totalSize || e.total;
 				            console.log('xhr.upload progress: ' + done + ' / ' + total + ' = ' + (Math.floor(done/total*1000)/10) + '%');
 				        };
 				    }
+
 				    xhr.onreadystatechange = function(e) {
 				        if ( 4 == this.readyState ) {
 				            console.log(['xhr upload complete', e]);
@@ -217,8 +162,7 @@ function parseXml(xml) {
 					}
 
 				    xhr.open('post', "/wsdarwin/funcsPHP/uploadFile.php", true);
-				    //alert("file is " + file);
-				    //var filesArray = [];
+
 				    var formData = new FormData();
 				    for (var i = 0; i < this.files.length; i++){
 				    	//filesArray.push(this.files[i]);
@@ -253,6 +197,7 @@ function parseXml(xml) {
 
 	<button class='analyzeBtn' id='analyzeBtn' onClick="analyze('analyze')"> Analyze URI </button>		
 	<button class='compareBtn' id='compareBtn' onClick="compareBtn()"> Compare </button>
+	<button class='crossServiceCompareBtn' id='crossServiceCompareBtn' onClick="crossServiceCompareBtn()"> Cross-Service Comparison </button>
 	<!--<button class='saveWADLbtn' id='saveWADLbtn' onClick='save_wadl_to_file()'>Save WADL File</button>-->
 	<button class='saveWADLbtn' id='saveWADLbtn' onClick='downloadWADL()'>Save WADL File</button>
 
@@ -260,8 +205,27 @@ function parseXml(xml) {
 		<div id='wadlOutput' class='wadlOutput' placeholder='WADL'>
 			<p>No WADL Output</p>
 		</div>
-		<div id='right_wadl_output' class='halfwadlOutput'>sdasd</div>
-		<div id='left_wadl_output' class='halfwadlOutput'>dddd</div>
+		<div id='right_wadl_output' class='halfwadlOutput'></div>
+		<div id='left_wadl_output' class='halfwadlOutput'></div>
+		<div id='leftInfoMenu' class='leftInfoMenu'>
+			<div id="rightHalfDiv" class="halfDiv">
+				<div>hey</div>
+				<div>two</div>
+			</div>
+			<div id="leftHalfDiv" class="halfDiv">
+				<div>second</div>
+				<div>three</span>
+			</div>
+			<!--<select size="3" height="100px" name="selectionField" multiple="yes" > 
+			  <option value="CA" >California -- CA </option>
+			  <option value="CO" >Colorado -- CO</option>
+			  <option value="CN" >Connecticut -- CN</option>
+			  <option value="CN" >Connecticut -- CN</option>
+			  <option value="CN" >Connecticut -- CN</option>
+			  <option value="CN" >asdfsd -- CN</option>
+			</select>
+			<button>hello world</button>-->
+		</div>
 	</div>
 
 </div>

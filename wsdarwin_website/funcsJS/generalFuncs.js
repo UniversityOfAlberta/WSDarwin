@@ -1,69 +1,448 @@
 //import "ObjTree.js";
 //import "jsdiff.js";
 
-var noURLFields = 0;
-var noCompareURLFields = 0;
-var uppedWADLurls = [];
-var compareWADLurls = [];
+// tomcat server path/location
+var tomcat_server_path				= "http://localhost:8080/";
+//var tomcat_server_path			= "http://ssrg17.cs.ualberta.ca:8080/";
+
+var server_api_url 				= tomcat_server_path + "wsdarwin_1.0.0/jaxrs/api/";
+
+// for java_diff: ( if true, appends text line by line, otherwise it prints it all in a tree-hierarchy way)
+var parsing_html_mode 			= true;
+var max_wadl_files_uploaded 	= 1;
+var sideToWriteTo 				= "";
+var crossService 				= true;
+
+var noURLFields 				= 0;
+var noCompareURLFields 			= 0;
+var uppedWADLurls 				= [];
+var compareWADLurls 			= [];
 
 //wadl html file
-var wadl_attribute_edit_mode = true;	// DEBUG (only applicable to 'analyze', not 'compare')
-var add_elements_mode = true;			// DEBUG (only applicable to 'analyze', not 'compare')
+var wadl_attribute_edit_mode 	= true;	// DEBUG (only applicable to 'analyze', not 'compare')
+var add_elements_mode 			= true;			// DEBUG (only applicable to 'analyze', not 'compare')
 
-var session_id = '';	// initially set in the java app
-var html_wadl_string = '';
-var strapped_html_wadl_string = '';
-var xml_wadl_string = '';
+var session_id 					= '';	// initially set in the java app
+var html_wadl_string 			= '';
+var strapped_html_wadl_string 	= '';
+var xml_wadl_string 			= '';
 
-var oldCompare = '';
-var newCompare = '';
+var oldCompare 	= '';
+var newCompare 	= '';
+var rightSideID = "b";
+var leftSideID 	= "a";
 
-var spaces = 0;
+var lineNumber 	= 0;
+var spaces 		= 0;
+var node_id 	= 0;
 var rootNode;
-var node_id = 0;
 var xmlDoc;
 
+var oldRootDoc;
+var newRootDoc;
+
+var firstWADL = "";
+var secondWADL = "";
+
+// highlight colors
+var crossServiceMappingsHighlightColor = "#cdfeff";
+
+// class declarations
+function wadl_doc(){
+
+	this.xmlDoc = null;
+
+	this.hello = function(){
+		alert('Hello World ' + this.xmlDoc);
+	}
+
+	this.setXmlDoc = function(arg){
+		this.xmlDoc = arg;
+		alert('arg is ' + arg)
+	}
+
+	this.getXmlDoc = function(){
+		return this.xmlDoc;
+	}
+
+}
+
+var analyzeObj = new wadl_doc();
+
+// User-action functions ---------------------------- 
+
+function activateView(viewid){
+	$("#" + 'analysisView').removeClass("active");
+	$("#" + 'comparisonView').removeClass("active");
+	$("#" + 'crossServiceComparisonView').removeClass("active");
+	$("#" + 'settingsView').removeClass("active");
+	$("#" + viewid).addClass("active");
+
+	if (viewid == "analysisView"){
+		window.location.hash = "analysisViewName";
+		//$("#compareA").show();
+		$("#compareB").hide();
+		$(".compareOptions").hide();
+		$("#analyzeSubmitBtn").show();
+		$("#compareSubmitBtn").hide();
+		$("#crossServiceCompareSubmitBtn").hide();
+
+		$("#files").text("Upload a WADL file");
+		$("#filesCompare").text("Upload a WADL file");
+
+		$("#uploadAWADLA").css("visibility", "");
+		$("#uploadAWADLB").css("visibility", "");
+	} else if (viewid == "comparisonView"){
+		window.location.hash = "compareViewName";
+		$(".compareOptions").show();
+		$("#compareB").show();
+		$("#analyzeSubmitBtn").hide();
+		$("#crossServiceCompareSubmitBtn").hide();
+		$("#compareSubmitBtn").show();
+
+		$("#files").text("Upload a WADL file");
+		$("#filesCompare").text("Upload a WADL file");
+		$("#uploadAWADLA").css("visibility", "");
+		$("#uploadAWADLB").css("visibility", "");
+
+	} else if (viewid == "crossServiceComparisonView"){
+		window.location.hash = "crossServiceViewName";
+
+		$(".compareOptions").hide();
+
+		$("#compareB").show();
+		$("#analyzeSubmitBtn").hide();	// need to be changed to upload .ser files for now
+		$("#compareSubmitBtn").hide();	// ..
+		$("#files").text("Upload a (.wsmeta) file");
+		$("#filesCompare").text("Upload a (.wsmeta) file");
+
+		$("#uploadAWADLA").css("visibility", "");
+		$("#uploadAWADLB").css("visibility", "");
+
+
+		$("#crossServiceCompareSubmitBtn").show();
+	}
+}
+
 function addURLField(){
+
 	var fullDiv = "	<div class='singleUrlDiv' id='singleURLdiv_" + noURLFields + "'>"+
-				  "	<select id='requestType1'>"+
+				  "	<select class='urlSelectBtn' id='requestType1'>"+
 				  "	<option value='get' selected>GET</option>"+
 						"<option value='post'>POST</option>"+
 						"<option value='put'>PUT</option>"+
 						"<option value='delete'>DELETE</option>"+
 						"<option value='head'>HEAD</option>"+
 					"</select>"+
-					"<input type='text' name='lname' id='urlInput_" + noURLFields + "' class='urlInput'>"+
+					//"<input type='text' name='lname' id='urlInput_" + noURLFields + "' class='urlInput'>"+
+					"<input type=\"text\" name='lname' id='urlInputA_" + noURLFields + "' style='width: 70%; display: inline-block;' class=\"form-control urlInputClassA\" placeholder=\"Text input\">" +
 					//"<button id='analyzeSingleURL1' class='analyzeSingleURL' onClick=\"analyzeSingleURL('" + noURLFields + "')\"> Analyze </button>"+
-					"<button onClick=\"removeURLField('" + noURLFields + "')\">Remove</button>"+
+					"<button style='margin-left: 10px; vertical-align: top;' onClick=\"removeURLField('" + noURLFields + "')\" type=\"button\" class=\"btn btn-danger\">X</button>" +
+					//"<button class='singleUrlRemoveBtn' onClick=\"removeURLField('" + noURLFields + "')\">Remove</button>"+
 					"</div>";
 	$('#fieldUrlDiv').append(fullDiv);
 	noURLFields++;
 }
 
 function addCompareURLField(){
-	//alert("ss");
-	var fullDiv = "	<div class='singleUrlDiv' id='singleCompareUrlDiv" + noCompareURLFields + "'>"+
-				  "	<select id='requestType1'>"+
+	var fullDiv = "	<div class='singleUrlDiv' id='singleCompareUrlDiv_" + noCompareURLFields + "'>"+
+				  "	<select class='urlSelectBtn' id='requestType1'>"+
 				  "	<option value='get' selected>GET</option>"+
 						"<option value='post'>POST</option>"+
 						"<option value='put'>PUT</option>"+
 						"<option value='delete'>DELETE</option>"+
 						"<option value='head'>HEAD</option>"+
 					"</select>"+
-					"<input type='text' name='comparelname' id='urlCompareInput_" + noCompareURLFields + "' class='urlInput2'>"+
-					//"<button id='analyzeSingleURL1' class='analyzeSingleURL' onClick=\"analyzeSingleURL('" + noCompareURLFields + "')\"> Analyze </button>"+
-					"<button onClick=\"removeURLField('" + noCompareURLFields + "')\">Remove</button>"+
+					"<input type=\"text\" name='comparelname' id='urlInputB_" + noCompareURLFields + "' style='width: 70%; display: inline-block;' class=\"form-control urlInputClassB\" placeholder=\"Text input\">" +
+					"<button style='margin-left: 10px; vertical-align: top;' onClick=\"removeCompareURLField('" + noCompareURLFields + "')\" type=\"button\" class=\"btn btn-danger\">X</button>" +
 					"</div>";
-	$('#compareDiv').append(fullDiv);
+	$('#fieldCompareUrlDiv').append(fullDiv);
 	noCompareURLFields++;
 }
 
-function var_dump(obj) {
-    var out = '';
-    for (var i in obj) {
-        out += i + ": " + obj[i] + "\n";
-    }
-    console.log(out);
+function get_input_urls(inputNo){
+	var urlArray = [];
+	// JSON urls to analyze
+	$('input.urlInputClass' + inputNo).each(function(index) {
+		urlArray.push( $('#urlInput' + inputNo + '_'+index).val() );
+	});
+	return urlArray;
+}
+
+var crossMappings = new Array();
+
+function crossServiceCompareBtn(){
+	runAnalysis("crossServiceCompare");
+}
+
+function compareBtn(){
+	runAnalysis("compare");
+}
+
+function analyzeBtn(){
+	runAnalysis("analyze");
+}
+
+function runAnalysis(process_mode){
+	// reset html elements
+	$("#left_wadl_output").hide();
+	$("#right_wadl_output").hide();
+	$("#wadlOutput").show();
+	$("#wadlOutput").html('');
+
+	var api_call_url;
+	var ajaxData;
+
+	if (process_mode === "analyze"){
+		// input urls
+		var analyzeDataJSON = JSON.stringify(get_input_urls('A'));
+
+		// WADL files uploaded..
+		var analyzed_wadls_URLs = [];
+
+		for (var i = 0; i < uppedWADLurls.length; i++){
+			analyzed_wadls_URLs.push(uppedWADLurls[i]);
+		}
+		var jsonWadlURLs = JSON.stringify(analyzed_wadls_URLs);
+
+		api_call_url = server_api_url + "analyze";
+		ajaxData = { newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id };
+	} else if ( (process_mode === 'compare') || (process_mode === 'crossServiceCompare') ){
+		// input urls
+		var analyzeDataJSON = JSON.stringify(get_input_urls('A'));
+		var compareDataJSON = JSON.stringify(get_input_urls('B'));
+
+		// WADL files uploaded..
+		var analyzed_wadls_URLs = [];
+		var compare_wadls_URLs = [];
+
+		for (var i = 0; i < uppedWADLurls.length; i++){
+			analyzed_wadls_URLs.push(uppedWADLurls[i]);
+		}
+		
+		for (var i = 0; i < compareWADLurls.length; i++){
+			compare_wadls_URLs.push(compareWADLurls[i]);
+		}
+		
+		var jsonWadlURLs 		= JSON.stringify(analyzed_wadls_URLs);
+		var jsonCompareWadlURLs = JSON.stringify(compare_wadls_URLs);
+
+		api_call_url = server_api_url + "analyze2";
+		ajaxData = {newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id, type: process_mode, compareURLs: compareDataJSON, compareWADLfiles: jsonCompareWadlURLs};
+	}
+	
+	console.log("--------- sending over: ");
+	console.debug("ajax data: " + JSON.stringify(ajaxData) );
+	console.debug("analyze_json:" + analyzeDataJSON);
+	console.debug("jsonWadlURLs:" + jsonWadlURLs);
+	console.debug("session_id:" + session_id);
+	console.debug("process_mode:" + process_mode);
+	console.debug("compare_json:" + compareDataJSON);
+	console.debug("jsonCompareWadlURLs:" + jsonCompareWadlURLs);
+	console.log("--------------- ");
+    
+    $.ajax({
+    	url: api_call_url,
+        type: "GET",
+        data: ajaxData,
+        dataType: "html",
+        crossDomain: true,				// sending ajax call to a jsp servlet, thus needing to enable this
+        success: function(response) {
+        	console.debug("response is " + response);
+        	var jsonObj = JSON.parse(response);
+
+        	session_id = jsonObj[0];
+        	var analysis_merged_wadl_url_path = jsonObj[1];
+			var compare_merged_wadl_url_path = jsonObj[2];
+			var delta_comparison_url = jsonObj[3];
+			console.log(delta_comparison_url);
+
+			console.log("merged #1_: " + analysis_merged_wadl_url_path);
+			console.log("merged #2_: " + compare_merged_wadl_url_path);
+			console.log("Compare or Analysis? :'" + process_mode + "'");
+
+			console.debug("jsonobj4 is " + jsonObj[4]);
+
+			if (process_mode == "compare"){
+				console.log("diffing the wadl's");
+				add_elements_mode = false;
+
+				getWADL(analysis_merged_wadl_url_path);
+				firstWADL = xml_wadl_string;
+				getWADL(compare_merged_wadl_url_path);
+				secondWADL = xml_wadl_string;
+
+				compareXMLDoc = loadXMLDoc(analysis_merged_wadl_url_path);
+				oldRootDoc = compareXMLDoc.documentElement;
+				compareXMLDoc = loadXMLDoc(compare_merged_wadl_url_path);
+				newRootDoc = compareXMLDoc.documentElement;
+				init_node(oldRootDoc, "_a_");
+				init_node(newRootDoc, "_b_");
+
+				//console.log("========== java> " + $('.diffTypeJava:checked').val() );
+				//console.log("========== text> " + $('.diffTypeText:checked').val() );
+				if ( $('.diffTypeText:checked').val() ) {
+					//text_diff_JS(1);		
+					sideBySideDiff();												// text comparison diff
+				} else if ( $('.diffTypeJava:checked').val() ) {
+					java_diff(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
+				}
+				
+
+				
+				//saveWADLtoFile();
+			} else if (process_mode == "analyze"){
+				add_elements_mode = true;
+				getWADL(analysis_merged_wadl_url_path);
+
+				xmlDocTest = loadXMLDoc(analysis_merged_wadl_url_path);
+				//smNode=xmlDocTest.documentElement;
+				console.debug('! ! ! !analyze xml doc: ' + xmlDocTest);
+				
+				analyzeObj.setXmlDoc(xmlDocTest);
+
+				//saveWADLtoFile();
+			} else if (process_mode == "crossServiceCompare"){
+
+				console.log("diffing the wadl's");
+				add_elements_mode = false;
+
+				getWADL(analysis_merged_wadl_url_path);
+				firstWADL = xml_wadl_string;
+				getWADL(compare_merged_wadl_url_path);
+				secondWADL = xml_wadl_string;
+
+				compareXMLDoc = loadXMLDoc(analysis_merged_wadl_url_path);
+				oldRootDoc = compareXMLDoc.documentElement;
+				compareXMLDoc = loadXMLDoc(compare_merged_wadl_url_path);
+				newRootDoc = compareXMLDoc.documentElement;
+				init_node(oldRootDoc, "_a_");
+				init_node(newRootDoc, "_b_");
+
+				console.debug("delta comparison url is: " + delta_comparison_url);
+				java_diff(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
+				//text_diff_JS(1);														// text comparison diff
+				
+				//saveWADLtoFile();
+
+	        	if (jsonObj[4] != null){
+
+
+	        		//var listOfMappings = jsonObj[4];
+	        		var n = 0;
+	        		var arrayInd = 0;
+	        		var listMappings = JSON.parse(jsonObj[4]);
+	        		console.debug("list of mappings: " + listMappings);
+	        		var mappingRow = listMappings[n];
+	        		var elementsAnalyzed = new Array();
+
+					crossMappings = [];
+					var csind = 0;
+	        		while(mappingRow != null){
+
+	        			var leftElem = mappingRow[0];
+	        			var rightElem = mappingRow[1];
+	        			var score = mappingRow[2];
+
+	        			var leftElemArray = mappingRow[0].split(":=");
+	        			var rightElemArray = mappingRow[1].split(":=");
+
+	        			var leftElemName = leftElemArray[0];
+	        			var leftElemType = leftElemArray[1];
+	        			var rightElemName = rightElemArray[0];
+	        			var rightElemType = rightElemArray[1];
+
+	        			if ( $.inArray(leftElem, elementsAnalyzed) > -1 ){
+	        				// leftElem[0] has already been analyzed
+	        				var ind = $.inArray(leftElem, elementsAnalyzed);
+	              			var mapObject = new Object();
+	        				mapObject.elemName = rightElem;
+	        				mapObject.score = score;
+	        				mapObject.elemId = "csr_" + csind;
+	        				csind++;
+	        				crossMappings[ind][1].push(mapObject);
+	        			} else {
+	        				crossMappings[arrayInd] = new Array(2);
+	        				var leftObject = new Object();
+	        				leftObject.elemName = leftElem;
+	        				leftObject.elemId = "csl_" + csind;
+	        				csind++;
+	        				crossMappings[arrayInd][0] = leftObject;
+	        				crossMappings[arrayInd][1] = new Array();
+	        				var mapObject = new Object();
+	        				mapObject.elemName = rightElem;
+	        				mapObject.score = score;
+	        				mapObject.elemId = "csr_" + csind;
+	        				csind++;
+	        				crossMappings[arrayInd][1].push(mapObject);
+
+	        				elementsAnalyzed[arrayInd] = leftElem;
+	        				arrayInd++;
+	        			}
+	        			n++;
+	        			mappingRow = listMappings[n];
+	        		}
+
+	        		var emptyBtn 		= "<a href='#' class='list-group-item' style='visibility: hidden'>empty</a>";
+	        		var emptyDivPadding = "<div style='width: 100%; height: 10px;'></div>";
+
+	        		$("#leftHalfDiv").html("");
+	        		$("#rightHalfDiv").html("");
+
+	        		console.log('start of crossMappings print');
+	        		console.debug(crossMappings);
+	        		console.log('end of crossMappings print');
+
+	        		for (var i = 0; i < crossMappings.length; i++){
+	        			console.log("left elem: " + crossMappings[i][0] + " and it's connections: ");
+	        			//var leftEname 	= crossMappings[i][0].split(":=")[0];
+	        			var leftEname 	= crossMappings[i][0].elemName.split(":=")[0];
+	        			var leftBtnId 	= crossMappings[i][0].elemId;
+	        			var leftBtn 	= "<a href='javascript:void(0)' id='" + leftBtnId + "' onClick='highlightLeftCrossServiceMappings(" + i + ")' class='list-group-item'>" + leftEname + "</a>";
+	        			$("#leftHalfDiv").append(leftBtn);
+	        			for (var k = 0; k < crossMappings[i][1].length; k++){
+	        				console.log(" ------> " + crossMappings[i][1][k].elemName);
+	        				//var leftEname = crossMappings[i][0].split(":=")[0];
+	        				var rightEname 	 = crossMappings[i][1][k].elemName.split(":=")[0];
+	        				var rightBtnId 	 = crossMappings[i][1][k].elemId;
+	        				var mappingScore = crossMappings[i][1][k].score;
+
+	        				var highlightColor = '';
+							if ( (mappingScore > 0) && (mappingScore <= 24) ){
+								highlightColor = "red";		// red
+							} else if ( (mappingScore > 24) && (mappingScore <= 49) ){
+								highlightColor = "orange";	// orange
+							} else if ( (mappingScore > 49) && (mappingScore <= 74) ){
+								highlightColor = "yellow";	// yellow
+							} else if ( (mappingScore > 74) && (mappingScore <= 100) ){
+								highlightColor = "green";	// green
+							}
+
+	        				//var leftBtn 	= "<a href='#' class='list-group-item' onClick='highlightCrossServiceMappings(\"" + leftEname + "\", \"" + rightEname + "\")'>" + crossMappings[i][0] + "  [" + crossMappings[i][1][k].score + "]   " + crossMappings[i][1][k].elemName + "</a>";
+	        				var rightBtn 	= "<a href='javascript:void(0)' id='" + rightBtnId + "' onClick='highlightRightCrossServiceMappings(" + i + ", " + k + ")' class='list-group-item' style=\"background-color: " + highlightColor + "\" >" + rightEname + "</a>";
+	        				
+	        				if (k != 0){
+	        					$("#leftHalfDiv").append(emptyBtn);
+	        				}
+	        				$("#rightHalfDiv").append(rightBtn);
+	        				//$("#rightHalfDiv").append("<div><button onClick='highlightCrossServiceMappings(\"" + leftEname + "\", \"" + rightEname + "\")'>" + crossMappings[i][0] + "  [" + crossMappings[i][1][k].score + "]   " + crossMappings[i][1][k].elemName + "</button></div>");
+	        			}
+	        			$("#leftHalfDiv").append("</br>");
+	        			$("#rightHalfDiv").append("</br>");
+	        		}
+	        	} else {
+	        		// NULL
+	        	}
+			}
+
+
+
+        },
+        error: function(xhr, status, error) {
+		  alert("Error accessing app. Please try again !");
+		}
+
+    });
 }
 
 function showCompareOptions(){
@@ -90,8 +469,19 @@ function hideOptions() {
 	$("#optionsDiv").css('height', "23px");
 }
 
-var firstWADL = "";
-var secondWADL = "";
+// Utility functions ---------------------------- 
+
+function var_dump(obj) {
+    var out = '';
+    for (var i in obj) {
+        out += i + ": " + obj[i] + "\n";
+    }
+    console.log(out);
+}
+
+function htmlentities(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
 
 function sideBySideDiff() {
 	text_diff_JS(0);
@@ -120,7 +510,6 @@ function text_diff_JS(viewingType) {
     //contextSize = contextSize ? contextSize : null;
 
     // build the diff view and add it to the current DOM
-    //diffoutputdiv.appendChild(
     var diffed_string = diffview.buildView({
 	        baseTextLines: base,
 	        newTextLines: newtxt,
@@ -139,7 +528,6 @@ function text_diff_JS(viewingType) {
 
     $("#wadlOutput").html( diffed_string );
 
-    //downloadWADL();
 }
 
 function saveWADLtoFile(){
@@ -150,8 +538,6 @@ function saveWADLtoFile(){
         data: { wadlString: xml_wadl_string },
         dataType: "html",
         success: function(response) {
-        	//console.log("RESPONSE: " + response);
-        	//$("#wadlOutput").append("<a href=\"http://pokemonpacific.com/wsdarwin/funcsPHP/wadlFile.wadl\">Download the wadl file</a>");
         },
         error: function(xhr, status, error) {
 		  console.log("Error acccesing downloadWADLfile.");
@@ -163,41 +549,47 @@ function saveWADLtoFile(){
 function downloadWADL(){
 	saveWADLtoFile();
 	window.open("http://pokemonpacific.com/wsdarwin/funcsPHP/wadlFile.wadl", '_blank', 'download');
-	//window.location = "http://pokemonpacific.com/wsdarwin/funcsPHP/wadlFile.wadl";
 }
 
 function removeURLField(id){
-	$('#singleURLdiv_'+id).remove();
-	//reassignIDs();
+	console.debug("length is " + $("#fieldUrlDiv").children().filter("div").length );
+	//console.log("length is " + $("div.fieldUrlDiv").length );
+	if ($("#fieldUrlDiv").children().filter("div").length > 1){
+		$('#singleURLdiv_'+id).remove();
+		reassignIDs();
+	}
 }
 
-/*function reassignIDs(){
+function removeCompareURLField(id){
+	if ($("#fieldCompareUrlDiv").children().filter("div").length > 1){
+		$('#singleCompareUrlDiv_'+id).remove();
+		reassignIDs();
+	}	
+}
+
+function reassignIDs(){
 	var idcount = 0;
 	// loop through all divs
 	$('div.singleUrlDiv').each(function(index) {
 	    // set div id to array value
-	    $('div').attr('id', "singleURLdiv_" + idcount);
+
+	    $('#singleUrlDiv_' + index).attr('id', "singleURLdiv_" + index);
+	   	//console.debug(this);
 	    idcount++;
 
 	});
 
 	noURLFields = idcount;
-}*/
-
-// utility funcs
-function htmlentities(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function removeNode(mynodeid){
 	var foundNode = find_node(rootNode, mynodeid);
-	//console.log('found node name: ' + foundNode.nodeName + ', parent: ' + foundNode.parentNode.nodeName);
+	console.log('found node name: ' + foundNode.nodeName + ', parent: ' + foundNode.parentNode.nodeName);
 	foundNode.parentNode.removeChild(foundNode);
 	setup_wadl_print();
 }
 
 function hideNodesChildren(mynodeid){
-	console.log("HIIIIIIIIIIDING");
 	var foundNode = find_node(rootNode, mynodeid);
 	foundNode.minimized = true;
 	setup_wadl_print();
@@ -221,11 +613,9 @@ function addResource(mynodeid){
 function addMethod(mynodeid){
 	var foundNode = find_node(rootNode, mynodeid);
 	var methodNode=xmlDoc.createElement("method");
-	//methodNode.setAttribute("id","");
 	methodNode.setAttribute("name","");
 
 	foundNode.appendChild(methodNode);
-	//document.getElementById("popupDiv").style.visibility="visible";
 
 	setup_wadl_print();
 }
@@ -235,7 +625,6 @@ function addParam(mynodeid){
 	var newNode=xmlDoc.createElement("param");
 	newNode.setAttribute("path","");
 	foundNode.appendChild(newNode);
-	//document.getElementById("popupDiv").style.visibility="visible";
 
 	setup_wadl_print();
 }
@@ -244,7 +633,6 @@ function addRequest(mynodeid){
 	var foundNode = find_node(rootNode, mynodeid);
 	var newNode=xmlDoc.createElement("request");
 	foundNode.appendChild(newNode);
-	//document.getElementById("popupDiv").style.visibility="visible";
 
 	setup_wadl_print();
 }
@@ -254,7 +642,6 @@ function addResponse(mynodeid){
 	var newNode=xmlDoc.createElement("response");
 	newNode.setAttribute("status","");
 	foundNode.appendChild(newNode);
-	//document.getElementById("popupDiv").style.visibility="visible";
 
 	setup_wadl_print();
 }
@@ -280,7 +667,6 @@ function addFault(mynodeid){
 }
 
 function updateAttribute(mynodeid, nodeAttrName, newAttrValue){
-	//alert('node attribute: ' + nodeAttrName + ", value: " + newAttrValue );
 	var foundNode = find_node(rootNode, mynodeid);
 	for (var i = 0; i < foundNode.attributes.length; i++){
 		if (foundNode.attributes[i].nodeName == nodeAttrName){
@@ -296,10 +682,9 @@ function find_node(mynode, sid){
 		window.foundNode = mynode;
 	}
 	for (var i = 0; i < mynode.childNodes.length; i++){
-		//console.log('FINDING NODES: ' + mynode.childNodes[i].nodeName + ", id: " + mynode.childNodes[i].my_id);
 		if (mynode.childNodes[i].my_id == sid){
 			window.foundNode = mynode.childNodes[i];		// window.foundNode global
-			console.log('! name is ' + window.foundNode.nodeName);
+			console.log('[find_node] found node name is ' + window.foundNode.nodeName);
 			return window.foundNode;
 		}
 		find_node(mynode.childNodes[i], sid);
@@ -307,22 +692,28 @@ function find_node(mynode, sid){
 	return window.foundNode;
 }
 
-function init_node(myNode){
-	//node_id = 0;
-	init_elements(myNode);
+function init_node(myNode, idSubname){
+	node_id = 0;
+	init_element_minimize_property(myNode);
+	init_element_ids(myNode, idSubname);
 }
 
-function init_elements(myNode){
+function init_element_minimize_property(myNode){
 	myNode.minimized = false;
-	myNode.my_id = node_id;
+	for (var i = 0; i < myNode.childNodes.length; i++){
+		init_element_minimize_property(myNode.childNodes[i]);
+	}
+}
+
+function init_element_ids(myNode, idSubname){
+	myNode.my_id = node_id + idSubname;
 	node_id++;
 	for (var i = 0; i < myNode.childNodes.length; i++){
-		init_elements(myNode.childNodes[i]);
+		init_element_ids(myNode.childNodes[i], idSubname);
 	}
 }
 
 function highlightDiv(divid){
-	//alert('hello world !');
 	//$("#"+divid).css('background-color', 'red');
 	$("#"+divid).css('text-decoration', 'line-through');
 }
@@ -361,11 +752,8 @@ function addSpacesTwo(){
 	}
 }
 
-function compareBtn(){
-	analyze("compare");
-}
-
-function java_diff(deltas_path, oldDocNode, newDocNode){
+function java_diff(deltas_path, oldDocNode, newDocNode, process_type){
+	console.debug("JAVA DIFF: " + deltas_path);
 	xmlDoc = loadXMLDoc(deltas_path);
 	mainNode=xmlDoc.documentElement;
 
@@ -373,13 +761,24 @@ function java_diff(deltas_path, oldDocNode, newDocNode){
 	//console.log("name: " + mainNode.nodeName + ", attrs length: " + mainNode.childNodes.length + ", attribute's value: " + mainNode.attributes.getNamedItem("xmlns").value);
 	//console.log(xmlDoc);
 
+	$("#left_wadl_output").html("");
+	$("#right_wadl_output").html("");
+
 	strapped_html_wadl_string = '';
-	console.log("old doc node: ");
+	sideToWriteTo = "left";
+	padding_left = 0;
+	level = 1;
+	lineNumber = 0;
 	parse_wadl_html(oldDocNode);
+
 	var oldText = strapped_html_wadl_string;
 	strapped_html_wadl_string = '';
-	console.log("new doc node: ");
+	sideToWriteTo = "right";
+	padding_left = 0;
+	level = 1;
+	lineNumber = 0;
 	parse_wadl_html(newDocNode);
+
 	var newText = strapped_html_wadl_string;
 	strapped_html_wadl_string = '';
 
@@ -387,9 +786,23 @@ function java_diff(deltas_path, oldDocNode, newDocNode){
 	$("#left_wadl_output").show();
 	$("#right_wadl_output").show();
 
-	$("#left_wadl_output").html(oldText);
-	$("#right_wadl_output").html(newText);
+	if (parsing_html_mode){
 
+	} else {
+		$("#left_wadl_output").html(oldText);
+		$("#right_wadl_output").html(newText);
+	}
+
+	if (process_type === "crossServiceCompare"){
+		console.log("cross servicing here..");
+		$(".halfwadlOutput").css("width", "40%");
+
+	} else if (process_type === "compare") {
+		highlightComparedWADLs(mainNode, oldDocNode, newDocNode);
+	}
+}
+
+function highlightComparedWADLs(mainNode, oldDocNode, newDocNode){
 	for (var i = 0; i < mainNode.childNodes.length; i++){
 		iserviceNode = mainNode.childNodes[i];
 		if (iserviceNode.nodeName == "MatchDelta"){
@@ -402,27 +815,34 @@ function java_diff(deltas_path, oldDocNode, newDocNode){
 			if (interfaceNode.nodeName == "MatchDelta"){
 				continue;
 			} else if (interfaceNode.nodeName == "ChangeDelta"){
+				console.log("=============== changed interface ================");
 				if (interfaceNode.attributes.getNamedItem("changedAttribute") != null){
 					if (interfaceNode.attributes.getNamedItem("changedAttribute").value === "address"){
-						var sourceSplits = interfaceNode.attributes.getNamedItem("source").value.split("\\");
-						var targetSplits = interfaceNode.attributes.getNamedItem("target").value.split("\\");
-						highlightResourceNodeDiv(sourceSplits[sourceSplits.length - 1], oldDocNode, 'ChangeDelta');
-						highlightResourceNodeDiv(targetSplits[targetSplits.length - 1], newDocNode, 'ChangeDelta');
+						var oldSplits = interfaceNode.attributes.getNamedItem("oldValue").value.split("/");
+						var newSplits = interfaceNode.attributes.getNamedItem("newValue").value.split("/");
+
+						highlightChangedResource(newSplits, oldDocNode, "ChangeDelta");
+						highlightChangedResource(oldSplits, newDocNode, "ChangeDelta");
 					}
 				}
 			} else if (interfaceNode.nodeName == "AddDelta"){
-				var targetSplits = interfaceNode.attributes.getNamedItem("target").value.split("\\");
-				highlightResourceNodeDiv(targetSplits[targetSplits.length - 1], newDocNode, 'AddDelta');
+				console.log(" AddDelta--> the source is " + interfaceNode.attributes.getNamedItem("target").value);
+				//var targetSplits = interfaceNode.attributes.getNamedItem("target").value.split("\\");
+				var targetVal = interfaceNode.attributes.getNamedItem("target").value;
+				//highlightResourceNodeDiv(targetSplits[targetSplits.length - 1], newDocNode, 'AddDelta');
+				highlightResourceNodeDiv(targetVal, newDocNode, 'AddDelta');
 			} else if (interfaceNode.nodeName == "DeleteDelta"){
-				var sourceSplits = interfaceNode.attributes.getNamedItem("source").value.split("\\");
-				highlightResourceNodeDiv(sourceSplits[sourceSplits.length - 1], oldDocNode, 'DeleteDelta');
+				
+				//console.log(" DeleteDelta--> the source is " + interfaceNode.attributes.getNamedItem("source").value);
+				//var sourceSplits = interfaceNode.attributes.getNamedItem("source").value.split("\\");
+				var sourceVal = interfaceNode.attributes.getNamedItem("source").value;
+				highlightResourceNodeDiv(sourceVal, oldDocNode, 'DeleteDelta');
+				//highlightResourceNodeDiv(sourceVal, oldDocNode, 'Space');
 			}
-
-
-			for (var j = 0; j < interfaceNode.childNodes.length; j++){
+			
+			for (var j = 0; j < interfaceNode.childNodes.length; j++){ // 2
 				operationNode = interfaceNode.childNodes[j];
 				if (operationNode.nodeName == "MatchDelta"){
-					//console.log("Skipping operation:" + operationNode.nodeName);
 					continue;
 				} else if (operationNode.nodeName == "ChangeDelta"){
 					if (operationNode.attributes.getNamedItem("changedAttribute") != null){
@@ -431,9 +851,7 @@ function java_diff(deltas_path, oldDocNode, newDocNode){
 						}
 					}
 				} else if (operationNode.nodeName == "AddDelta"){
-
 					var targetVal = operationNode.attributes.getNamedItem("target").value;
-					//console.log("hello thereee !!!!!!!!!!!!!!!!! " + targetVal);
 					highlightMethodNodeDiv(targetVal, newDocNode, 'AddDelta');
 				} else if (operationNode.nodeName == "DeleteDelta"){
 					var sourceVal = operationNode.attributes.getNamedItem("source").value;
@@ -442,9 +860,10 @@ function java_diff(deltas_path, oldDocNode, newDocNode){
 				
 				for (var m = 0; m < operationNode.childNodes.length; m++){
 					xsNode = operationNode.childNodes[m];
+					
 
 					if (xsNode.nodeName == "MatchDelta"){
-						console.log("Skipping operation:" + xsNode.nodeName);
+						//console.log("Skipping operation:" + xsNode.nodeName);
 						continue;
 					} else if (xsNode.nodeName == "ChangeDelta"){
 						if (xsNode.attributes.getNamedItem("changedAttribute") != null){
@@ -456,45 +875,50 @@ function java_diff(deltas_path, oldDocNode, newDocNode){
 						// request:  operationNode.attributes.getNamedItem('target').value + "RequestType"
 						// response: operationNode.attributes.getNamedItem('target').value + "ResponseType"
 						var targetVal = xsNode.attributes.getNamedItem("target").value;
-						var sourceSplits = targetVal.split(":");
-						highlightCTypeNodeDiv(sourceSplits[0], newDocNode, 'AddDelta');
+						var targetSplits = targetVal.split(":");
+						highlightCTypeNodeDiv(targetSplits[0], newDocNode, 'AddDelta');
 					} else if (xsNode.nodeName == "DeleteDelta"){
 						// request:  operationNode.attributes.getNamedItem('source').value + "RequestType"
 						// response: operationNode.attributes.getNamedItem('source').value + "ResponseType"
 						var sourceVal = xsNode.attributes.getNamedItem("source").value;
-						var targetSplits = sourceVal.split(":");
-						highlightCTypeNodeDiv(targetSplits[0], oldDocNode, 'DeleteDelta');
+						var sourceSplits = sourceVal.split(":");
+						highlightCTypeNodeDiv(sourceSplits[0], oldDocNode, 'DeleteDelta');
+
+
 					}
 
-					for (var k = 0; k < xsNode.childNodes.length; k++){
-						var xs_twoNode = xsNode.childNodes[k];
+					for (var p = 0; p < xsNode.childNodes.length; p++){
+						var xs_twoNode = xsNode.childNodes[p];
 						if (xs_twoNode.nodeName == "MatchDelta"){
 							continue;
 						} else if (xs_twoNode.nodeName == "ChangeDelta"){
 							// *** add change delta
 						} else if (xs_twoNode.nodeName == "AddDelta"){
+							//var targetVal = xsNode.getNamedItem("target").value;
 							var targetSplits = xsNode.attributes.getNamedItem("target").value.split(":");
 							var targetSplitsInside = xs_twoNode.attributes.getNamedItem("target").value.split(":");
 							highlightXSElemInsideCTypeNodeDiv(targetSplits[0], targetSplitsInside[0], newDocNode, 'AddDelta');
 						} else if (xs_twoNode.nodeName == "DeleteDelta"){
+							//var sourceVal = xsNode.getNamedItem("source").value;
 							var sourceSplits = xsNode.attributes.getNamedItem("source").value.split(":");
 							var sourceSplitsInside = xs_twoNode.attributes.getNamedItem("source").value.split(":");
 							highlightXSElemInsideCTypeNodeDiv(sourceSplits[0], sourceSplitsInside[0], oldDocNode, 'DeleteDelta');
 						}
 					}
+
 				}
-			}
+			} // 2
+
 		}
 	}
-
-	console.log(" --- END OF JAVA DIFFING --- ");
 }
 
 var highlightGreen = "#A2D293";
 var highlightRed = "#ED9899";
 var highlightYellow = "#FFDC87";
+//$("#"+xsNode.my_id+"line").css("background-color", highlightColor);
 
-function highlightResourceNodeDiv(resourcePath, xml_doc, type){
+function highlightChangedResource(splits, xml_doc, type){
 	var highlightColor = '';
 	if (type == "AddDelta"){
 		highlightColor = highlightGreen;
@@ -506,10 +930,161 @@ function highlightResourceNodeDiv(resourcePath, xml_doc, type){
 
 	if ( (xml_doc.childNodes[1].nodeName != null) && (xml_doc.childNodes[1].nodeName == "resources") ){
 		var resourcesNode = xml_doc.childNodes[1];
-		for (var i = 0; i < resourcesNode.childNodes.length; i++){
-			var resource_Node = resourcesNode.childNodes[i];
-			if (resource_Node.attributes.getNamedItem("path").value == resourcePath){
-				$("#"+resource_Node.my_id).css("background-color", highlightColor);
+		console.log("resources node base: " + resourcesNode.attributes.getNamedItem('base').value );
+		// go through each resource and if 
+		for (var i = 0; i < resourcesNode.childNodes.length; i++) {
+			var resNode = resourcesNode.childNodes[i];
+			var ind = 1;	// splits[0] is the base, so start at 1
+			while (resNode.nodeName == "resource"){
+				//console.log("splits[ind] is " + splits[ind] + ", path value is " + resNode.attributes.getNamedItem('path').value );
+				if ( !(splits[ind] === resNode.attributes.getNamedItem('path').value)) {
+					
+					if (parsing_html_mode){
+						$("."+resNode.my_id + "line").css("background-color", highlightColor);
+						/*$("."+newNode.my_id + "line").each(function(){
+							this.css("background-color", highlightColor);
+						});*/
+					} else {
+						$("#"+resNode.my_id+"line").css("background-color", highlightColor);
+					}
+				}
+				ind++;
+				resNode = resNode.childNodes[0];
+			}
+		}
+	}
+}
+
+function contains(list, obj) {
+    for (var i = 0; i < list.length; i++) {
+        if (list[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function reassignLineNumbers(side){
+	if (side == leftSideID){
+		lineNumber = 1;
+		$("#left_wadl_output").children().each(function(){
+			$(this).attr("data-lineNumber", lineNumber+"_a");
+			lineNumber++;
+		});
+	} else if (side == rightSideID){
+		lineNumber = 1;
+		$("#right_wadl_output").children().each(function(){
+			$(this).attr("data-lineNumber", lineNumber+"_b");
+			lineNumber++;
+		});
+	}
+	
+}
+
+function addGraySpace(startAtLineIndex, noLines, side){
+	console.log("startat line index is " + startAtLineIndex + ", no lines: " + noLines + ", side: " + side);
+	//startAtLineIndex--;
+	var emptyDivs = "";
+	var n = 0;
+	while(n < noLines){
+		emptyDivs += "<div style='background-color: gray'>.</div>";
+		n++;
+	}
+	if (side == leftSideID){
+		//$("#left_wadl_output")
+	} else if (side == rightSideID){
+
+	}
+	
+	//var abc = startAtLineIndex + "_" + side;
+	console.log("!!!! startAtLineIndex is " +  startAtLineIndex);
+	var elemToInsertAfter = $("*[data-lineNumber=" + startAtLineIndex + "]");
+	$(emptyDivs).insertAfter( elemToInsertAfter );
+	console.log("insert on side: " + side + " after elem with id: " + elemToInsertAfter.attr("id") );
+}
+// pass (method_id, "resources node")
+function highlightResourceRec(resource_id, node, highlightColor){
+	for (var i = 0; i < node.childNodes.length; i++){
+		var newNode = node.childNodes[i];
+		if (newNode.nodeName == "resource"){
+			var areEqual = newNode.attributes.getNamedItem("path").value.toLowerCase() === resource_id.toLowerCase();
+			//if (resource_Node.attributes.getNamedItem("path").value == resourcePath.toLowerCase() ){
+			if (areEqual){
+
+				if (parsing_html_mode){
+					var endElemClass = newNode.my_id + "line_end";
+					var elemNode = $("."+newNode.my_id + "line");
+					var noLines = 1;
+					// go thru each div until this id is again met (but with line_end) and highlight all divs
+					while(elemNode.attr("class") != endElemClass ){
+						noLines++;
+						elemNode.css("background-color", highlightColor);
+						elemNode = elemNode.next();
+					}
+					$("." + endElemClass).css("background-color", highlightColor);
+
+					if (newNode.my_id.split("_")[1] == rightSideID){
+						var newAttrLineNumber = elemNode.attr("data-lineNumber").split("_")[0] + "_" + leftSideID;
+						console.log("adding gray space to: " + newAttrLineNumber);
+						//addGraySpace(newAttrLineNumber, noLines, leftSideID);
+						reassignLineNumbers(rightSideID);
+					} else if (newNode.my_id.split("_")[1] == leftSideID) {
+						var newAttrLineNumber = elemNode.attr("data-lineNumber").split("_")[0] + "_" + rightSideID;
+						console.log("adding gray space to: " + newAttrLineNumber);
+						//addGraySpace(newAttrLineNumber, noLines, rightSideID);
+						reassignLineNumbers(leftSideID);
+					}
+
+					//console.log("the id is " + newNode.my_id);
+					//var side = newNode.my_id.split("_");
+					//console.log("and : " + side[1]);
+
+				} else {
+					$("#"+newNode.my_id).css("background-color", highlightColor);
+				}
+			} else {
+				highlightResourceRec(resource_id, newNode, highlightColor);
+			}
+		}
+	}
+}
+
+function highlightResourceNodeDiv(resource_path, xml_doc, type){
+	var highlightColor = '';
+	if (type == "AddDelta"){
+		highlightColor = highlightGreen;
+	} else if (type == "DeleteDelta"){
+		highlightColor = highlightRed;
+	} else if (type == "ChangeDelta"){
+		highlightColor = highlightYellow;
+	}
+	console.log(" [highlightResourceNodeDiv] -- > '" + resource_path + "'");
+	if ( (xml_doc.childNodes[1].nodeName != null) && (xml_doc.childNodes[1].nodeName == "resources") ){
+		var resourcesNode = xml_doc.childNodes[1];
+		highlightResourceRec(resource_path, resourcesNode, highlightColor);
+	}
+}
+
+function highlightMethodRec(method_id, node, highlightColor){
+	for (var i = 0; i < node.childNodes.length; i++){
+		var newNode = node.childNodes[i];
+		if (newNode.nodeName == "resource"){
+			highlightMethodRec(method_id, newNode, highlightColor);
+		} else if (newNode.nodeName == "method"){
+			if (newNode.attributes.getNamedItem("id").value === method_id){
+				if (parsing_html_mode){
+					var elemNode = $("."+newNode.my_id + "line");
+					var endElemClass = newNode.my_id + "line_end";
+					var noLines = 0;
+					while(elemNode.attr("class") != endElemClass ){
+						noLines++;
+						elemNode.css("background-color", highlightColor);
+						elemNode = elemNode.next();
+					}
+					$("." + endElemClass).css("background-color", highlightColor);
+				} else {
+					$("#"+newNode.my_id).css("background-color", highlightColor);
+				}
 			}
 		}
 	}
@@ -525,15 +1100,72 @@ function highlightMethodNodeDiv(method_id, xml_doc, type){
 		highlightColor = highlightYellow;
 	}
 
+	// if there is a 'resources' node
 	if ( (xml_doc.childNodes[1].nodeName != null) && (xml_doc.childNodes[1].nodeName == "resources") ){
 		var resourcesNode = xml_doc.childNodes[1];
-		for (var i = 0; i < resourcesNode.childNodes.length; i++){
-			var resource_Node = resourcesNode.childNodes[i];
-			for (var j = 0; j < resource_Node.childNodes.length; j++){
-				var methodNode = resource_Node.childNodes[i];
-				console.log("Method node id val is: " + methodNode.attributes.getNamedItem("id").value);
-				if (methodNode.attributes.getNamedItem("id").value == method_id){
-					$("#"+methodNode.my_id).css("background-color", highlightColor);
+		highlightMethodRec(method_id, resourcesNode, highlightColor);
+	}
+}
+
+function highlightCTypeRec(ctype_id, node, type){
+	for (var i = 0; i < node.childNodes.length; i++){
+		var newNode = node.childNodes[i];
+		if (newNode.nodeName == "resource"){
+			highlightMethodRec(method_id, newNode, highlightColor);
+		} else if (newNode.nodeName == "method") {
+			highlightMethodRec(method_id, newNode, highlightColor);
+		} else if (newNode.nodeName == "method"){
+			if (newNode.attributes.getNamedItem("id").value === method_id){
+				if (parsing_html_mode){
+					var elemNode = $("."+newNode.my_id + "line");
+					var endElemClass = newNode.my_id + "line_end";
+					while(elemNode.attr("class") != endElemClass ){
+						elemNode.css("background-color", highlightColor);
+						elemNode = elemNode.next();
+					}
+					$("." + endElemClass).css("background-color", highlightColor);
+
+
+				} else {
+					$("#"+newNode.my_id).css("background-color", highlightColor);
+				}
+			}
+		}
+	}
+}
+
+function highlightCTypeGrammarsRec(ctype_id, node, highlightColor){
+	for (var i = 0; i < node.childNodes.length; i++){
+		var newNode = node.childNodes[i];
+		if (newNode.nodeName == "xs:schema"){
+			highlightCTypeGrammarsRec(ctype_id, newNode, highlightColor);
+		} else if (newNode.nodeName == "xs:complexType"){
+			if (newNode.attributes.getNamedItem("name").value == ctype_id){
+				if (parsing_html_mode){
+					var elemNode = $("."+newNode.my_id + "line");
+					var endElemClass = newNode.my_id + "line_end";
+					while(elemNode.attr("class") != endElemClass ){
+						elemNode.css("background-color", highlightColor);
+						elemNode = elemNode.next();
+					}
+					$("." + endElemClass).css("background-color", highlightColor);
+				} else {
+					$("#"+newNode.my_id).css("background-color", highlightColor);
+				}
+			}
+		} else if (newNode.nodeName == "xs:element"){
+			var typeSplits = newNode.attributes.getNamedItem("type").value.split(":");
+			if (typeSplits[1] == ctype_id){
+				if (parsing_html_mode){
+					var elemNode = $("."+newNode.my_id + "line");
+					var endElemClass = newNode.my_id + "line_end";
+					while(elemNode.attr("class") != endElemClass ){
+						elemNode.css("background-color", highlightColor);
+						elemNode = elemNode.next();
+					}
+					$("." + endElemClass).css("background-color", highlightColor);
+				} else {
+					$("#"+newNode.my_id).css("background-color", highlightColor);
 				}
 			}
 		}
@@ -550,17 +1182,18 @@ function highlightCTypeNodeDiv(ctype_id, xml_doc, type){
 		highlightColor = highlightYellow;
 	}
 
-	console.log("CTYPE id: " + ctype_id);
 	if ( (xml_doc.childNodes[1].nodeName != null) && (xml_doc.childNodes[1].nodeName == "resources") ){
 		var resourcesNode = xml_doc.childNodes[1];
+		//highlightCTypeRec(ctype_id, resourcesNode, highlightColor);
+
 		for (var i = 0; i < resourcesNode.childNodes.length; i++){
 			var resource_Node = resourcesNode.childNodes[i];
+
 			for (var j = 0; j < resource_Node.childNodes.length; j++){
 				var methodNode = resource_Node.childNodes[i];
-				console.log("Method node id val is: " + methodNode.attributes.getNamedItem("id").value);
 				for (var m = 0; m < methodNode.childNodes.length; m++){
-					console.log("CTYPE 22 id: " + ctype_id);
 					var ctypeNode = methodNode.childNodes[m];
+					// ********************************************************************************* not implemented:
 					//if (ctypeNode.attributes.getNamedItem("id").value == ctype_id){
 					//	$("#"+ctypeNode.my_id).css("background-color", highlightColor);
 					//}
@@ -568,34 +1201,43 @@ function highlightCTypeNodeDiv(ctype_id, xml_doc, type){
 			}
 		}
 	}
-	console.log("Highlighting grammars part: " + xml_doc.childNodes[0].nodeName);
+
 	if ( (xml_doc.childNodes[0].nodeName != null) && (xml_doc.childNodes[0].nodeName == "grammars") ){
 		var grammarsNode = xml_doc.childNodes[0];
-		console.log("grammars: " + grammarsNode.nodeName);
-		for (var i = 0; i < grammarsNode.childNodes.length; i++){
-			var schemaNode = grammarsNode.childNodes[i];
-			for (var j = 0; j < schemaNode.childNodes.length; j++){
-				var xsNode = schemaNode.childNodes[j];
-				console.log("xs node: " + xsNode.nodeName);
-				if (xsNode.nodeName == "xs:complexType"){
-					console.log("xs node name: " + xsNode.attributes.getNamedItem("name").value);
-					if (xsNode.attributes.getNamedItem("name").value == ctype_id){
-						$("#"+xsNode.my_id).css("background-color", highlightColor);
-					}
-				}
+		highlightCTypeGrammarsRec(ctype_id, grammarsNode, highlightColor);
+	}
+}
 
-				if (xsNode.nodeName == "xs:element"){
-					var typeSplits = xsNode.attributes.getNamedItem("type").value.split(":");
-					if (typeSplits[1] == ctype_id){
-						$("#"+xsNode.my_id).css("background-color", highlightColor);
+function highlightXSElemInsideCTypeRec(complexTypeName, xselementName, node, highlightColor ){
+	for (var i = 0; i < node.childNodes.length; i++){
+		var newNode = node.childNodes[i];
+		if (newNode.nodeName == "xs:schema"){
+			highlightXSElemInsideCTypeRec(complexTypeName, xselementName, newNode, highlightColor);
+		} else if (newNode.nodeName == "xs:complexType"){
+			if (newNode.attributes.getNamedItem('name').value == complexTypeName){
+				highlightXSElemInsideCTypeRec(complexTypeName, xselementName, newNode, highlightColor);
+			}
+		} else if (newNode.nodeName == "xs:sequence"){
+			highlightXSElemInsideCTypeRec(complexTypeName, xselementName, newNode, highlightColor);
+		} else if (newNode.nodeName == "xs:element"){
+			if (newNode.attributes.getNamedItem('name').value == xselementName){
+				if (parsing_html_mode){
+					var elemNode = $("."+newNode.my_id + "line");
+					var endElemClass = newNode.my_id + "line_end";
+					while(elemNode.attr("class") != endElemClass ){
+						elemNode.css("background-color", highlightColor);
+						elemNode = elemNode.next();
 					}
+					$("." + endElemClass).css("background-color", highlightColor);
+				} else {
+					$("#"+newNode.my_id).css("background-color", highlightColor);
 				}
 			}
 		}
 	}
 }
 
-function highlightXSElemInsideCTypeNodeDiv(xs_ctype_id, xsnode_name, xml_doc, type){
+function highlightXSElemInsideCTypeNodeDiv(complexTypeName, xselementName, xml_doc, type){
 	var highlightColor = '';
 	if (type == "AddDelta"){
 		highlightColor = highlightGreen;
@@ -605,136 +1247,83 @@ function highlightXSElemInsideCTypeNodeDiv(xs_ctype_id, xsnode_name, xml_doc, ty
 		highlightColor = highlightYellow;
 	}
 
-	console.log("Highlighting grammars part: " + xml_doc.childNodes[0].nodeName);
 	if ( (xml_doc.childNodes[0].nodeName != null) && (xml_doc.childNodes[0].nodeName == "grammars") ){
 		var grammarsNode = xml_doc.childNodes[0];
-		console.log("grammars: " + grammarsNode.nodeName);
-		for (var i = 0; i < grammarsNode.childNodes.length; i++){
-			var schemaNode = grammarsNode.childNodes[i];
-			for (var j = 0; j < schemaNode.childNodes.length; j++){
-				var xsNode = schemaNode.childNodes[j];
-				console.log("xs node: " + xsNode.nodeName);
-				if (xsNode.attributes.getNamedItem('name').value == xs_ctype_id){
-					var xsSeq = xsNode.childNodes[0];
-					for (var u = 0; u < xsSeq.childNodes.length; u++){
-						var insideXSelem = xsSeq.childNodes[u];
-						if (insideXSelem.attributes.getNamedItem('name').value == xsnode_name){
-							$("#"+insideXSelem.my_id).css("background-color", highlightColor);
-						}
-					}
-				}
-			}
-		}
+		highlightXSElemInsideCTypeRec(complexTypeName, xselementName, grammarsNode, highlightColor);
 	}
 }
 
-//function changeResource(oldValue, newValue){	// Resource === Interface in WSMeta Model
+function highlightRightCrossServiceMappings(leftElemIndex, rightElemIndex){
+	var highlightColor = "";
+	var isActive = $("#" + crossMappings[leftElemIndex][1][rightElemIndex].elemId).hasClass('active');
+	if (!isActive){	
+		highlightColor = crossServiceMappingsHighlightColor;
+		/*if ( (mappingScore > 0) && (mappingScore <= 24) ){
+			highlightColor = "yellow";
+		} else if ( (mappingScore > 24) && (mappingScore <= 49) ){
+			highlightColor = "yellow";
+		} else if ( (mappingScore > 49) && (mappingScore <= 74) ){
+			highlightColor = "yellow";
+		} else if ( (mappingScore > 74) && (mappingScore <= 100) ){
+			highlightColor = "yellow";
+		}*/
+	}
+	$("#" + crossMappings[leftElemIndex][1][rightElemIndex].elemId).toggleClass('active');
+	var leftElemName 	= crossMappings[leftElemIndex][0].elemName.split(":=")[0];
+	var rightElemName 	= crossMappings[leftElemIndex][1][rightElemIndex].elemName.split(":=")[0];
 
-//}
+	// toggle highlight of element 'rightElemName' on the right side
+	var grammarsNew = newRootDoc.childNodes[0];
+	highlightXSElementWithName(rightElemName, grammarsNew, highlightColor);
+}
 
-function analyze(process_mode){
-	// reset
-	$("#left_wadl_output").hide();
-	$("#right_wadl_output").hide();
-	$("#wadlOutput").show();
-	$("#wadlOutput").html('');
-
-	var analyze_urls_array = [];
-	var compare_urls_array = [];
-
-	// JSON urls to analyze
-	$('input.urlInput').each(function(index) {
-		analyze_urls_array.push( $('#urlInput_'+index).val() );
-	});
-	// JSON urls to compare
-	if (process_mode === 'compare'){
-		$('input.urlInput2').each(function(index) {
-			compare_urls_array.push( $('#urlCompareInput_'+index).val() );
-			//console.log("compare urls: " + $('#urlCompareInput_'+index).val() );
-		});
+// uses global var 'crossMappings'
+function highlightLeftCrossServiceMappings(leftElemIndex){
+	var isActive = $("#" + crossMappings[leftElemIndex][0].elemId).hasClass('active');
+	var highlightColor = "";
+	if (!isActive){
+		highlightColor = crossServiceMappingsHighlightColor;
 	}
 	
-	var analyze_json = JSON.stringify(analyze_urls_array);
-	var compare_json = JSON.stringify(compare_urls_array);
+	var leftElemName = crossMappings[leftElemIndex][0].elemName.split(":=")[0];
+	$("#" + crossMappings[leftElemIndex][0].elemId).toggleClass('active');
 
-	// WADL files uploaded..
-	var analyzed_wadls_URLs = [];
-	var compare_wadls_URLs = [];
-
-	for (var i = 0; i < uppedWADLurls.length; i++){
-		analyzed_wadls_URLs.push(uppedWADLurls[i]);
-		//console.log("link " + i + ": " + uppedWADLurls[i]);
-	}
-
-	// WADL files to compare
-	if (process_mode === 'compare'){
-		for (var i = 0; i < compareWADLurls.length; i++){
-			compare_wadls_URLs.push(compareWADLurls[i]);
-			//console.log("link " + i + ": " + compareWADLurls[i]);
+	for (var i = 0; i < crossMappings[leftElemIndex][1].length; i++){
+		var rightElemName = crossMappings[leftElemIndex][1][i].elemName.split(":=")[0];
+		if (!isActive){
+			$("#" + crossMappings[leftElemIndex][1][i].elemId).addClass('active');
+		} else {
+			$("#" + crossMappings[leftElemIndex][1][i].elemId).removeClass('active');
 		}
+
+		highlightCrossServiceMappings(leftElemName, rightElemName, highlightColor);
 	}
+}
 
-	//analyzed_wadls_URLs.push("http://localhost:8080/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/WADLresponse020.wadl");
-	var jsonWadlURLs = JSON.stringify(analyzed_wadls_URLs);
-	var jsonCompareWadlURLs = JSON.stringify(compare_wadls_URLs);
+function highlightCrossServiceMappings(leftElemName, rightElemName, highlightColor){
+	console.log("l: " + leftElemName + " r: " + rightElemName);
+	
+	var grammarsOld = oldRootDoc.childNodes[0];
+	var grammarsNew = newRootDoc.childNodes[0];
+	highlightXSElementWithName(leftElemName, grammarsOld, highlightColor);
+	highlightXSElementWithName(rightElemName, grammarsNew, highlightColor);
+}
 
-    $.ajax({
-    	url: "http://localhost:8080/wsdarwin_1.0.0/jaxrs/api/analyze",
-        type: "GET",
-        data: { newURLs: analyze_json, newUppedFiles: jsonWadlURLs, sessionid: session_id, type: process_mode, compareURLs: compare_json, compareWADLfiles: jsonCompareWadlURLs },
-        //parameters: { url:  },
-        dataType: "html",
-        crossDomain: true,	// sending ajax call to a jsp servlet, thus needing to enable this
-        //data: { buyerid: buyerid_arg, txnid: txn_id},
-        success: function(response) {
-        	//alert('resp: ' + response);
-        	var jsonObj = JSON.parse(response);
-
-        	session_id = jsonObj[0];
-        	var analysis_merged_wadl_url_path = jsonObj[1];
-			var compare_merged_wadl_url_path = jsonObj[2];
-			var delta_comparison_url = jsonObj[3];
-			console.log("delta comparisons url: ");
-			console.log(delta_comparison_url);
-
-			console.log("merged #1_: " + analysis_merged_wadl_url_path);
-			console.log("merged #2_: " + compare_merged_wadl_url_path);
-			console.log("process_mode is " + process_mode);
-
-			if (process_mode == "compare"){
-				console.log("diffing the wadl's");
-				add_elements_mode = false;
-
-				getWADL(analysis_merged_wadl_url_path);
-				firstWADL = xml_wadl_string;
-				getWADL(compare_merged_wadl_url_path);
-				secondWADL = xml_wadl_string;
-
-				compareXMLDoc = loadXMLDoc(analysis_merged_wadl_url_path);
-				var oldRootDoc = compareXMLDoc.documentElement;
-				compareXMLDoc = loadXMLDoc(compare_merged_wadl_url_path);
-				var newRootDoc = compareXMLDoc.documentElement;
-				init_node(oldRootDoc);
-				init_node(newRootDoc);
-
-				java_diff(delta_comparison_url, oldRootDoc, newRootDoc);	// java comparison diff
-				//text_diff_JS(1);											// text comparison diff
-				
-				saveWADLtoFile();
-			} else if (process_mode == "analyze"){
-				add_elements_mode = true;
-				getWADL(analysis_merged_wadl_url_path);
-				saveWADLtoFile();
+function highlightXSElementWithName(xselementName, node, highlightColor ){
+	for (var i = 0; i < node.childNodes.length; i++){
+		var newNode = node.childNodes[i];
+		if (newNode.nodeName == "xs:schema"){
+			highlightXSElementWithName(xselementName, newNode, highlightColor);
+		} else if (newNode.nodeName == "xs:complexType"){
+			highlightXSElementWithName(xselementName, newNode, highlightColor);
+		} else if (newNode.nodeName == "xs:sequence"){
+			highlightXSElementWithName(xselementName, newNode, highlightColor);
+		} else if (newNode.nodeName == "xs:element"){
+			if (newNode.attributes.getNamedItem('name').value == xselementName){
+				$("#" + newNode.my_id + "line").css("background-color", highlightColor);
 			}
-        },
-        error: function(xhr, status, error) {
-          //alert("status: " + status + ", xhr: " + xhr.responseText + ", error: " + error) ;
-		  alert("Error accessing app. Please try again !");
-		  //var err = eval("(" + xhr.responseText + ")");
-		  //alert(err.Message);
 		}
-
-    });
+	}
 }
 
 function getWADL(wadl_url_path){
@@ -742,7 +1331,6 @@ function getWADL(wadl_url_path){
 	rootNode=xmlDoc.documentElement;
 	// nodeName, attributes, childNodes
 
-	init_elements(rootNode);
 	setup_wadl_print();
 	//setup_wadl_print_free();
 }
@@ -765,35 +1353,65 @@ function setup_wadl_print(){
 	strapped_html_wadl_string = '';
 	xml_wadl_string = '';
 	spaces = 0;
+	init_element_ids(rootNode, "");
+
 	parse_wadl_html(rootNode);
-	//parse_wadl_html_two(rootNode);
 	$("#wadlOutput").html(html_wadl_string);
-	//$("#wadlOutput").html(strapped_html_wadl_string);
+}
+
+var margin_left = 0;
+var padding_left = 0;
+var level = 1;
+
+function appendToHTML(side, str, elemClassName){
+	$("#" + sideToWriteTo + "_wadl_output").append(str);
+	lineNumber++;
+	if (side == "left"){
+		$("." + elemClassName).attr("data-lineNumber", lineNumber + "_a");
+	} else if (side == "right"){
+		$("." + elemClassName).attr("data-lineNumber", lineNumber + "_b");
+	}	
 }
 
 // parses the wadl/xml document recursively and print it out
 function parse_wadl_html(myNode){
 
-	//var n = 0;
 	addSpaces();
 	
 	// if 'myNode' has any child nodes, then it can be expanded/minimized; otherwise, it can't
 	if (myNode.childNodes.length > 0){
 		// if the node is not minimized, add an onClick 'hideNode' action; else, add an onClick 'showNode' action
 		if (myNode.minimized){
-			html_wadl_string += "<button onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";			// remove element button
+			// remove element button
+			var showNodesChildrenBtn = "<button type=\"button\" class=\"btn btn-default btn-xs\" onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";
+			html_wadl_string += showNodesChildrenBtn;
+			//html_wadl_string += "<button onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";			
 		} else {
-			html_wadl_string += "<button onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";			// remove element button
+			// remove element button
+			var hideNodesChildrenBtn = "<button type=\"button\" class=\"btn btn-default btn-xs\" onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";
+			html_wadl_string += hideNodesChildrenBtn;
+			//html_wadl_string += "<button onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";			// remove element button
 		}
 	}
 
 	html_wadl_string += "<span id='" + myNode.my_id + "'>";
 	html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
 
-	strapped_html_wadl_string += "<div style=\"background-color: white; margin-left: 10px;\" id='" + myNode.my_id + "'>";
+	strapped_html_wadl_string += "<div id='" + myNode.my_id + "_all'>";
+	
+	var marginMinus = -level*10;
+	var marginLeftCalc = 10;
+
+	padding_left = level * 13;
+
+	strapped_html_wadl_string += "<div style=\"margin-left: 10px;\" id='" + myNode.my_id + "'>";
+	strapped_html_wadl_string += "<span id='" + myNode.my_id + "line'>";
 	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
-	//$("#"+myNode.my_id).css("margin-left") += '3px';
-	//$("#"+myNode.my_id).css("margin-left", "35px");
+
+	var spanElem = "";
+	var elemClassName = myNode.my_id + "line";
+	spanElem += "<div data-lineNumber=\"" + lineNumber + "\" style=\"padding-left: " + padding_left + "px;\" id='" + myNode.my_id + "line' class='" + elemClassName + "' >";
+	spanElem += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
 
 	xml_wadl_string += "<" + myNode.nodeName;
 
@@ -802,58 +1420,76 @@ function parse_wadl_html(myNode){
 		if (wadl_attribute_edit_mode){
 			html_wadl_string += 		 "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + "<input type='text' onchange=\"updateAttribute('" + myNode.my_id + "', '" + myNode.attributes[i].nodeName + "', this.value );\" value=\"" + htmlentities( myNode.attributes[i].value ) + "\"></input>" + "\"" + "</i></font>";
 			strapped_html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
+			spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
 		} else {
 			html_wadl_string += 		 "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
 			strapped_html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+			spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
 		}
 		xml_wadl_string += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
 	}
 
 	xml_wadl_string += ">";
 	xml_wadl_string += "\n";
-	//xml_wadl_string += "</br>";
 
 	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
-	
+	strapped_html_wadl_string += "</span>";
+
+	spanElem += "<font color='#008080'>" + htmlentities(">") + "</font>";
+	spanElem += "</div>";
+	appendToHTML("left", spanElem, elemClassName);
+
+	var removeNodeBtn = "<button style=\"margin-left: 10px;\" type=\"button\" class=\"btn btn-danger btn-xs\" onmouseout=\"unhighlight('" + myNode.my_id + "');\" onmouseover=\"highlightDiv('" + myNode.my_id + "');\" onClick=\"removeNode('" + myNode.my_id + "')\">X</button>";
 
 	html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
-	html_wadl_string += "<button onmouseout=\"unhighlight('" + myNode.my_id + "');\" onmouseover=\"highlightDiv('" + myNode.my_id + "');\" onClick=\"removeNode('" + myNode.my_id + "')\">X</button>";	// remove element button
+	html_wadl_string += removeNodeBtn;
 	html_wadl_string += "</br>";
+
 	
 	// only print myNode's children nodes if myNode is not minimized
 	if (!myNode.minimized){
 		// print myNode's children nodes
 		for (var i = 0; i < myNode.childNodes.length; i++){
 			spaces += 4;
+			margin_left += 10;
+			level++;
 			parse_wadl_html(myNode.childNodes[i]);
 		}
 	}
 
+	var addBtnsSize = "xs";			// 'xs' for extra small, 'sm' for small
+	var addBtnsType = "default";	// 'default' for white, ..
+
 	// printing the add 'element(s)' buttons
 	if (myNode.nodeName == 'resources'){
 		addSpacesTwo();
-		html_wadl_string += "<button onClick=\"addResource('" + myNode.my_id + "')\">Add Resource</button>";		// remove element button
+		var addResourceBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addResource('" + myNode.my_id + "')\">Add Resource</button>";
+		html_wadl_string += addResourceBtn;
 		html_wadl_string += "</br>";
 		
 		addSpacesTwo();
-		html_wadl_string += "<button onClick=\"addMethod('" + myNode.my_id + "')\">Add Method</button>";			// remove element button
+		var addMethodBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addMethod('" + myNode.my_id + "')\">Add Method</button>";
+		html_wadl_string += addMethodBtn;
 		html_wadl_string += "</br>";
 
 		addSpacesTwo();
-		html_wadl_string += "<button onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";			// remove element button
+		var addParamBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";
+		html_wadl_string += addParamBtn;
 		html_wadl_string += "</br>";
 	} else if (myNode.nodeName == 'resource'){
-		//console.log("RES PATH: " + myNode.attributes.getNamedItem("path").value);
 		addSpacesTwo();
-		html_wadl_string += "<button onClick=\"addResource('" + myNode.my_id + "')\">Add Resource</button>";		// remove element button
+		var addResourceBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addResource('" + myNode.my_id + "')\">Add Resource</button>";
+		html_wadl_string += addResourceBtn;
 		html_wadl_string += "</br>";
 		
 		addSpacesTwo();
-		html_wadl_string += "<button onClick=\"addMethod('" + myNode.my_id + "')\">Add Method</button>";			// remove element button
+		var addMethodBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addMethod('" + myNode.my_id + "')\">Add Method</button>";
+		html_wadl_string += addMethodBtn;
 		html_wadl_string += "</br>";
 		
 		addSpacesTwo();
-		html_wadl_string += "<button onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";			// remove element button
+		var addParamBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";
+		html_wadl_string += addParamBtn;
 		html_wadl_string += "</br>";
 	} else if (myNode.nodeName == 'method'){
 		// a method element can only have one request and one response element
@@ -869,13 +1505,15 @@ function parse_wadl_html(myNode){
 		
 		if (!hasRequest){
 			addSpacesTwo();
-			html_wadl_string += "<button onClick=\"addRequest('" + myNode.my_id + "')\">Add Request</button>";		// remove element button
+			var addRequestBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addRequest('" + myNode.my_id + "')\">Add Request</button>";
+			html_wadl_string += addRequestBtn;
 			html_wadl_string += "</br>";
 		}
 
 		if (!hasResponse){
 			addSpacesTwo();
-			html_wadl_string += "<button onClick=\"addResponse('" + myNode.my_id + "')\">Add Response</button>";		// remove element button
+			var addResponseBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addResponse('" + myNode.my_id + "')\">Add Response</button>";
+			html_wadl_string += addResponseBtn;
 			html_wadl_string += "</br>";
 		}
 	} else if (myNode.nodeName == 'request'){
@@ -889,12 +1527,14 @@ function parse_wadl_html(myNode){
 
 		if (!hasRepresentation){
 			addSpacesTwo();
-			html_wadl_string += "<button onClick=\"addRepresentation('" + myNode.my_id + "')\">Add Representation</button>";		// remove element button
+			var addRepresentationBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addRepresentation('" + myNode.my_id + "')\">Add Representation</button>";
+			html_wadl_string += addRepresentationBtn;
 			html_wadl_string += "</br>";
 		}
 
 		addSpacesTwo();
-		html_wadl_string += "<button onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";		// remove element button
+		var addParamBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";
+		html_wadl_string += addParamBtn;
 		html_wadl_string += "</br>";
 	} else if (myNode.nodeName == 'response'){
 		// a response element can only have one representation element
@@ -907,26 +1547,41 @@ function parse_wadl_html(myNode){
 
 		if (!hasRepresentation){
 			addSpacesTwo();
-			html_wadl_string += "<button onClick=\"addRepresentation('" + myNode.my_id + "')\">Add Representation</button>";		// remove element button
+			var addRepresentationBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addRepresentation('" + myNode.my_id + "')\">Add Representation</button>";
+			html_wadl_string += addRepresentationBtn;
 			html_wadl_string += "</br>";
 		}
 
 		addSpacesTwo();
-		html_wadl_string += "<button onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";		// remove element button
+		var addParamBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";
+		html_wadl_string += addParamBtn;
 		html_wadl_string += "</br>";
 
 		addSpacesTwo();
-		html_wadl_string += "<button onClick=\"addFault('" + myNode.my_id + "')\">Add Fault</button>";		// remove element button
+		var addFaultBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addFault('" + myNode.my_id + "')\">Add Fault</button>";
+		html_wadl_string += addFaultBtn;
 		html_wadl_string += "</br>";
 	}
 
+	elemClassName = myNode.my_id + "line_end";
+	spanElem = "";
+	spanElem += "<div data-lineNumber=\"" + '15' + "\" style=\"padding-left: " + padding_left + "px\" id='" + myNode.my_id + "line_end' class='" + elemClassName + "'>";
+	spanElem += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
+	spanElem += "</div>";
+
+	appendToHTML("left", spanElem, elemClassName);
+
 	// print the end element of myNode
 	addSpaces();
-
+	level--;
+	padding_left = level * 13;
 	xml_wadl_string += "</" + myNode.nodeName + ">";
 	xml_wadl_string += "\n";
-	//xml_wadl_string += "</br>";
+
+	strapped_html_wadl_string += "<span id='" + myNode.my_id + "line'>";
 	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
+	strapped_html_wadl_string += "</span>";
+	strapped_html_wadl_string += "</div>";
 	strapped_html_wadl_string += "</div>";
 
 	html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
@@ -937,54 +1592,3 @@ function parse_wadl_html(myNode){
 	spaces -= 4;
 }
 
-/*
-function parse_wadl_html_two(myNode){
-
-	addSpaces();
-
-	html_wadl_string += "<span id='" + myNode.my_id + "'>";
-	html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
-	
-	strapped_html_wadl_string += "<" + myNode.nodeName;
-
-	// print myNode's attributes
-	for (var i = 0; i < myNode.attributes.length; i++){
-		html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
-		strapped_html_wadl_string += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
-	}
-
-	strapped_html_wadl_string += ">";
-	strapped_html_wadl_string += "\n";
-	html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
-	html_wadl_string += "</br>";
-
-	// print myNode's children nodes
-	for (var i = 0; i < myNode.childNodes.length; i++){
-		spaces += 4;
-		parse_wadl_html_two(myNode.childNodes[i]);
-	}
-
-	// print the end element of myNode
-	addSpaces();
-	strapped_html_wadl_string += "</" + myNode.nodeName + ">";
-	strapped_html_wadl_string += "\n";
-	html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
-	html_wadl_string += "</span>";
-	html_wadl_string += "</br>";
-
-	// decrease spaces as the recursion is going down in the element hierarchy
-	spaces -= 4;
-}
-
-function save_wadl_to_file(){
-	html_wadl_string = '';
-	strapped_html_wadl_string = '';
-	spaces = 0;
-	parse_wadl_html_two(rootNode);
-	$('#popupBig').html(html_wadl_string);
-	$('#popupBig').append("</br><button onClick=\"document.getElementById('outerpopup').style.visibility='hidden';\">Close</button>");
-
-	document.getElementById("outerpopup").style.visibility="visible";
-}
-
-*/

@@ -1,0 +1,4 @@
+[11-Jun-2014 00:39:08 America/Chicago] PHP Parse error:  syntax error, unexpected '<' in /home1/pokemon/public_html/wsdarwin/index2.php on line 97
+[11-Jun-2014 00:40:06 America/Chicago] PHP Parse error:  syntax error, unexpected 'uploadAWADL' (T_STRING), expecting ',' or ';' in /home1/pokemon/public_html/wsdarwin/index2.php on line 99
+[02-Jul-2014 05:47:07 America/Chicago] PHP Parse error:  syntax error, unexpected 'diff_type_0' (T_STRING), expecting ',' or ';' in /home1/pokemon/public_html/wsdarwin/index2.php on line 304
+[02-Jul-2014 05:47:08 America/Chicago] PHP Parse error:  syntax error, unexpected 'diff_type_0' (T_STRING), expecting ',' or ';' in /home1/pokemon/public_html/wsdarwin/index2.php on line 304

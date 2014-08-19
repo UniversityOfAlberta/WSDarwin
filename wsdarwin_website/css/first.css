@@ -3,10 +3,24 @@ body {
 	background-color: white;
 }
 
+p {
+	margin: 0;
+	padding: 0;
+}
+
 .bodyWrap {
 	background-color: white;
 	margin: 0 auto;
-	width: 85%;
+	width: 100%;
+}
+
+.menuTabs {
+	margin-top: 50px;
+	margin-left: 25px;
+}
+
+.tab-content {
+	margin-top: 15px;
 }
 
 .textfieldWrap {
@@ -36,7 +50,6 @@ body {
 	border-style:solid;
 	border-width:thin;
 	border-color: #D8D8D8;
-	/*background-color: yellow;*/
 	width: 30%;
 	padding:0;
 	margin:0;
@@ -45,9 +58,61 @@ body {
 
 .urlRequestDiv {
 	vertical-align: top;
-	/*background-color: gray;*/
 	margin-left: 10px;
 	margin-top: 10px;
+}
+
+.uploadAWADL {
+	padding-bottom: 15px;
+	display: inline-block;
+	vertical-align: top;
+	margin-left: 7px;
+}
+
+.uploadWADLcontent {
+	padding-bottom: 10px;
+	padding-top: 10px;
+	border-bottom: 1px solid #DDCDCD;
+	display: none;
+}
+
+.uploadWADLcontentCompare {
+	padding-bottom: 10px;
+	padding-top: 10px;
+	border-bottom: 1px solid #DDCDCD;
+	display: none;
+}
+
+.borderBtm {
+	border-bottom: 1px solid #DDCDCD;
+}
+
+.innerUploadWADLcontent {
+	padding-left: 15px;
+}
+
+.innerUploadWADLcontentCompare {
+	padding-left: 15px;
+}
+
+.submitBtnDiv {
+	margin-top: 10px;
+	padding-bottom: 10px;
+}
+
+.compareSubmitBtnDiv {
+	margin-top: 10px;
+	padding-bottom: 10px;
+	display: none;
+}
+
+.compareA {
+	margin-bottom: 15px;
+}
+
+.compareB {
+	margin-bottom: 15px;
+	display: none;
 }
 
 .wadlDiv {
@@ -56,41 +121,44 @@ body {
 	width: 100%;
 	padding:0;
 	margin:0;
-	
-}
-
-p {
-	margin: 0;
-	padding: 0;
+	padding-top: 10px;
+	padding-left: 10px;
+	background-color: #F8F8F8;
+	border-top: 1px solid #DDCDCD;
+	height: auto;
 }
 
 .halfwadlOutput {
 	width: 50%;
 	display: inline-block;
 	float: right;
-	/*background-color: red;*/
+}
+
+.leftInfoMenu {
+	width: 20%;
+	display: inline-block;
+	float: right;
+}
+
+.halfDiv {
+	width: 50%;
+	display: inline-block;
+	float: right;
 }
 
 .wadlOutput {
-	/*margin-left: 10px;
-	background-color: gray;*/
 	max-width: inherit;
 	max-height: inherit;
-	border-style:solid;
-	border-width:thin;
-	border-color: #D8D8D8;
 	margin-bottom: 55px;
 }
 
-.optionsDiv {
-	background-color: #F0F0F0;
-	height: 23px;
-	width: 100%;
-	margin-bottom: 10px;
-	overflow: hidden;
+.inlineDiv {
+	display: inline;
+	margin: 0;
+	padding: 0;
 }
 
-.compareDiv {
+.optionsDiv {
 	background-color: #F0F0F0;
 	height: 23px;
 	width: 100%;
@@ -109,26 +177,43 @@ p {
 }
 
 .middleRegion {
-	/*background-color: black;*/
-	/*margin-top: 25px;*/
 	margin-top: 5px;
 }
 
+.urlSelectBtn {
+	height: 33px;
+	width: 84px;
+	margin-right: 10px;
+	border-radius: 4px;
+}
+
+.addURLbtn {
+	display: inline-block;
+	vertical-align: top;
+}
+
 .fieldUrlDiv {
-	margin-top: 2px;
 	height: auto;
 	overflow: auto;
 	max-height: 150px;
 	resize: vertical;
 	padding-bottom: 10px;
-	background-color: #F0F0F0;
+	border-bottom: 1px solid #DDCDCD;
+}
+
+.fieldCompareUrlDiv {
+	height: auto;
+	overflow: auto;
+	max-height: 150px;
+	resize: vertical;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #DDCDCD;
 }
 
 .areaUrlDiv {
 	background-color: gray;
 	padding: 0;
 	margin: 0;
-	/*visibility: hidden;*/
 }
 
 .analyzeSingleURL {
@@ -136,14 +221,14 @@ p {
 }
 
 .singleUrlDiv {
-	margin-top: 5px;
+	margin-bottom: 5px;
 }
 
-.urlInput {
+.urlInputClassA {
 	width: 600px;
 }
 
-.urlInput2 {
+.urlInputClassB {
 	width: 600px;
 }
 
@@ -155,19 +240,11 @@ p {
 }
 
 .analyzeBtn {
-	/*background-image: url("/wsdarwin/images/plusBtn.png");
 
-	background:url("/wsdarwin/images/plusBtn.png") 2px center no-repeat;
-    height: 32px;
-    padding: 10px 10px 10px 70px;
-    height: 28px;
-    width: 28px;
-    padding: 0;
-    margin: 0;*/
 }
 
 .saveWADLbtn {
-	/*visibility: 'hidden';*/
+
 }
 
 .popupBig {
@@ -193,3 +270,8 @@ p {
 	
 }
 
+/* bootstrap over-writing some class attrs */
+
+.list-group-item {
+	padding: 2px 3px;
+}
