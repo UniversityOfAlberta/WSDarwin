@@ -42,6 +42,7 @@ public class WADLFile implements WADLElement {
 	private Grammars grammarsElements;
 	private HashMap<String, Resources> resourcesElements;
 	private HashSet<MapDelta> mapDeltas;
+	public ArrayList<ArrayList<String>> elemMappingArray;
 
 	// still hard-coded see Annoki ToDo-List
 	/*public static final String 	RESOURCES_BASE = "http://maps.googleapis.com/maps/";
@@ -66,6 +67,7 @@ public class WADLFile implements WADLElement {
 		this.grammarsElements = new Grammars();			
 		this.resourcesElements = new HashMap<String, Resources>();
 		this.mapDeltas = new HashSet<MapDelta>();
+		this.elemMappingArray = new ArrayList<ArrayList<String>>();
 	}
 
 	public WADLFile(String filename) {
@@ -75,7 +77,11 @@ public class WADLFile implements WADLElement {
 		this.resourcesElements = new HashMap<String, Resources>();
 		this.mapDeltas = new HashSet<MapDelta>();
 	}
-
+	
+	public ArrayList<ArrayList<String>> getElementMappings(){
+		return this.elemMappingArray;
+	}
+	
 	public String getIdentifier() {
 		return wadlFilename;
 	}
@@ -1013,7 +1019,15 @@ public class WADLFile implements WADLElement {
 			 }
 		 }
 		 if (maxEl != null) {
-			System.out.println(maxEl.getName() + "\t" + maxEl.getValue() + "\t"
+			 //String [] elemLst = new String[4];
+			 ArrayList<String> elemLst = new ArrayList<String>();
+			 elemLst.add(maxEl.getName());
+			 //elemLst.add(String.valueOf(maxEl.getValue()));
+			 elemLst.add(xsd.getName());
+			 //elemLst.add(String.valueOf(value));
+			 elemLst.add(String.valueOf(max));
+			 this.elemMappingArray.add(elemLst);
+			System.out.println("this stuff: " + maxEl.getName() + "\t" + maxEl.getValue() + "\t"
 					+ xsd.getName() + "\t" + value + "\t" + max);
 		}
 		 return maxEl;

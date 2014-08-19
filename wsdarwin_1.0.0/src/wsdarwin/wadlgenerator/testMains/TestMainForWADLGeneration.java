@@ -73,18 +73,32 @@ public class TestMainForWADLGeneration {
 	// eclipse's tomcat path
 	// private static final String PATH_PREFIX_TWO = "C:/Users/mihai/eclipse_workspace/wsdarwin_1.0.0/WebContent/files/icsm2014/"+VENDOR;
 	// tomcat path
+	// 1:
 	private static final String PATH_PREFIX_TWO = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/"+VENDOR;
 	
-	//private static final String HOST_PATH = "localhost:8080/wsdarwin_1.0.0/";
+	// 2:
+	//private static final String PATH_PREFIX_TWO = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/icsm2014/"+VENDOR;
 	
+	
+	
+	//private static final String PATH_PREFIX_TWO = "http://ssrg17.cs.ualberta.ca:8080/wsdarwin_1.0.0/files/icsm2014/"+VENDOR;
+	
+	//private static final String HOST_PATH = "localhost:8080/wsdarwin_1.0.0/";
 	//private static final String PATH_PREFIX_TWO = HOST_PATH + "files/icsm2014/"+VENDOR;
 	private static final String FILENAME_DIR_TWO = PATH_PREFIX_TWO+"/wadl/";
 	//private static final String WADL_PATH = PATH_PREFIX_FILES;
 	private static final String RESPONSE_DIR_TWO = PATH_PREFIX_TWO+"/responses/";
 	private static final String UPLOADED_WADLS = PATH_PREFIX_TWO+"/uploadedWADL/";
 	
-	private static final String PATH_PREFIX_FILES = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
-	private static final String LOCALHOST_FILES_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
+	// 1:
+	 private static final String PATH_PREFIX_FILES = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
+	 private static final String LOCALHOST_FILES_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
+	
+	// 2:
+	//private static final String PATH_PREFIX_FILES = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/";
+	//private static final String LOCALHOST_FILES_PATH = "http://ssrg17.cs.ualberta.ca:8080/wsdarwin_1.0.0/files/";
+	
+	
 	//private static final String LOCALHOST_WADL_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
 	//private static final String LOCALHOST_WADL_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/icsm2014/twitter/wadl/";
 	
@@ -104,11 +118,77 @@ public class TestMainForWADLGeneration {
 		  return buf.toString();
 	}
 	
+	
+	
 	@GET
 	@Path("/analyze")
+    public String analyze(
+    		@QueryParam("newURLs") String newURLs, 
+    		@QueryParam("newUppedFiles") String newUppedFiles,
+    		@QueryParam("sessionid") String sessionid) throws Exception {
+		
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		ArrayList<String> analyze_URLs = gson.fromJson(newURLs, ArrayList.class);
+		ArrayList<String> analyze_WADLurls = gson.fromJson(newUppedFiles, ArrayList.class);
+		ArrayList<String> returnArray = new ArrayList<String>();
+		System.out.println(" -- > session id: " + sessionid);
+		String session_id = getSessionID(sessionid, returnArray);
+		
+		String filenameA = PATH_PREFIX_FILES + "wadlA" + session_id + ".wadl";
+		String localhostFilenameA = LOCALHOST_FILES_PATH + "wadlA" + session_id + ".wadl";
+		System.out.println("filename A: " + filenameA );
+		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
+		
+		returnArray.add(analysis_wadl_merged_path_url);
+		String ret = gson.toJson(returnArray);
+		return ret;
+		
+	}
+	
+	
+	@GET
+	@Path("/compare")
+    public String compare(
+    		@QueryParam("newURLs") String newURLs, 
+    		@QueryParam("newUppedFiles") String newUppedFiles,
+    		@QueryParam("sessionid") String sessionid, 
+    		@QueryParam("compareURLs") String compareURLs, 
+    		@QueryParam("compareWADLfiles") String compareWADLfiles) throws Exception {
+		
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		ArrayList<String> analyze_URLs = gson.fromJson(newURLs, ArrayList.class);
+		ArrayList<String> compare_URLs = gson.fromJson(compareURLs, ArrayList.class);
+		ArrayList<String> analyze_WADLurls = gson.fromJson(newUppedFiles, ArrayList.class);
+		ArrayList<String> compare_WADLurls = gson.fromJson(compareWADLfiles, ArrayList.class);
+		ArrayList<String> returnArray = new ArrayList<String>();
+		
+		String session_id = getSessionID(sessionid, returnArray);
+		
+		String filenameA = PATH_PREFIX_FILES + "wadlA" + session_id + ".wadl";
+		String localhostFilenameA = LOCALHOST_FILES_PATH + "wadlA" + session_id + ".wadl";
+		System.out.println("filename A: " + filenameA );
+		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
+		String compare_wadl_merged_path_url = "";
+		return "";
+	}
+	
+	/*
+	@GET
+	@Path("/crossServiceCompare")
+    public String crossServiceCompare(@QueryParam("newURLs") String newURLs, @QueryParam("newUppedFiles") String newUppedFiles,
+    		@QueryParam("sessionid") String sessionid, @QueryParam("type") String call_type,
+    		@QueryParam("compareURLs") String compareURLs, @QueryParam("compareWADLfiles") String compareWADLfiles) throws Exception {
+		
+	}
+	*/
+	@GET
+	@Path("/analyze2")
     public String singleURL(@QueryParam("newURLs") String newURLs, @QueryParam("newUppedFiles") String newUppedFiles,
     		@QueryParam("sessionid") String sessionid, @QueryParam("type") String call_type,
     		@QueryParam("compareURLs") String compareURLs, @QueryParam("compareWADLfiles") String compareWADLfiles) throws Exception {
+		
+		
+		//return "Blah";
 		
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		ArrayList<String> analyze_URLs = gson.fromJson(newURLs, ArrayList.class);
@@ -149,7 +229,7 @@ public class TestMainForWADLGeneration {
 		returnArray.add(analysis_wadl_merged_path_url);
 		returnArray.add(compare_wadl_merged_path_url);
 
-		if (call_type.equals("compare")){
+		//if (call_type.equals("compare")){
 			System.out.println("creating xml comparison file");
 			
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -164,9 +244,9 @@ public class TestMainForWADLGeneration {
 			System.out.println("done creating xml comparison file");
 			//String deltaString = gson.toJson(delta);
 			returnArray.add(LOCALHOST_FILES_PATH + "deltaComparison.xml");
-	    }
+	    //}
 		
-		/*System.out.println(" = = = = = = ");
+		System.out.println(" = = = = = = ");
 		System.out.println("wadl files A and B exist  ? " + testA.getIdentifier() + " AND " + testB.getIdentifier() );
 		
 		testA.mapElement(testB);
@@ -176,7 +256,17 @@ public class TestMainForWADLGeneration {
 			System.out.println("<><><> " + aset );
 			System.out.println("<><><> " + bset );
 		//}
-		delta.printDelta(0);*/
+		
+		
+		System.out.println("------------------------");
+		System.out.println("Cross Service printDelta:");
+		delta.printDelta(0);
+		System.out.println("------------------------");
+		//returnArray.add(LOCALHOST_FILES_PATH + "deltaComparison.xml");
+		System.out.println("SUUUP: " + testA.getElementMappings());
+		System.out.println("ABECEDAR: " + gson.toJson(testA.getElementMappings()));
+		
+		returnArray.add( gson.toJson( testA.getElementMappings() ) );
 		
 		String ret = gson.toJson(returnArray);		
 		return ret;
