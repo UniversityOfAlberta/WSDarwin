@@ -118,6 +118,14 @@ public class RequestAnalyzer extends Uri {
 				valueObject = Boolean.parseBoolean(queryValues[i]);
 				type = "boolean";
 			}
+			/*else if(Pattern.matches("^(\\d{4})-(\\d{2})-(\\d{2})[T]?(\\d{2}):(\\d{2}):(\\d{2})[Z]?$", queryValues[i])) {
+				valueObject = queryValues[i];
+				type = "dateTime";
+			}
+			else if(Pattern.matches("^(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})$", queryValues[i])) {
+				valueObject = queryValues[i];
+				type = "date";
+			}*/
 			/*else if(queryValues[i].equals(queryValues[i].toUpperCase()) &&
 					containsLetter(queryValues[i])) {
 				 four conditions: isString && isUpperCase && containsLetter && distribution.exists 
@@ -130,7 +138,7 @@ public class RequestAnalyzer extends Uri {
 				type = "string";
 			}
 			
-			//System.out.println("ELEM TYPPE-> > " + type);
+			System.out.println("RequestAnalyzer.java: ELEM TYPPE-> > " + type + " for: " + queryValues[i]);
 			
 			param = new Param(queryParameters[i], type, valueObject, WADLFile.PARAM_STYLE, WADLFile.PARAM_REQUIRED);
 			paramElements.put(queryParameters[i], param);

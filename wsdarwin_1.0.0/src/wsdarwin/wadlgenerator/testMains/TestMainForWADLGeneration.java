@@ -16,8 +16,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -44,13 +47,17 @@ import com.google.gson.GsonBuilder;
 
 import wsdarwin.comparison.delta.Delta;
 import wsdarwin.comparison.delta.MapDelta;
+import wsdarwin.model.PrimitiveType;
 import wsdarwin.parsers.WADLParser;
 import wsdarwin.util.DeltaUtil;
 import wsdarwin.util.XMLGenerator;
 import wsdarwin.wadlgenerator.RequestAnalyzer;
 import wsdarwin.wadlgenerator.Response2XSD;
 import wsdarwin.wadlgenerator.model.WADLFile;
+import wsdarwin.wadlgenerator.model.xsd.XSDComplexType;
+import wsdarwin.wadlgenerator.model.xsd.XSDElement;
 import wsdarwin.wadlgenerator.model.xsd.XSDFile;
+import wsdarwin.wadlgenerator.model.xsd.XSDIType;
 
 import java.net.*;
 import java.io.*;
@@ -132,7 +139,8 @@ public class TestMainForWADLGeneration {
 		ArrayList<String> analyze_WADLurls = gson.fromJson(newUppedFiles, ArrayList.class);
 		ArrayList<String> returnArray = new ArrayList<String>();
 		System.out.println(" -- > session id: " + sessionid);
-		String session_id = getSessionID(sessionid, returnArray);
+		String session_id = getSessionID(sessionid);
+		returnArray.add(session_id);
 		
 		String filenameA = PATH_PREFIX_FILES + "wadlA" + session_id + ".wadl";
 		String localhostFilenameA = LOCALHOST_FILES_PATH + "wadlA" + session_id + ".wadl";
@@ -141,6 +149,14 @@ public class TestMainForWADLGeneration {
 		
 		returnArray.add(analysis_wadl_merged_path_url);
 		String ret = gson.toJson(returnArray);
+		
+		String regex = "\\b(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+		if (Pattern.matches(regex, "http://google.com")){
+			System.out.println("BLAH ONE !");
+		}
+		if (Pattern.matches(regex, "https://avatars.githubusercontent.com/u/100?v=2")){
+			System.out.println("BLAH TWO !");
+		}
 		return ret;
 		
 	}
@@ -155,6 +171,7 @@ public class TestMainForWADLGeneration {
     		@QueryParam("compareURLs") String compareURLs, 
     		@QueryParam("compareWADLfiles") String compareWADLfiles) throws Exception {
 		
+		System.out.println("COMPARE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		ArrayList<String> analyze_URLs = gson.fromJson(newURLs, ArrayList.class);
 		ArrayList<String> compare_URLs = gson.fromJson(compareURLs, ArrayList.class);
@@ -162,33 +179,156 @@ public class TestMainForWADLGeneration {
 		ArrayList<String> compare_WADLurls = gson.fromJson(compareWADLfiles, ArrayList.class);
 		ArrayList<String> returnArray = new ArrayList<String>();
 		
-		String session_id = getSessionID(sessionid, returnArray);
+		String session_id = getSessionID(sessionid);
+		returnArray.add(session_id);
 		
 		String filenameA = PATH_PREFIX_FILES + "wadlA" + session_id + ".wadl";
 		String localhostFilenameA = LOCALHOST_FILES_PATH + "wadlA" + session_id + ".wadl";
 		System.out.println("filename A: " + filenameA );
 		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
 		String compare_wadl_merged_path_url = "";
-		return "";
+		
+		Delta delta = null;
+		if ( ( (compare_URLs != null) || (compare_WADLurls != null) ) && ( (compare_WADLurls.size() > 0) || (compare_URLs.size() > 0) ) ){
+			String filenameB = PATH_PREFIX_FILES + "wadlB" + session_id + ".wadl";
+			String localhostFilenameB = LOCALHOST_FILES_PATH + "wadlB" + session_id + ".wadl";
+			compare_wadl_merged_path_url = getWadl(compare_URLs, compare_WADLurls, "compareURLS", session_id, filenameB, localhostFilenameB);
+			System.out.println("");
+			System.out.println("analysis path: " + analysis_wadl_merged_path_url);
+			System.out.println("compare path: " + compare_wadl_merged_path_url);
+			
+			// parse the 2 wadl's into a wsdarwin.model and diff them
+			WADLParser parser1 = new WADLParser(new File(filenameA));
+			WADLParser parser2 = new WADLParser(new File(filenameB));
+			
+			delta = parser1.getService().diff(parser2.getService());
+						
+			//DeltaUtil.findMoveDeltas(delta);
+			delta.printDelta(0);
+			//System.out.println("Diff finished");
+		}
+		
+		returnArray.add(analysis_wadl_merged_path_url);
+		returnArray.add(compare_wadl_merged_path_url);
+		
+		System.out.println("creating xml comparison file");
+		
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setNamespaceAware(true);
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		DOMImplementation domImpl = builder.getDOMImplementation();
+		Document xmldoc = domImpl.createDocument("localXMLdelta", "deltas", null);
+		
+		delta.createXMLElement(xmldoc, xmldoc.getDocumentElement());
+		//String comparison_file_path = 
+		writeXML(domImpl, xmldoc, PATH_PREFIX_FILES + "/deltaComparison.xml");
+		System.out.println("done creating xml comparison file");
+		//String deltaString = gson.toJson(delta);
+		returnArray.add(LOCALHOST_FILES_PATH + "deltaComparison.xml");
+		
+		String ret = gson.toJson(returnArray);		
+		return ret;
+	}
+	
+	@GET
+	@Path("/crossServiceCompare")
+    public String crossServiceCompare(
+    		@QueryParam("newURLs") String newURLs, 
+    		@QueryParam("newUppedFiles") String newUppedFiles,
+    		@QueryParam("sessionid") String sessionid, 
+    		@QueryParam("compareURLs") String compareURLs, 
+    		@QueryParam("compareWADLfiles") String compareWADLfiles) throws Exception {
+		
+		System.out.println("CROSS SERVICE COMPARE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		ArrayList<String> analyze_URLs = gson.fromJson(newURLs, ArrayList.class);
+		ArrayList<String> compare_URLs = gson.fromJson(compareURLs, ArrayList.class);
+		ArrayList<String> analyze_WADLurls = gson.fromJson(newUppedFiles, ArrayList.class);
+		ArrayList<String> compare_WADLurls = gson.fromJson(compareWADLfiles, ArrayList.class);
+		ArrayList<String> returnArray = new ArrayList<String>();
+		System.out.println(" -- > session id: " + sessionid);
+		String session_id = getSessionID(sessionid);
+		returnArray.add(session_id);
+		//MergedWADL_A_ + session_id
+		
+		String filenameA = PATH_PREFIX_FILES + "wadlA" + session_id + ".wadl";
+		String localhostFilenameA = LOCALHOST_FILES_PATH + "wadlA" + session_id + ".wadl";
+		System.out.println("filename A: " + filenameA );
+		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
+		String compare_wadl_merged_path_url = "";
+		
+		Delta delta = null;
+		if ( ( (compare_URLs != null) || (compare_WADLurls != null) ) && ( (compare_WADLurls.size() > 0) || (compare_URLs.size() > 0) ) ){
+			String filenameB = PATH_PREFIX_FILES + "wadlB" + session_id + ".wadl";
+			String localhostFilenameB = LOCALHOST_FILES_PATH + "wadlB" + session_id + ".wadl";
+			compare_wadl_merged_path_url = getWadl(compare_URLs, compare_WADLurls, "compareURLS", session_id, filenameB, localhostFilenameB);
+			System.out.println("");
+			System.out.println("analysis path: " + analysis_wadl_merged_path_url);
+			System.out.println("compare path: " + compare_wadl_merged_path_url);
+			
+			// parse the 2 wadl's into a wsdarwin.model and diff them
+			WADLParser parser1 = new WADLParser(new File(filenameA));
+			WADLParser parser2 = new WADLParser(new File(filenameB));
+			
+			delta = parser1.getService().diff(parser2.getService());
+						
+			//DeltaUtil.findMoveDeltas(delta);
+			delta.printDelta(0);
+			//System.out.println("Diff finished");
+		}
+		
+		returnArray.add(analysis_wadl_merged_path_url);
+		returnArray.add(compare_wadl_merged_path_url);
+
+		//if (call_type.equals("compare")){
+			System.out.println("creating xml comparison file");
+			
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setNamespaceAware(true);
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			DOMImplementation domImpl = builder.getDOMImplementation();
+			Document xmldoc = domImpl.createDocument("localXMLdelta", "deltas", null);
+			
+			delta.createXMLElement(xmldoc, xmldoc.getDocumentElement());
+			//String comparison_file_path = 
+			writeXML(domImpl, xmldoc, PATH_PREFIX_FILES + "/deltaComparison.xml");
+			System.out.println("done creating xml comparison file");
+			//String deltaString = gson.toJson(delta);
+			returnArray.add(LOCALHOST_FILES_PATH + "deltaComparison.xml");
+	    //}
+		
+		System.out.println(" = = = = = = ");
+		System.out.println("wadl files A and B exist  ? " + testA.getIdentifier() + " AND " + testB.getIdentifier() );
+		
+		testA.mapElement(testB);
+		HashSet<MapDelta> bset = testB.getMapDeltas();
+		HashSet<MapDelta> aset = testA.getMapDeltas();
+		//for (int i = 0; i < abc.size(); i++){
+		//	System.out.println("<><><> " + aset );
+		//	System.out.println("<><><> " + bset );
+		//}
+		
+		
+		System.out.println("------------------------");
+		System.out.println("Cross Service printDelta:");
+		delta.printDelta(0);
+		System.out.println("------------------------");
+		//returnArray.add(LOCALHOST_FILES_PATH + "deltaComparison.xml");
+		System.out.println("SUUUP: " + testA.getElementMappings());
+		System.out.println("ABECEDAR: " + gson.toJson(testA.getElementMappings()));
+		
+		returnArray.add( gson.toJson( testA.getElementMappings() ) );
+		
+		String ret = gson.toJson(returnArray);		
+		return ret;
 	}
 	
 	/*
-	@GET
-	@Path("/crossServiceCompare")
-    public String crossServiceCompare(@QueryParam("newURLs") String newURLs, @QueryParam("newUppedFiles") String newUppedFiles,
-    		@QueryParam("sessionid") String sessionid, @QueryParam("type") String call_type,
-    		@QueryParam("compareURLs") String compareURLs, @QueryParam("compareWADLfiles") String compareWADLfiles) throws Exception {
-		
-	}
-	*/
 	@GET
 	@Path("/analyze2")
     public String singleURL(@QueryParam("newURLs") String newURLs, @QueryParam("newUppedFiles") String newUppedFiles,
     		@QueryParam("sessionid") String sessionid, @QueryParam("type") String call_type,
     		@QueryParam("compareURLs") String compareURLs, @QueryParam("compareWADLfiles") String compareWADLfiles) throws Exception {
-		
-		
-		//return "Blah";
 		
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		ArrayList<String> analyze_URLs = gson.fromJson(newURLs, ArrayList.class);
@@ -197,7 +337,8 @@ public class TestMainForWADLGeneration {
 		ArrayList<String> compare_WADLurls = gson.fromJson(compareWADLfiles, ArrayList.class);
 		ArrayList<String> returnArray = new ArrayList<String>();
 		System.out.println(" -- > session id: " + sessionid);
-		String session_id = getSessionID(sessionid, returnArray);
+		String session_id = getSessionID(sessionid);
+		returnArray.add(session_id);
 		//MergedWADL_A_ + session_id
 		
 		String filenameA = PATH_PREFIX_FILES + "wadlA" + session_id + ".wadl";
@@ -271,9 +412,10 @@ public class TestMainForWADLGeneration {
 		String ret = gson.toJson(returnArray);		
 		return ret;
 	}
-
+	 */
+	
 	// if a session id is set, return it; if a session id is not set, create a new one
-	private String getSessionID(String sessionid, ArrayList<String> returnArray) {
+	private String getSessionID(String sessionid) {
 		String session_id = new String("_");	//session id
 		if (sessionid.equals("")){
 			// #1 : random session numbers
@@ -282,10 +424,10 @@ public class TestMainForWADLGeneration {
 			
 			// #2 : static session 
 			session_id += "static";
-			returnArray.add(session_id);
+			//returnArray.add(session_id);
 			System.out.println("creating new session id: " + session_id);
 		} else {
-			returnArray.add(sessionid);
+			//returnArray.add(sessionid);
 			session_id = sessionid;
 			System.out.println("returning same session id: " + session_id);
 		}
@@ -389,6 +531,9 @@ public class TestMainForWADLGeneration {
 			String resourceBase, XMLGenerator generator, WADLFile mergedWADL,
 			HashSet<XSDFile> grammarSet, String mergedWADLFileName) throws MalformedURLException,
 			IOException, ParserConfigurationException {
+		
+		HashMap<String, HashMap<String, Integer>> valueFrequencies = new HashMap<String, HashMap<String, Integer>>();
+		
 		for(String requestLine : requests) {
 			String[] tokens = requestLine.split(" ");
 			String id = "";
@@ -448,10 +593,19 @@ public class TestMainForWADLGeneration {
 		    // Call diff&merge methods from sub-objects 
 		    mergedWADL.compareToMerge(newWADL);
 		    
+			// calculating the value frequency of all XSDElements
+		    HashMap<String, XSDIType> xsdtypes = xsdFile.getTypes();
+		    System.out.println("============== START of printing all elements of xsdfile ================ ");
+		    for (String typeString: xsdtypes.keySet()){
+		    	getXSDElementsValueFrequencies(xsdtypes.get(typeString), valueFrequencies);
+		    }
+		    System.out.println("============== END of printing all elements of xsdfile ================ ");
+		    
 		    // Add the newly generated wadl's path to the list wadl_paths
 		    //wadl_paths.add(LOCALHOST_FILES_PATH+FILENAME_WADL);
 			
 		}
+		System.out.println("VALUE FREQUENCY TABLE: " + valueFrequencies);
 	}
 	
 	/*private static String getWADLMergedFilename(String call_type) {
@@ -463,6 +617,39 @@ public class TestMainForWADLGeneration {
 		}
 		return mergedFileName;
 	}*/
+	
+	// NAME ??????????? getXSDElementsValueFrequencies
+	public static void getXSDElementsValueFrequencies(Object elem, HashMap<String, HashMap<String, Integer>> valueFrequencies){
+		if (elem instanceof XSDComplexType){
+			XSDComplexType xscomplex = (XSDComplexType) elem;
+			//System.out.println("Complex Element [name] " + xscomplex.getName() + " [elements]: " + xscomplex.getElements());
+			HashMap<String, XSDElement> elemList = xscomplex.getElements();
+			for (String elemKey: elemList.keySet()){
+				getXSDElementsValueFrequencies(elemList.get(elemKey), valueFrequencies);
+			}
+		} else if (elem instanceof XSDElement){
+			XSDElement xsdelem = (XSDElement) elem;
+			System.out.println("[name] " + xsdelem.getName() + " [type] " + xsdelem.getType() 
+						+ " [value] " + xsdelem.getValue());
+			
+			// if XSDElement xsdelem's name exists in valueFrequencies
+			if (valueFrequencies.containsKey(xsdelem.getName())){
+				System.out.println("KEY " + xsdelem.getName() + " already exists !!!!!!!!!!" );
+				HashMap<String, Integer> type_value_map = valueFrequencies.get(xsdelem.getName());
+				System.out.println("BLAH BAH  ! '" + xsdelem.getType() + "' and '" + xsdelem.getType().toString() + "'" );
+				// if XSDElement xsdelem's type also exists (checks that the element also has the same type)
+				if (type_value_map.containsKey(xsdelem.getType().toString())){
+					// increase frequency by 1
+					Integer currentFrequency = type_value_map.get(xsdelem.getType().toString());
+					type_value_map.put(xsdelem.getType().toString(), (currentFrequency+1));
+				}
+			} else {	// add element to the valueFrequencies list
+				HashMap<String, Integer> type_value_map = new HashMap<String, Integer>();
+				type_value_map.put(xsdelem.getType().toString(), 1);
+				valueFrequencies.put(xsdelem.getName(), type_value_map);
+			}
+		}
+	}
 	
 	/**
 	 * @param args
@@ -562,7 +749,20 @@ public class TestMainForWADLGeneration {
 // https://api.github.com/users/mralexgray/repos
 // https://api.github.com/users/fokaefs/repos
 // https://api.github.com/users/mojombo
-// https://api.github.com/users/willcodeforfoo
+//
+// 
+// https://api.github.com/repos/penguinsource/pokemon_pac
+//
+// TYPES dateTime, anyURI, email example:  
+// 		https://api.github.com/users/willcodeforfoo
+//
+//
+//
+//
+//
+//
+//
+// 
 // 
 // API calls with only one resource:
 //

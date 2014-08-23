@@ -27,18 +27,24 @@ public class XSDFile implements WADLElement {
 	private HashMap<String, XSDIType> types;
 	private HashMap<String, XSDElement> elements;
 	private XSDElement responseElement;
+	// newly added in order to keep track of value frequency of all xsdelements
+	//private TreeMap<XSDElement, Integer> valueFrequencies;
 
 	public XSDFile(HashMap<String, XSDIType> types,
 			HashMap<String, XSDElement> elements) {
 		this.types = types;
 		this.elements = elements;
 	}
-
+	
 	public XSDFile() {
 		this.types = new HashMap<String, XSDIType>();
 		this.elements = new HashMap<String, XSDElement>();
 	}
-
+	
+	//public TreeMap<XSDElement, Integer> getValueFrequencies() {
+	//	return this.valueFrequencies;
+	//}
+	
 	public void addElement(String name, XSDElement element) {
 		elements.put(name, element);
 	}
@@ -101,7 +107,7 @@ public class XSDFile implements WADLElement {
 		NodeList grammars = xmlDoc.getElementsByTagName("grammars");
 		NodeList schemas = grammars.item(0).getChildNodes();
 		
-		System.out.println("<<< READING THE XSD OF THE FILE >>>");
+		//System.out.println("<<< READING THE XSD OF THE FILE >>>");
 		
 		// for all the 'xs:complexType' elements in <xs:schema> with index 0:
 		for (int i = 0; i < schemas.item(0).getChildNodes().getLength(); i++){
@@ -154,7 +160,7 @@ public class XSDFile implements WADLElement {
 		
 		responseElement = findResponseType();
 		
-		System.out.println("<<< END OF READING THE XSD OF THE FILE >>>");
+		//System.out.println("<<< END OF READING THE XSD OF THE FILE >>>");
 	
 	}
 	

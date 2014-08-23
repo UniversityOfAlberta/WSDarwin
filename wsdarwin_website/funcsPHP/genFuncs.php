@@ -1,6 +1,6 @@
 <?php
 
-$localhostON = 4;
+$localhostON = 5;
 
 if ($localhostON == 0){
         $baseURL = "http://" . $_SERVER['HTTP_HOST'] . "/";				// 000webhost:  blackmarket5.hostei.com
@@ -19,7 +19,9 @@ if ($localhostON == 0){
 } else if ($localhostON == 4){
         $baseURL = "http://pokemonpacific.com/wsdarwin/";	// localhost mihai
         $basehref = "<base href=\"http://pokemonpacific/wsdarwin/\" />";
-
+} else if ($localhostON == 5){
+        $baseURL = "http://ssrg17.cs.ualberta.ca/wsdarwin/";       // localhost mihai
+        $basehref = "<base href=\"http://ssrg17.cs.ualberta.ca/wsdarwin/\" />";
 }
 
 function addURLtextfield(){

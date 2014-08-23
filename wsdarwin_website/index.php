@@ -3,9 +3,16 @@
 <html>
 
 <head>
+<!-- Bootstrap css sheets-->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/bootstrap.css" rel="stylesheet">
+
 <!-- css sheets -->
-<link rel=stylesheet href="<?= $GLOBALS['baseURL']; ?>css/first.css" type="text/CSS">
 <link rel=stylesheet href="<?= $GLOBALS['baseURL']; ?>css/diffview.css" type="text/CSS">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+<link rel=stylesheet href="<?= $GLOBALS['baseURL']; ?>css/first.css" type="text/CSS">
+
 <!-- scripts -->
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/generalFuncs.js"></script>
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/ObjTree.js"></script>
@@ -15,57 +22,118 @@
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdifflib-master/diffview.js"></script>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script> -->
 
-
-<script>
-
-function parseXml(xml) {
-   var dom = null;
-   if (window.DOMParser) {
-      try { 
-         dom = (new DOMParser()).parseFromString(xml, "text/xml"); 
-      } 
-      catch (e) { dom = null; }
-   }
-   else if (window.ActiveXObject) {
-      try {
-         dom = new ActiveXObject('Microsoft.XMLDOM');
-         dom.async = false;
-         if (!dom.loadXML(xml)) // parse error ..
-
-            window.alert(dom.parseError.reason + dom.parseError.srcText);
-      } 
-      catch (e) { dom = null; }
-   }
-   else
-      alert("cannot parse xml string!");
-   return dom;
-}
-</script>
 
 </head>
 
 <body>
+	<div class='bodyWrap' id='bodyWrap'>
 
-<div class='outerpopup' id='outerpopup'>
-	<div class='popupBig' id="popupBig"></div>
-</div>
-
-<div class='bodyWrap' id='bodyWrap'>
-
-	<div class='popupDiv' id='popupDiv'>heeeeeeeeey</div>
-
-	<div class='fields_input'>
-		<button onClick="addURLField()"> Add URL </button>
-
-		Select images: <input id='files' type="file" multiple>
-		<input type="submit">
+	<div class="menuTabs">
+		<!-- Nav tabs -->
+		<ul class="nav nav-tabs">
+		  <li class="active" name='analysisViewName' id='analysisView'><a href="javascript:activateView('analysisView'); ">Analysis</a></li>
+		  <li id='comparisonView' name='compareViewName'><a href="javascript:activateView('comparisonView')">Comparison</a></li>
+		  <li id='crossServiceComparisonView' name='crossServiceViewName'><a href="javascript:activateView('crossServiceComparisonView')">Cross Service Comparison</a></li>
+		  <li id='settingsView'><a href="javascript:activateView('settingsView')">Settings</a></li>
+		</ul>
 
 		<script>
-		document.getElementById('files').addEventListener('change', function(e) {
+
+		</script>
+
+		<!-- Tab panes -->
+		<div class="tab-content">
+		  <div class="tab-pane active" id="analysis">
+
+		  	<!-------------------------------->
+
+		  	<!-- compareA goes here: -->
+		  	<?php printCompareA(); ?>
+
+			<!-- compareB goes here: -->
+			<?php printCompareB(); ?>
+
+			<!-- Analyze the input(s) -->
+			<div id='analyzeSubmitBtn' class="submitBtnDiv">
+				<button type="button" id='analyzeBtn' onClick="analyzeBtn('analyze')" style="width: 84px;" class="btn btn-success">Analyze</button>
+				<button type="button" onClick="runSampleTest()" class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button>
+			</div>
+
+			<!-- Compare the input(s) -->
+			<div id='compareSubmitBtn' class="compareSubmitBtnDiv">
+				<button type="button" id='compareBtn' onClick="compareBtn()" style="width: 84px;" class="btn btn-primary">Compare</button>
+				<button type="button" onClick="runSampleTest()" class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button>
+			</div>
+			
+			<!-- Cross-Service Comparison of the input(s) -->
+			<div id='crossServiceCompareSubmitBtn' class="compareSubmitBtnDiv">
+				<button type="button" id='crossServiceCompareBtn' onClick="crossServiceCompareBtn()" style="width: 180px;" class="btn btn-info">Cross-Service Compare</button>
+				<button type="button" onClick="runSampleTest()" class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button>
+			</div>
+			
+			<!------------------------------ -->
+
+		  </div>
+		  <div class="tab-pane" id="comparison"></div>
+		  <div class="tab-pane" id="crossServiceComparison"></div>
+		  <div class="tab-pane" id="settings"></div>
+		</div>
+	</div>
+
+	<div class='wadlDiv'>
+		<div id='wadlOutput' class='wadlOutput' placeholder='WADL'>
+		</div>
+		<div id='right_wadl_output' class='halfwadlOutput'></div>
+		<div id='left_wadl_output' class='halfwadlOutput'></div>
+		<div id='leftInfoMenu' class='leftInfoMenu'>
+			<div id="rightHalfDiv" class="halfDiv list-group">
+			  	<!--
+			  	<a href="#" class="list-group-item active"> Cras justo odio </a>
+				<a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+				<a href="#" class="list-group-item">Morbi leo risus</a>
+				<a href="#" class="list-group-item">Porta ac consectetur ac</a>
+				<a href="#" class="list-group-item">Vestibulum at eros</a>
+				-->
+			</div>
+			<div id="leftHalfDiv" class="halfDiv list-group">
+			</div>
+
+		</div>
+	</div>
+
+	</div>
+</body>
+</html>
+
+		<script>
+			function onLoad() {
+		    	$('#fileInput').click();
+			}
+
+			function onLoadCompare(){
+				$('#fileInputCompare').click();
+			}
+
+			function handleFiles(files) {
+			    var file 		= files[0];
+			    var reader 		= new FileReader();
+			    reader.onload 	= onFileReadComplete;
+			    reader.readAsText(file);
+			}
+			  
+			function onFileReadComplete(event) { 
+			  // Do something fun with your file contents.
+			}
+		</script>
+
+		<script>
+		document.getElementById('fileInput').addEventListener('change', function(e) {
+		//function uploadAFile()
 		    //var file = this.files[0];
-		    console.log("files length: " + this.files.length);
+		    //console.log("files length: " + this.files.length);
 		    var xhr = new XMLHttpRequest();
 		    //xhr.file = file; // not necessary if you create scopes like this
 		    xhr.addEventListener('progress', function(e) {
@@ -91,11 +159,21 @@ function parseXml(xml) {
 			        var resp = JSON.parse(xhr.responseText);
 			        console.log("links: " + resp['filepaths'] + ", count: " + resp['filepaths'].length );
 			    	for (var i = 0; i < resp['filepaths'].length; i++){
-			    		uppedWADLurls.push(resp['filepaths'][i]);
+			    		if (uppedWADLurls.length < max_wadl_files_uploaded) {
+							uppedWADLurls.push(resp['filepaths'][i]);
+				    		var displayWADLbtn = "<button style=\"margin-left: 25px;\" onClick=\"check()\" type=\"button\" class=\"btn btn-primary btn-xs\">Display WADL</button>";
+				    		var deleteWADLbtn  = "<button style=\"margin-left: 10px;\" onClick=\"emptyUppedWADLs()\" type=\"button\" class=\"btn btn-danger btn-xs\">X</button>";
+				    		$("#innerUploadWADLcontent").append("<div style=\"margin-bottom: 5px;\"><a href='" + resp['filepaths'][i] + "'>" + "File " + i + "</a>" + displayWADLbtn + deleteWADLbtn + "</div>");
+			    		} else {
+			    			alert("A maximum number (1) of WADL files has been reached");
+			    		}
+			    		
 			    	}
+
 
 			    }
 			}
+			$("#uploadWADLcontent").show();
 
 		    xhr.open('post', "/wsdarwin/funcsPHP/uploadFile.php", true);
 		    //alert("file is " + file);
@@ -104,139 +182,242 @@ function parseXml(xml) {
 		    for (var i = 0; i < this.files.length; i++){
 		    	//filesArray.push(this.files[i]);
 		    	formData.append("file"+i, this.files[i]);
+		    	console.log("ABC: " + this.files[i].filepaths);
 		    }
 			//formData.append("uppedFiles", this.files);
 		    xhr.send(formData);
-
+		//}
 		}, false);
+
+		document.getElementById('fileInputCompare').addEventListener('change', function(e) {
+		    var xhr = new XMLHttpRequest();
+		    //xhr.file = file; // not necessary if you create scopes like this
+		    xhr.addEventListener('progress', function(e) {
+		        var done = e.position || e.loaded, total = e.totalSize || e.total;
+		        console.log('xhr progress: ' + (Math.floor(done/total*1000)/10) + '%');
+		    }, false);
+		    if ( xhr.upload ) {
+		        xhr.upload.onprogress = function(e) {
+		            var done = e.position || e.loaded, total = e.totalSize || e.total;
+		            console.log('xhr.upload progress: ' + done + ' / ' + total + ' = ' + (Math.floor(done/total*1000)/10) + '%');
+		        };
+		    }
+		    xhr.onreadystatechange = function(e) {
+		        if ( 4 == this.readyState ) {
+		            console.log(['xhr upload complete', e]);
+		            console.log("e is " + e.responseText );
+		        }
+		    };
+
+			xhr.onreadystatechange = function() {
+			    if(xhr.readyState == 4 && xhr.status == 200) {
+			        alert(xhr.responseText);
+			        var resp = JSON.parse(xhr.responseText);
+			        console.log("links: " + resp['filepaths'] + ", count: " + resp['filepaths'].length );
+			    	for (var i = 0; i < resp['filepaths'].length; i++){
+			    		if (compareWADLurls.length < max_wadl_files_uploaded) {
+							compareWADLurls.push(resp['filepaths'][i]);
+				    		var displayWADLbtn = "<button style=\"margin-left: 25px;\" onClick=\"check()\" type=\"button\" class=\"btn btn-primary btn-xs\">Display WADL</button>";
+				    		var deleteWADLbtn  = "<button style=\"margin-left: 10px;\" onClick=\"emptyCompareUppedWADLs()\" type=\"button\" class=\"btn btn-danger btn-xs\">X</button>";
+				    		$("#innerUploadWADLcontentCompare").append("<div style=\"margin-bottom: 5px;\"><a href='" + resp['filepaths'][i] + "'>" + "File " + i + "</a>" + displayWADLbtn + deleteWADLbtn + "</div>");
+			    		} else {
+			    			alert("A maximum number (1) of WADL files has been reached");
+			    		}
+			    		
+			    	}
+
+
+			    }
+			}
+			$("#uploadWADLcontentCompare").show();
+
+		    xhr.open('post', "/wsdarwin/funcsPHP/uploadFile.php", true);
+		    //alert("file is " + file);
+		    //var filesArray = [];
+		    var formData = new FormData();
+		    for (var i = 0; i < this.files.length; i++){
+		    	//filesArray.push(this.files[i]);
+		    	formData.append("file"+i, this.files[i]);
+		    	console.log("ABC: " + this.files[i].filepaths);
+		    }
+			//formData.append("uppedFiles", this.files);
+		    xhr.send(formData);
+		//}
+		}, false);
+
+function check(){
+	console.log("size of uppedWADLurls is " + uppedWADLurls.length);
+}
+
+function emptyUppedWADLs(){
+	uppedWADLurls = [];
+	hideUploadWADLContent();
+	console.log("size of uppedWADLurls is " + uppedWADLurls.length);
+}
+
+function emptyCompareUppedWADLs(){
+	uppedWADLurls = [];
+	hideUploadCompareWADLContent();
+	console.log("size of uppedWADLurls is " + uppedWADLurls.length);
+}
+
+function hideUploadWADLContent(){
+	$("#uploadWADLcontent").hide();
+	$("#innerUploadWADLcontent").html("");
+}
+
+function hideUploadCompareWADLContent(){
+	$("#uploadWADLcontentCompare").hide();
+	$("#innerUploadWADLcontentCompare").html("");
+}
+
+function hideUploadWADLContentCompare(){
+	$("#uploadWADLcontent").hide();
+	$("#innerUploadWADLcontent").html("");
+}
 		</script>
 
-		<div id='fieldUrlDiv' class='fieldUrlDiv'>
-			<script type="text/javascript"> addURLField(); </script>
-		</div>
+<?php
 
-	</div>
-	<div class='middleRegion'>
+function printCompareB(){
 
-	<div id='compareDiv' class='compareDiv'>
-		<button class='showCompareBtn' id='showCompareBtn' onClick="showCompareOptions()">+ Show Compare Tool</button>
-		<div id='compareInsideDiv' class='compareInsideDiv'>
-			<button onClick="addCompareURLField()"> Add URL </button>
-			<span>
-			Upload a WADL File<input id='filesCompare' type='file' placeholder='Upload'></input>
-			</span>
-
-			<script>
-				document.getElementById('filesCompare').addEventListener('change', function(e) {
-				    var xhr = new XMLHttpRequest();
-				    //xhr.file = file; // not necessary if you create scopes like this
-				    xhr.addEventListener('progress', function(e) {
-				        var done = e.position || e.loaded, total = e.totalSize || e.total;
-				        console.log('xhr progress: ' + (Math.floor(done/total*1000)/10) + '%');
-				    }, false);
-
-				    if ( xhr.upload ) {
-				        xhr.upload.onprogress = function(e) {
-				            var done = e.position || e.loaded, total = e.totalSize || e.total;
-				            console.log('xhr.upload progress: ' + done + ' / ' + total + ' = ' + (Math.floor(done/total*1000)/10) + '%');
-				        };
-				    }
-
-				    xhr.onreadystatechange = function(e) {
-				        if ( 4 == this.readyState ) {
-				            console.log(['xhr upload complete', e]);
-				            console.log("e is " + e.responseText );
-				        }
-				    };
-
-					xhr.onreadystatechange = function() {
-					    if(xhr.readyState == 4 && xhr.status == 200) {
-					        alert(xhr.responseText);
-					        var resp = JSON.parse(xhr.responseText);
-					        console.log("links: " + resp['filepaths'] + ", count: " + resp['filepaths'].length );
-					    	for (var i = 0; i < resp['filepaths'].length; i++){
-					    		compareWADLurls.push(resp['filepaths'][i]);
-					    	}
-					    	//console.log("URLS added: " + uppedWADLurls);
-					    }
-					}
-
-				    xhr.open('post', "/wsdarwin/funcsPHP/uploadFile.php", true);
-
-				    var formData = new FormData();
-				    for (var i = 0; i < this.files.length; i++){
-				    	//filesArray.push(this.files[i]);
-				    	formData.append("file"+i, this.files[i]);
-				    }
-					//formData.append("uppedFiles", this.files);
-				    xhr.send(formData);
-
-				}, false);
-			</script>
-
-		</div>
-	</div>
-
-	<div id='optionsDiv' class='optionsDiv'>
-		<button class='showOptionsBtn' id='showOptionsBtn' onClick="showOptions()">+ Show Options</button>
-		<div class='optionsInsideDiv'>
-			<div>Comparison View: </div>
-			<div>Parameters: </div>
-			<span>Comparison View: </span>
-			<!--
-			<span>Side By Side Diff</span><input type='radio' id='sideBySideDiff' onClick='diffUsingJS()'></input>
-			<span>Inline Diff</span><input type='radio' id='inlineDiff' onClick='diffUsingJS()'></input>
-			-->
-			<input type="radio" onClick="inlineDiff()" name="comparisonDiffType" value="true" id="diff_yes" />
-			<label for="diff_yes">Inline Diff</label>
-			<input type="radio" onClick="sideBySideDiff()" name="comparisonDiffType" value="false" id="diff_no" />
-			<label for="diff_no">Side by Side Diff</label>
-
-		</div>
-	</div>
-
-	<button class='analyzeBtn' id='analyzeBtn' onClick="analyze('analyze')"> Analyze URI </button>		
-	<button class='compareBtn' id='compareBtn' onClick="compareBtn()"> Compare </button>
-	<button class='crossServiceCompareBtn' id='crossServiceCompareBtn' onClick="crossServiceCompareBtn()"> Cross-Service Comparison </button>
-	<!--<button class='saveWADLbtn' id='saveWADLbtn' onClick='save_wadl_to_file()'>Save WADL File</button>-->
-	<button class='saveWADLbtn' id='saveWADLbtn' onClick='downloadWADL()'>Save WADL File</button>
-
-	<div class='wadlDiv'>
-		<div id='wadlOutput' class='wadlOutput' placeholder='WADL'>
-			<p>No WADL Output</p>
-		</div>
-		<div id='right_wadl_output' class='halfwadlOutput'></div>
-		<div id='left_wadl_output' class='halfwadlOutput'></div>
-		<div id='leftInfoMenu' class='leftInfoMenu'>
-			<div id="rightHalfDiv" class="halfDiv">
-				<div>hey</div>
-				<div>two</div>
+	echo
+		"<div id=\"compareB\" class=\"compareB\">
+		  	<!-- Adds an input URL for Analysis -->
+		  	<div class=\"addURLbtn\">
+		  		<div style=\"display: inline-block; vertical-align: top;\">
+					<button type=\"button\" onClick=\"addCompareURLField()\" class=\"btn btn-default\">Add URL</button>
+				</div>
+				<div id=\"uploadAWADLB\" class=\"uploadAWADL\">
+					<button id='filesCompare' type=\"button\" onClick=\"onLoadCompare()\" class=\"btn btn-default\">Upload a WADL File</button>
+					<!--	FOR MULTIPLE FILES TO BE UPLOADED 	-->
+						<!-- <input style='height: 0; width: 0; visibility: hidden' id='fileInput' onchange=\"handleFiles(this.files)\" type=\"file\" multiple> -->
+					
+					<!--	FOR ONLY A SINGLE FILE TO BE UPLOADED 	-->
+					<input style='height: 0; width: 0; visibility: hidden' id='fileInputCompare' onchange=\"handleFiles(this.files)\" type=\"file\">
+					<!-- <input type=\"submit\"> -->
+				</div>
 			</div>
-			<div id="leftHalfDiv" class="halfDiv">
-				<div>second</div>
-				<div>three</span>
+
+			<!-- holds all the url inputs for Compare -->
+			<div id='fieldCompareUrlDiv' class='fieldCompareUrlDiv'>
+				<script type=\"text/javascript\"> addCompareURLField(); </script>
 			</div>
-			<!--<select size="3" height="100px" name="selectionField" multiple="yes" > 
-			  <option value="CA" >California -- CA </option>
-			  <option value="CO" >Colorado -- CO</option>
-			  <option value="CN" >Connecticut -- CN</option>
-			  <option value="CN" >Connecticut -- CN</option>
-			  <option value="CN" >Connecticut -- CN</option>
-			  <option value="CN" >asdfsd -- CN</option>
-			</select>
-			<button>hello world</button>-->
-		</div>
-	</div>
+			
+			<div class='compareOptions'>
+				<input type='radio' class='diffTypeJava' name='diffType' id='diff_type_0' checked><label class='labelo' for='diff_type_0'>java</label></input>
+				<input type='radio' class='diffTypeText' name='diffType' id='diff_type_1'><label class='labelo' for='diff_type_1'>text</label></input>
+			</div>
+			
+			<div class=\"uploadWADLcontentCompare\" id=\"uploadWADLcontentCompare\">
+				<div style=\"color: gray\">Uploaded WADL File(s) [Max 1 file can be uploaded] </div>
+				<div class=\"innerUploadWADLcontentCompare\" id=\"innerUploadWADLcontentCompare\"></div>
+			</div>
 
-</div>
-
-</div>
-
-<?php 
-if (isset($GLOBALS['error_message'])){
-	echo "err:" . $GLOBALS['error_message'];
+		</div>";
 }
+
+function printCompareA(){
+	echo
+		"<div id=\"compareA\" class=\"compareA\">
+
+		  	<!-- Adds an input URL for Analysis -->
+		  	<div class=\"addURLbtn\">
+		  		<div style=\"display: inline-block; vertical-align: top;\">
+					<button type=\"button\" onClick=\"addURLField()\" class=\"btn btn-default\">Add URL</button>
+				</div>	
+				<div id=\"uploadAWADLA\" class=\"uploadAWADL\">
+					<button id='files' type=\"button\" onClick=\"onLoad()\" class=\"btn btn-default\">Upload a WADL File</button>
+					<!--	FOR MULTIPLE FILES TO BE UPLOADED 	-->
+ 					<!-- <input style='height: 0; width: 0; visibility: hidden' id='fileInput' onchange=\"handleFiles(this.files)\" type=\"file\" multiple> -->
+					
+					<!--	FOR ONLY A SINGLE FILE TO BE UPLOADED 	-->
+					<input style='height: 0; width: 0; visibility: hidden' id='fileInput' onchange=\"handleFiles(this.files)\" type=\"file\">
+					<!-- <input type=\"submit\"> -->
+				</div>
+			</div>
+			<!-- holds all the url inputs for Analysis -->
+			<div id='fieldUrlDiv' class='fieldUrlDiv'>
+				<script type=\"text/javascript\"> addURLField(); </script>
+			</div>
+			
+			<div class=\"uploadWADLcontent\" id=\"uploadWADLcontent\">
+				<div style=\"color: gray\">Uploaded WADL File(s) [Max 1 file can be uploaded] </div>
+				<div class=\"innerUploadWADLcontent\" id=\"innerUploadWADLcontent\"></div>
+			</div>
+
+		</div>";
+}
+
 ?>
 
-</body>
-</html>
+<?php
+
+
+/*
+			<!------------------->
+			<!-- compareB DIV: -->
+
+			<div class="compareB">
+			  	<!-- Adds an input URL for Analysis -->
+			  	<div class="addURLbtn">
+			  		<div style="display: inline-block; vertical-align: top;">
+						<button type="button" onClick="addCompareURLField()" class="btn btn-default">Add URL</button>
+					</div>
+					<div id="uploadAWADL" class="uploadAWADL">
+						<button id='filesCompare' type="button" onClick="onLoadCompare()" class="btn btn-default">Upload a WADL File</button>
+						<!--	FOR MULTIPLE FILES TO BE UPLOADED 	-->
+	 					<!-- <input style='height: 0; width: 0; visibility: hidden' id='fileInput' onchange="handleFiles(this.files)" type="file" multiple> -->
+						
+						<!--	FOR ONLY A SINGLE FILE TO BE UPLOADED 	-->
+						<input style='height: 0; width: 0; visibility: hidden' id='fileInputCompare' onchange="handleFiles(this.files)" type="file">
+						<!-- <input type="submit"> -->
+					</div>
+				</div>
+
+				<!-- holds all the url inputs for Compare //
+				<div id='fieldCompareUrlDiv' class='fieldCompareUrlDiv'>
+					
+				</div>
+
+				<div class="uploadWADLcontentCompare" id="uploadWADLcontentCompare">
+					<div style="color: gray">Uploaded WADL File(s) [Max 1 file can be uploaded] </div>
+					<div class="innerUploadWADLcontentCompare" id="innerUploadWADLcontentCompare"></div>
+				</div>
+
+			</div>
+
+			<!------------------->
+			<!-- compareA DIV: -->
+
+		  	<div class="compareA">
+
+			  	<!-- Adds an input URL for Analysis -->
+			  	<div class="addURLbtn">
+			  		<div style="display: inline-block; vertical-align: top;">
+						<button type="button" onClick="addURLField()" class="btn btn-default">Add URL</button>
+					</div>
+					<div id="uploadAWADL" class="uploadAWADL">
+						<button id='files' type="button" onClick="onLoad()" class="btn btn-default">Upload a WADL File</button>
+						<!--	FOR MULTIPLE FILES TO BE UPLOADED 	-->
+	 					<!-- <input style='height: 0; width: 0; visibility: hidden' id='fileInput' onchange="handleFiles(this.files)" type="file" multiple> -->
+						
+						<!--	FOR ONLY A SINGLE FILE TO BE UPLOADED 	-->
+						<input style='height: 0; width: 0; visibility: hidden' id='fileInput' onchange="handleFiles(this.files)" type="file">
+						<!-- <input type="submit"> -->
+					</div>
+				</div>
+				<!-- holds all the url inputs for Analysis -->
+				<div id='fieldUrlDiv' class='fieldUrlDiv'>
+					<script type="text/javascript"> addURLField(); </script>
+				</div>
+				
+				<div class="uploadWADLcontent" id="uploadWADLcontent">
+					<div style="color: gray">Uploaded WADL File(s) [Max 1 file can be uploaded] </div>
+					<div class="innerUploadWADLcontent" id="innerUploadWADLcontent"></div>
+				</div>
+
+			</div>
+
+*/
+?>

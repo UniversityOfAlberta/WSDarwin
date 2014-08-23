@@ -32,9 +32,9 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 		this.valueFrequencies = new TreeMap<Object, Integer>();
 		this.type2valueMap = new TreeMap<String, Object>();
 		this.elementDistanceMap = new HashMap<XSDElement, Double>();
-		/*this.addType2Value(type, value);
-		this.addTypeFrequency(type, 1);
-		this.addValueFrequency(value, 1);*/
+		//this.addType2Value(type, value);
+		//this.addTypeFrequency(type, 1);
+		this.addValueFrequency(value, 1);
 	}
 	
 	public XSDElement(String name, XSDIType type) {
@@ -101,7 +101,7 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 	}
 
 	public TreeMap<Object, Integer> getValueFrequencies() {
-		return valueFrequencies;
+		return this.valueFrequencies;
 	}
 
 	public TreeMap<String, Object> getType2valueMap() {
@@ -118,12 +118,14 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 	}
 	
 	public void addValueFrequency(Object value, int frequency) {
+		System.out.println("adding value frequency for object: " + value + ", freq: " + frequency);
 		if(this.valueFrequencies.containsKey(value)) {
 			this.valueFrequencies.put(value, this.valueFrequencies.get(value)+frequency);
 		}
 		else {
 			this.valueFrequencies.put(value, frequency);
 		}
+		System.out.println("this.valueFrequencies is : " + this.valueFrequencies.keySet());
 	}
 	
 	public void addType2Value(String type, Object value) {

@@ -270,6 +270,10 @@ p {
 	
 }
 
+.labelo {
+	font-weight: 500;
+}
+
 /* bootstrap over-writing some class attrs */
 
 .list-group-item {

@@ -184,6 +184,8 @@ function analyzeBtn(){
 }
 
 function runAnalysis(process_mode){
+	console.debug("WTF !");
+
 	// reset html elements
 	$("#left_wadl_output").hide();
 	$("#right_wadl_output").hide();
@@ -227,19 +229,14 @@ function runAnalysis(process_mode){
 		var jsonWadlURLs 		= JSON.stringify(analyzed_wadls_URLs);
 		var jsonCompareWadlURLs = JSON.stringify(compare_wadls_URLs);
 
-		api_call_url = server_api_url + "analyze2";
-		ajaxData = {newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id, type: process_mode, compareURLs: compareDataJSON, compareWADLfiles: jsonCompareWadlURLs};
+		api_call_url = server_api_url + process_mode;
+		ajaxData = {newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id, compareURLs: compareDataJSON, compareWADLfiles: jsonCompareWadlURLs};
 	}
 	
-	console.log("--------- sending over: ");
-	console.debug("ajax data: " + JSON.stringify(ajaxData) );
-	console.debug("analyze_json:" + analyzeDataJSON);
-	console.debug("jsonWadlURLs:" + jsonWadlURLs);
-	console.debug("session_id:" + session_id);
-	console.debug("process_mode:" + process_mode);
-	console.debug("compare_json:" + compareDataJSON);
-	console.debug("jsonCompareWadlURLs:" + jsonCompareWadlURLs);
-	console.log("--------------- ");
+	console.log("--------AJAX data:-------- ");
+	console.debug("api call: " 	+ api_call_url);
+	console.debug("ajax data: " + ajaxData);
+	console.log("---------------- ");
     
     $.ajax({
     	url: api_call_url,
@@ -279,16 +276,12 @@ function runAnalysis(process_mode){
 				init_node(oldRootDoc, "_a_");
 				init_node(newRootDoc, "_b_");
 
-				//console.log("========== java> " + $('.diffTypeJava:checked').val() );
-				//console.log("========== text> " + $('.diffTypeText:checked').val() );
 				if ( $('.diffTypeText:checked').val() ) {
 					//text_diff_JS(1);		
 					sideBySideDiff();												// text comparison diff
 				} else if ( $('.diffTypeJava:checked').val() ) {
 					java_diff(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
 				}
-				
-
 				
 				//saveWADLtoFile();
 			} else if (process_mode == "analyze"){

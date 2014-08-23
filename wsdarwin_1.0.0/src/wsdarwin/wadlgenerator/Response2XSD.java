@@ -149,7 +149,9 @@ public class Response2XSD {
 
 	private XSDElement processJSONChildren(String s, Object object) {
 		XSDElement element = null;
+		//System.out.println("processJSONChildren: [String:] " + s + " [object:] " + object);
 		if(object instanceof Map) {
+			//System.out.println(object + " [is a Map]");
 			XSDComplexType type = null;
 			if(xsdFile.getTypes().containsKey(s+"Type")) {
 				type = (XSDComplexType)xsdFile.getTypes().get(s+"Type");
@@ -167,6 +169,7 @@ public class Response2XSD {
 			xsdFile.addType(type.getName(), type);
 		}
 		else if(object instanceof List) {
+			//System.out.println(object + " [is a List]");
 			XSDComplexType listType = null;
 			if(xsdFile.getTypes().containsKey(s+"ListType")) {
 				listType = (XSDComplexType)xsdFile.getTypes().get(s+"ListType");
@@ -238,32 +241,122 @@ public class Response2XSD {
 			}
 		}
 		else {
+			//System.out.println(object + " [is ELSE]");
 			String value = ""+object;
 			if(value.equals("")) {
 				element = new XSDElement(s,XSDPrimitiveType.STRING,value);
 			}
-			else if (Pattern.matches("^[-+]?\\d*$", value) && value.length()<=10) {
+			//else if (Pattern.matches("^[-+]?\\d*$", value) && value.length()<=10) {
+			else if (Pattern.matches("^[-+]?\\d*$", value) && isInteger(value)) {
 				element = new XSDElement(s,
-						XSDPrimitiveType.INT, Integer.parseInt(value));
-			} else if (Pattern.matches("^[-+]?\\d*$", value) && value.length()<=19) {
+						XSDPrimitiveType.INT, Integer.parseInt(value));				
+			//} else if (Pattern.matches("^[-+]?\\d*$", value) && value.length()<=19) {
+			} else if (Pattern.matches("^[-+]?\\d*$", value) && isLong(value)) {
 				element = new XSDElement(s,
 						XSDPrimitiveType.LONG, Long.parseLong(value));
-			} else if (Pattern.matches(
-					"^[-+]?[0-9]+[.]?[0-9]*([eE][-+]?[0-9]+)?$",
-					value)) {
+			//} else if (Pattern.matches("^[-+]?[0-9]+[.]?[0-9]*([eE][-+]?[0-9]+)?$", value)) {
+			} else if (Pattern.matches("^[-+]?[0-9]+[.]?[0-9]*([eE][-+]?[0-9]+)?$", value) && isDouble(value) ) {
 				element = new XSDElement(s,
 						XSDPrimitiveType.DOUBLE, Double.parseDouble(value));
 			} else if (Pattern.matches("true|false", value)) {
 				element = new XSDElement(s,
 						XSDPrimitiveType.BOOLEAN, Boolean.parseBoolean(value));
-			} else {
+			} else if (Pattern.matches("^[-+]?\\d*$", value) && isShort(value)) {
+				element = new XSDElement(s,
+						XSDPrimitiveType.SHORT, value);
+			} else if (Pattern.matches("^[-+]?\\d*$", value) && isByte(value)) {
+				element = new XSDElement(s,
+						XSDPrimitiveType.BYTE, value);
+			} else if (Pattern.matches("^(\\d{4})-(\\d{2})-(\\d{2})[T]?(\\d{2}):(\\d{2}):(\\d{2})[Z]?$", value)) {
+				element = new XSDElement(s,
+						XSDPrimitiveType.DATETIME, value);
+			} else if (matchesURI(value)) {
+				element = new XSDElement(s,
+						XSDPrimitiveType.ANYURI, value);
+			} else if (matchesEmail(value)) {
+				element = new XSDElement(s,
+						XSDPrimitiveType.EMAIL, value);
+			} else if (Pattern.matches("^(\\d{4})-(\\d{2})-(\\d{2})$", value)) {
+				element = new XSDElement(s,
+						XSDPrimitiveType.DATE, value);
+			}
+			else {
 				element = new XSDElement(s,
 						XSDPrimitiveType.STRING, value);
 			}
 		}
+		
 		return element;
 	}
+	
+	public static boolean matchesEmail(String value){
+		String regex = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+		if (Pattern.matches(regex, value)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public static boolean matchesURI(String value) {
+		String regex = "\\b(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+		if (Pattern.matches(regex, value)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public static boolean isInteger(String s) {
+	    try { 
+	        Integer.parseInt(s); 
+	    } catch(NumberFormatException e) { 
+	        return false; 
+	    }
+	    // only got here if we didn't return false
+	    return true;
+	}
+	
+	public static boolean isShort(String s) {
+	    try { 
+	        Short.parseShort(s); 
+	    } catch(NumberFormatException e) { 
+	        return false; 
+	    }
+	    // only got here if we didn't return false
+	    return true;
+	}
+	
+	public static boolean isByte(String s) {
+	    try { 
+	        Byte.parseByte(s);
+	    } catch(NumberFormatException e) { 
+	        return false; 
+	    }
+	    // only got here if we didn't return false
+	    return true;
+	}
 
+	public static boolean isLong(String s) {
+	    try { 
+	        Long.parseLong(s); 
+	    } catch(NumberFormatException e) { 
+	        return false; 
+	    }
+	    // only got here if we didn't return false
+	    return true;
+	}
+	
+	public static boolean isDouble(String s) {
+	    try { 
+	        Double.parseDouble(s); 
+	    } catch(NumberFormatException e) { 
+	        return false; 
+	    }
+	    // only got here if we didn't return false
+	    return true;
+	}
+	
 	private boolean isComplexType(Map<String, Object> map) {
 		int counter = 0;
 		for (String key : map.keySet()) {

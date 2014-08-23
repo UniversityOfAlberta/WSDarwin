@@ -6,8 +6,10 @@ import wsdarwin.wadlgenerator.model.WADLElement;
 
 public enum XSDPrimitiveType implements XSDIType {
 
-	INT("int"), STRING("string"), DOUBLE("double"), BOOLEAN("boolean"), LONG(
-			"long");
+	INT("int"), STRING("string"), DOUBLE("double"), BOOLEAN("boolean"), 
+	LONG("long"), 
+	DATETIME("dateTime"), DATE("date"), TIME("time"), ANYURI("anyURI"), EMAIL("email"), // ***** TIME needs to be implemented, the rest NEED to be tested carefully.
+	SHORT("short"),	BYTE("byte");
 
 	private String type;
 
