@@ -17,6 +17,7 @@ public class Resource implements WADLElement {
 //	private String queryType;
 	
 	private String path;
+	private boolean variableID;
 	private HashMap<String, Method> methodElements;
 	private HashMap<String, Resource> resourceElements;
 	private HashMap<Method, Request> changedMethodRequest;
@@ -25,6 +26,7 @@ public class Resource implements WADLElement {
 
 	public Resource(String path) {
 		this.path = path;
+		this.variableID = false;
 		this.methodElements = new HashMap<String, Method>();
 		this.resourceElements = new HashMap<String, Resource>();
 		this.changedMethodRequest = new HashMap<Method, Request>();
@@ -38,6 +40,14 @@ public class Resource implements WADLElement {
 
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	public boolean hasVariableID() {
+		return variableID;
+	}
+
+	public void setVariableID(boolean variableID) {
+		this.variableID = variableID;
 	}
 
 	public HashMap<String, Method> getMethodElements() {

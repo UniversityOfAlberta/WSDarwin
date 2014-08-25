@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -93,6 +94,12 @@ public class XMLGenerator {
 						if(xsdElement.getMaxOccurs() != null) {
 							childElement.setAttribute("minOccurs", ""+xsdElement.getMinOccurs());
 							childElement.setAttribute("maxOccurs", ""+xsdElement.getMaxOccurs());
+						}
+						if(xsdElement.getType() instanceof XSDPrimitiveType) {
+							Map<Object, Integer> valueFrequencies = xsdElement.getValueFrequencies();
+							Map<String, Integer> typeFrequencies = xsdElement.getTypeFrequencies();
+							appendValueAndTypeFrequencies(xmldoc, childElement,
+									valueFrequencies, typeFrequencies);
 						}
 						sequence.appendChild(childElement);
 					}
@@ -240,6 +247,7 @@ public class XMLGenerator {
 		for(Resource rr : resource) {
 			Element resourceElement = xmldoc.createElement("resource");
 			resourceElement.setAttribute("path", rr.getIdentifier());
+			resourceElement.setAttribute("hasVariableID", ""+rr.hasVariableID());
 			resourcesElement.appendChild(resourceElement);
 		
 			HashSet<Resource> resourceResources = new HashSet<Resource>();
@@ -259,15 +267,17 @@ public class XMLGenerator {
 				Element requestElement = xmldoc.createElement("request");
 				methodElement.appendChild(requestElement);
 
-				HashSet<Param> param = new HashSet<Param>(); 
-				param.addAll(request.getParamElements().values());
-				for(Param par : param) {
+				HashSet<Param> parameters = new HashSet<Param>(); 
+				parameters.addAll(request.getParamElements().values());
+				for(Param par : parameters) {
 					Element paramElement = xmldoc.createElement("param");
-//						paramElement.setIdAttribute("required", par.isRequired());
 					paramElement.setAttribute("style", par.getStyle());
 					paramElement.setAttribute("type", XML_SCHEMA_NAMESPACE+par.getType());
 					paramElement.setAttribute("name", par.getIdentifier());
-					//System.out.println("(55) list Element: " + paramElement.getAttribute("name") + ", type: " + paramElement.getAttribute("type"));
+					HashMap<Object, Integer> valueFrequencies = par.getValueFrequencies();
+					HashMap<String, Integer> typeFrequencies = par.getTypeFrequencies();
+					appendValueAndTypeFrequencies(xmldoc, paramElement,
+							valueFrequencies, typeFrequencies);
 					requestElement.appendChild(paramElement);
 				}
 																
@@ -291,5 +301,26 @@ public class XMLGenerator {
 			}
 		}
 		
+	}
+
+	private void appendValueAndTypeFrequencies(Document xmldoc,
+			Element parentElement, Map<Object, Integer> valueFrequencies,
+			Map<String, Integer> typeFrequencies) {
+		Element valueFrequenciesElement = xmldoc.createElement("valueFrequencies");
+		for(Object value : valueFrequencies.keySet()) {
+			Element valueElement = xmldoc.createElement("vf");
+			valueElement.setAttribute("value", value.toString());
+			valueElement.setAttribute("frequency", ""+valueFrequencies.get(value));
+			valueFrequenciesElement.appendChild(valueElement);
+		}
+		parentElement.appendChild(valueFrequenciesElement);
+		Element typeFrequenciesElement = xmldoc.createElement("typeFrequencies");
+		for(String type : typeFrequencies.keySet()) {
+			Element typeElement = xmldoc.createElement("tf");
+			typeElement.setAttribute("type", type);
+			typeElement.setAttribute("frequency", ""+typeFrequencies.get(type));
+			typeFrequenciesElement.appendChild(typeElement);
+		}
+		parentElement.appendChild(typeFrequenciesElement);
 	}
 }

@@ -8,6 +8,7 @@ import java.util.HashSet;
 import wsdarwin.comparison.delta.*;
 import wsdarwin.model.WSElement;
 import wsdarwin.util.DeltaUtil;
+import wsdarwin.wadlgenerator.model.xsd.XSDElement;
 
 public class Response implements WADLElement {
 
@@ -88,9 +89,15 @@ public class Response implements WADLElement {
 			if(!this.getRepresentationElements().containsKey(element)) {
 				representationAdded.add(response.getRepresentationElements().get(element));
 				// + set frequency to 1
+				XSDElement xsdElement = response.getRepresentationElements().get(element).getElement();
+				xsdElement.addTypeFrequency(xsdElement.getType().getIdentifier(), 1);
+				xsdElement.addValueFrequency(xsdElement.getValue(), 1);
 			} else {
 					// + increase frequency
 				changedRepresentation.add(this.getRepresentationElements().get(element));
+				XSDElement xsdElement = this.getRepresentationElements().get(element).getElement();
+				xsdElement.addTypeFrequency(xsdElement.getType().getIdentifier(), 1);
+				xsdElement.addValueFrequency(xsdElement.getValue(), 1);
 			}
 		}
 		return representationAdded;

@@ -33,7 +33,7 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 		this.type2valueMap = new TreeMap<String, Object>();
 		this.elementDistanceMap = new HashMap<XSDElement, Double>();
 		//this.addType2Value(type, value);
-		//this.addTypeFrequency(type, 1);
+		this.addTypeFrequency(type.getIdentifier(), 1);
 		this.addValueFrequency(value, 1);
 	}
 	
