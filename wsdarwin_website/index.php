@@ -14,6 +14,10 @@
 <link rel=stylesheet href="<?= $GLOBALS['baseURL']; ?>css/first.css" type="text/CSS">
 
 <!-- scripts -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script> -->
+
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/generalFuncs.js"></script>
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/ObjTree.js"></script>
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdiff.js"></script>
@@ -21,9 +25,6 @@
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdifflib-master/difflib.js"></script>
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdifflib-master/diffview.js"></script>
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script> -->
 
 
 </head>
@@ -40,9 +41,14 @@
 		  <li id='settingsView'><a href="javascript:activateView('settingsView')">Settings</a></li>
 		</ul>
 
-		<script>
+<script>
 
-		</script>
+$('#downloadAnalyzeWADL').click(function(e) {
+	alert('wtf');
+	
+});
+
+</script>
 
 		<!-- Tab panes -->
 		<div class="tab-content">
@@ -58,20 +64,22 @@
 
 			<!-- Analyze the input(s) -->
 			<div id='analyzeSubmitBtn' class="submitBtnDiv">
-				<button type="button" id='analyzeBtn' onClick="analyzeBtn('analyze')" style="width: 84px;" class="btn btn-success">Analyze</button>
-				<button type="button" onClick="runSampleTest()" class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button>
+				<button type="button" id='analyzeBtn' onClick="analyzeBtn()" style="width: 84px;" class="btn btn-success">Analyze</button>
+				<button type="button" onClick="runSampleTest('analyze')" class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button>
+				<button type="button" id='downloadAnalyzeWADL' class="btn btn-default" style="margin-left: 7px;">Save WADL</button>
 			</div>
 
 			<!-- Compare the input(s) -->
 			<div id='compareSubmitBtn' class="compareSubmitBtnDiv">
 				<button type="button" id='compareBtn' onClick="compareBtn()" style="width: 84px;" class="btn btn-primary">Compare</button>
-				<button type="button" onClick="runSampleTest()" class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button>
+				<button type="button" onClick="runSampleTest('compare')" class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button>
 			</div>
 			
 			<!-- Cross-Service Comparison of the input(s) -->
 			<div id='crossServiceCompareSubmitBtn' class="compareSubmitBtnDiv">
 				<button type="button" id='crossServiceCompareBtn' onClick="crossServiceCompareBtn()" style="width: 180px;" class="btn btn-info">Cross-Service Compare</button>
-				<button type="button" onClick="runSampleTest()" class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button>
+				<button type="button" onClick="runSampleTest('crossServiceCompare')" class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button>
+				
 			</div>
 			
 			<!------------------------------ -->

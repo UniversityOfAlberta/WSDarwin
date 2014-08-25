@@ -58,7 +58,6 @@ function wadl_doc(){
 
 	this.setXmlDoc = function(arg){
 		this.xmlDoc = arg;
-		alert('arg is ' + arg)
 	}
 
 	this.getXmlDoc = function(){
@@ -531,6 +530,8 @@ function saveWADLtoFile(){
         data: { wadlString: xml_wadl_string },
         dataType: "html",
         success: function(response) {
+        	console.log("success?? response: " + response);
+        	onclick="this.target='_blank';"
         },
         error: function(xhr, status, error) {
 		  console.log("Error acccesing downloadWADLfile.");
@@ -538,6 +539,8 @@ function saveWADLtoFile(){
 
     });
 }
+
+
 
 function downloadWADL(){
 	saveWADLtoFile();
@@ -1414,6 +1417,8 @@ function parse_wadl_html(myNode){
 			html_wadl_string += 		 "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + "<input type='text' onchange=\"updateAttribute('" + myNode.my_id + "', '" + myNode.attributes[i].nodeName + "', this.value );\" value=\"" + htmlentities( myNode.attributes[i].value ) + "\"></input>" + "\"" + "</i></font>";
 			strapped_html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
 			spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
+			// *******************************************************************************************
+			console.debug("name: " + myNode.attributes[i].name + ", value: " + myNode.attributes[i].value);
 		} else {
 			html_wadl_string += 		 "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
 			strapped_html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
@@ -1585,3 +1590,18 @@ function parse_wadl_html(myNode){
 	spaces -= 4;
 }
 
+function runSampleTest(process){
+	console.debug("running sample test");
+	if (process === 'analyze'){
+		$('#urlInputA' + '_'+"0").val("https://api.github.com/users");
+		analyzeBtn();
+	} else if (process === 'compare'){
+		$('#urlInputA' + '_'+"0").val("https://api.github.com/users/penguinsource/repos");
+		$('#urlInputB' + '_'+"0").val("https://api.github.com/users/fokaefs/repos");
+		compareBtn();
+	} else if (process === 'crossServiceCompare'){
+		$('#urlInputA' + '_'+"0").val("https://graph.facebook.com/oprescu3");
+		$('#urlInputB' + '_'+"0").val("https://graph.facebook.com/jack");
+		crossServiceCompareBtn();
+	}
+}
