@@ -1,4 +1,4 @@
-package wsdarwin.wadlgenerator.testMains;
+package wsdarwin.service;
 
 
 import java.io.BufferedReader;
@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -30,6 +31,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -63,7 +65,7 @@ import java.net.*;
 import java.io.*;
 
 @Path(value="/api")
-public class TestMainForWADLGeneration {
+public class WSDarwinService extends Application{
 	
 	public static final Boolean DEBUG = true;
 	
@@ -221,7 +223,7 @@ public class TestMainForWADLGeneration {
 		
 		delta.createXMLElement(xmldoc, xmldoc.getDocumentElement());
 		//String comparison_file_path = 
-		writeXML(domImpl, xmldoc, PATH_PREFIX_FILES + "/deltaComparison.xml");
+		XMLGenerator.writeXML(domImpl, xmldoc, PATH_PREFIX_FILES + "/deltaComparison.xml");
 		System.out.println("done creating xml comparison file");
 		//String deltaString = gson.toJson(delta);
 		returnArray.add(LOCALHOST_FILES_PATH + "deltaComparison.xml");
@@ -291,7 +293,7 @@ public class TestMainForWADLGeneration {
 			
 			delta.createXMLElement(xmldoc, xmldoc.getDocumentElement());
 			//String comparison_file_path = 
-			writeXML(domImpl, xmldoc, PATH_PREFIX_FILES + "/deltaComparison.xml");
+			XMLGenerator.writeXML(domImpl, xmldoc, PATH_PREFIX_FILES + "/deltaComparison.xml");
 			System.out.println("done creating xml comparison file");
 			//String deltaString = gson.toJson(delta);
 			returnArray.add(LOCALHOST_FILES_PATH + "deltaComparison.xml");
@@ -434,7 +436,7 @@ public class TestMainForWADLGeneration {
 		return session_id;
 	}	
 	
-	private void writeXML(DOMImplementation domImpl, Document xmldoc,
+	/*private void writeXML(DOMImplementation domImpl, Document xmldoc,
 			String filename) throws FileNotFoundException {
 			DOMImplementationLS ls = (DOMImplementationLS) domImpl;
 	        LSSerializer lss = ls.createLSSerializer();
@@ -442,9 +444,9 @@ public class TestMainForWADLGeneration {
 	        lso.setByteStream(new FileOutputStream(new File(filename)));
 	        
 	        lss.write(xmldoc, lso);
-	}
+	}*/
 	
-	public static WADLFile getAnalyzeWADLfile(ArrayList<String> analyze_WADLurls) throws ParserConfigurationException, IOException {
+	public WADLFile getAnalyzeWADLfile(ArrayList<String> analyze_WADLurls) throws ParserConfigurationException, IOException {
 		for (int i = 0; i < analyze_WADLurls.size(); i++){
 			try {
 				
@@ -488,7 +490,7 @@ public class TestMainForWADLGeneration {
 		return null;		
 	}
 	
-	public static void getURIs(ArrayList<String> url_list, ArrayList<String> uriListReference, ArrayList<String> requestsListReference){
+	public void getURIs(ArrayList<String> url_list, ArrayList<String> uriListReference, ArrayList<String> requestsListReference){
 		ArrayList<String> apiLinks = new ArrayList<String>();
 		
 		for (int i = 0; i < url_list.size(); i++){
@@ -513,7 +515,7 @@ public class TestMainForWADLGeneration {
 		}
 	}
 	
-	private static String analyzeURIs(ArrayList<String> uris,
+	private String analyzeURIs(ArrayList<String> uris,
 			HashMap<String, XSDFile> responses, RequestAnalyzer analyzer) {
 		String resourceBase = "";
 		if ( (uris != null) && (uris.size() > 0)){
@@ -526,7 +528,7 @@ public class TestMainForWADLGeneration {
 		return resourceBase;
 	}
 	
-	private static void processRequests(ArrayList<String> requests,
+	private void processRequests(ArrayList<String> requests,
 			HashMap<String, XSDFile> responses, RequestAnalyzer analyzer,
 			String resourceBase, XMLGenerator generator, WADLFile mergedWADL,
 			HashSet<XSDFile> grammarSet, String mergedWADLFileName) throws MalformedURLException,
@@ -619,7 +621,7 @@ public class TestMainForWADLGeneration {
 	}*/
 	
 	// NAME ??????????? getXSDElementsValueFrequencies
-	public static void getXSDElementsValueFrequencies(Object elem, HashMap<String, HashMap<String, Integer>> valueFrequencies){
+	public void getXSDElementsValueFrequencies(Object elem, HashMap<String, HashMap<String, Integer>> valueFrequencies){
 		if (elem instanceof XSDComplexType){
 			XSDComplexType xscomplex = (XSDComplexType) elem;
 			//System.out.println("Complex Element [name] " + xscomplex.getName() + " [elements]: " + xscomplex.getElements());
@@ -654,7 +656,7 @@ public class TestMainForWADLGeneration {
 	/**
 	 * @param args
 	 */
-	public static String getWadl(ArrayList<String> url_list, ArrayList<String> analyze_WADLurls, String call_type, String session_id, String mergedWADLFileName, String localhostFilePath) {
+	public String getWadl(ArrayList<String> url_list, ArrayList<String> analyze_WADLurls, String call_type, String session_id, String mergedWADLFileName, String localhostFilePath) {
 		try {
 			ArrayList<String> requests = new ArrayList<String>();
 			ArrayList<String> uris = new ArrayList<String>();
@@ -739,6 +741,15 @@ public class TestMainForWADLGeneration {
 				e.printStackTrace();
 			}
 		return null;
+	}
+
+
+
+	@Override
+	public Set<Class<?>> getClasses() {
+		Set<Class<?>> classes = new HashSet<Class<?>>();
+		classes.add(WSDarwinService.class);
+		return classes;
 	}
 
 }

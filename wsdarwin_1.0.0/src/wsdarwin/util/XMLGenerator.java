@@ -137,7 +137,7 @@ public class XMLGenerator {
 		}
 	}
 
-	private void writeXML(DOMImplementation domImpl, Document xmldoc,
+	public static void writeXML(DOMImplementation domImpl, Document xmldoc,
 			String filename) throws FileNotFoundException {
 			DOMImplementationLS ls = (DOMImplementationLS) domImpl;
 	        LSSerializer lss = ls.createLSSerializer();
