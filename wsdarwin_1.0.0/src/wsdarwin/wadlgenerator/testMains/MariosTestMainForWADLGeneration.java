@@ -33,17 +33,17 @@ public class MariosTestMainForWADLGeneration {
 	 */
 	public static final Boolean DEBUG = true;
 	
-	private static final String VENDOR = "imdb";
-	private static final String PATH_PREFIX = "files/icsm2014/interoperability/movies/"+VENDOR;
+	private static final String VENDOR = "github";
+	private static final String PATH_PREFIX = "files/icsm2014/"+VENDOR;
 	
 	private static final String FILENAME_DIR = PATH_PREFIX+"/wadl/";
 	private static final String XSD_DIR = PATH_PREFIX+"/xsd/";
 	private static final String RESPONSE_DIR = PATH_PREFIX+"/responses/";
 
 	public static void main(String[] args) {
-		//testGeneration();
+		testGeneration();
 		//testComparison();
-		testMapping();
+		//testMapping();
 
 	}
 	

@@ -59,7 +59,7 @@ public enum XSDPrimitiveType implements XSDIType {
 	@Override
 	public String getIdentifier() {
 		// TODO Auto-generated method stub
-		return null;
+		return type;
 	}
 
 	public static XSDPrimitiveType fromString(String type) {
