@@ -3,19 +3,22 @@
 <html>
 
 <head>
-<!-- Bootstrap css sheets-->
-<link href="css/bootstrap.min.css" rel="stylesheet">
-<link href="css/bootstrap.css" rel="stylesheet">
-
-<!-- css sheets -->
-<link rel=stylesheet href="<?= $GLOBALS['baseURL']; ?>css/diffview.css" type="text/CSS">
-<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
-<link rel=stylesheet href="<?= $GLOBALS['baseURL']; ?>css/first.css" type="text/CSS">
 
 <!-- scripts -->
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+<!-- Bootstrap css sheets 
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/bootstrap.css" rel="stylesheet">
+-->
+<!-- css sheets -->
+<link rel="stylesheet" href="<?= $GLOBALS['baseURL']; ?>css/diffview.css" type="text/CSS">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="<?= $GLOBALS['baseURL']; ?>css/first.css" type="text/CSS">
+
+
 <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script> -->
 
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/generalFuncs.js"></script>
@@ -24,8 +27,6 @@
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdifflib-master/difflib.js"></script>
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdifflib-master/difflib.js"></script>
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdifflib-master/diffview.js"></script>
-
-
 
 </head>
 
@@ -40,15 +41,6 @@
 		  <li id='crossServiceComparisonView' name='crossServiceViewName'><a href="javascript:activateView('crossServiceComparisonView')">Cross Service Comparison</a></li>
 		  <li id='settingsView'><a href="javascript:activateView('settingsView')">Settings</a></li>
 		</ul>
-
-<script>
-
-$('#downloadAnalyzeWADL').click(function(e) {
-	alert('wtf');
-	
-});
-
-</script>
 
 		<!-- Tab panes -->
 		<div class="tab-content">
@@ -283,7 +275,7 @@ function hideUploadWADLContentCompare(){
 	$("#uploadWADLcontent").hide();
 	$("#innerUploadWADLcontent").html("");
 }
-		</script>
+</script>
 
 <?php
 

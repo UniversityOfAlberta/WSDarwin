@@ -183,8 +183,6 @@ function analyzeBtn(){
 }
 
 function runAnalysis(process_mode){
-	console.debug("WTF !");
-
 	// reset html elements
 	$("#left_wadl_output").hide();
 	$("#right_wadl_output").hide();
@@ -425,6 +423,7 @@ function runAnalysis(process_mode){
 	        	} else {
 	        		// NULL
 	        	}
+
 			}
 
 
@@ -1352,7 +1351,18 @@ function setup_wadl_print(){
 	init_element_ids(rootNode, "");
 
 	parse_wadl_html(rootNode);
+
 	$("#wadlOutput").html(html_wadl_string);
+	initBootstrapJS_tooltips();
+
+	
+}
+
+// initializing bootstrap js tooltips
+// For performance reasons, the Tooltip and Popover data-apis are
+// opt-in, meaning you must initialize them yourself.
+function initBootstrapJS_tooltips(){
+	jQuery('[data-toggle=tooltip]').tooltip();
 }
 
 var margin_left = 0;
@@ -1371,11 +1381,11 @@ function appendToHTML(side, str, elemClassName){
 
 // parses the wadl/xml document recursively and print it out
 function parse_wadl_html(myNode){
-
 	addSpaces();
-	
+
 	// if 'myNode' has any child nodes, then it can be expanded/minimized; otherwise, it can't
-	if (myNode.childNodes.length > 0){
+	// SPECIAL CASE: don't print any child of xs:element
+	if ( (myNode.childNodes.length > 0) && (myNode.nodeName !== "xs:element") ){
 		// if the node is not minimized, add an onClick 'hideNode' action; else, add an onClick 'showNode' action
 		if (myNode.minimized){
 			// remove element button
@@ -1394,7 +1404,6 @@ function parse_wadl_html(myNode){
 	html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
 
 	strapped_html_wadl_string += "<div id='" + myNode.my_id + "_all'>";
-	
 	var marginMinus = -level*10;
 	var marginLeftCalc = 10;
 
@@ -1406,26 +1415,29 @@ function parse_wadl_html(myNode){
 
 	var spanElem = "";
 	var elemClassName = myNode.my_id + "line";
+
 	spanElem += "<div data-lineNumber=\"" + lineNumber + "\" style=\"padding-left: " + padding_left + "px;\" id='" + myNode.my_id + "line' class='" + elemClassName + "' >";
 	spanElem += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
-
 	xml_wadl_string += "<" + myNode.nodeName;
+	
+	printAttributes(myNode, spanElem);
 
-	// print myNode's attributes
+	/*// print myNode's attributes
 	for (var i = 0; i < myNode.attributes.length; i++){
-		if (wadl_attribute_edit_mode){
-			html_wadl_string += 		 "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + "<input type='text' onchange=\"updateAttribute('" + myNode.my_id + "', '" + myNode.attributes[i].nodeName + "', this.value );\" value=\"" + htmlentities( myNode.attributes[i].value ) + "\"></input>" + "\"" + "</i></font>";
-			strapped_html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
-			spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
-			// *******************************************************************************************
-			console.debug("name: " + myNode.attributes[i].name + ", value: " + myNode.attributes[i].value);
-		} else {
-			html_wadl_string += 		 "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
-			strapped_html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
-			spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+		// SPECIAL CASE: don't print attribute 'hasVariableID' 
+		if (myNode.attributes[i].name !== "hasVariableID"){
+			if (wadl_attribute_edit_mode){
+				html_wadl_string += 		 "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + "<input type='text' onchange=\"updateAttribute('" + myNode.my_id + "', '" + myNode.attributes[i].nodeName + "', this.value );\" value=\"" + htmlentities( myNode.attributes[i].value ) + "\"></input>" + "\"" + "</i></font>";
+				strapped_html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
+				spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
+			} else {
+				html_wadl_string += 		 "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+				strapped_html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+				spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+			}
+			xml_wadl_string += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
 		}
-		xml_wadl_string += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
-	}
+	}*/
 
 	xml_wadl_string += ">";
 	xml_wadl_string += "\n";
@@ -1437,15 +1449,25 @@ function parse_wadl_html(myNode){
 	spanElem += "</div>";
 	appendToHTML("left", spanElem, elemClassName);
 
-	var removeNodeBtn = "<button style=\"margin-left: 10px;\" type=\"button\" class=\"btn btn-danger btn-xs\" onmouseout=\"unhighlight('" + myNode.my_id + "');\" onmouseover=\"highlightDiv('" + myNode.my_id + "');\" onClick=\"removeNode('" + myNode.my_id + "')\">X</button>";
+	var removeNodeBtn = "<button style=\"margin-left: 10px;\" type=\"button\""+
+						"class=\"btn btn-danger btn-xs\" onmouseout=\"unhighlight('" + myNode.my_id + "');\""+ 
+						"onmouseover=\"highlightDiv('" + myNode.my_id + "');\""+
+						"onClick=\"removeNode('" + myNode.my_id + "')\">X</button>";
 
 	html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
 	html_wadl_string += removeNodeBtn;
+	if (myNode.nodeName === "xs:element"){
+		var hintTypeTooltip = "<a href='#' data-toggle='tooltip' data-placement='right'"+
+		" title='Click to convert to an Enumeration type'>Hover over me</a>";
+		html_wadl_string += hintTypeTooltip;
+	}
 	html_wadl_string += "</br>";
-
 	
+	//printChildren(myNode);
 	// only print myNode's children nodes if myNode is not minimized
-	if (!myNode.minimized){
+	// SPECIAL CASE: don't print any child of xs:element
+	//if ( (!myNode.minimized) ){
+	if ( (!myNode.minimized) && (myNode.nodeName !== "xs:element") ){
 		// print myNode's children nodes
 		for (var i = 0; i < myNode.childNodes.length; i++){
 			spaces += 4;
@@ -1455,10 +1477,77 @@ function parse_wadl_html(myNode){
 		}
 	}
 
+	printAddElementButtons(myNode);
+
+	elemClassName = myNode.my_id + "line_end";
+	spanElem = "";
+	spanElem += "<div data-lineNumber=\"" + '15' + "\" style=\"padding-left: " + padding_left + "px\" id='" + myNode.my_id + "line_end' class='" + elemClassName + "'>";
+	spanElem += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
+	spanElem += "</div>";
+
+	appendToHTML("left", spanElem, elemClassName);
+
+	// print the end element of myNode
+	addSpaces();
+	level--;
+	padding_left = level * 13;
+	
+	xml_wadl_string += "</" + myNode.nodeName + ">";
+	xml_wadl_string += "\n";
+	
+	strapped_html_wadl_string += "<span id='" + myNode.my_id + "line'>";
+	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
+	strapped_html_wadl_string += "</span>";
+	strapped_html_wadl_string += "</div>";
+	strapped_html_wadl_string += "</div>";
+
+	html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
+	html_wadl_string += "</span>";
+	html_wadl_string += "</br>";
+	
+	// decrease spaces as the recursion is going down in the element hierarchy
+	spaces -= 4;
+}
+
+function printChildren(myNode){
+	// only print myNode's children nodes if myNode is not minimized
+	// SPECIAL CASE: don't print any child of xs:element
+	//if ( (!myNode.minimized) ){
+	if ( (!myNode.minimized) && (myNode.nodeName !== "xs:element") ){
+		// print myNode's children nodes
+		for (var i = 0; i < myNode.childNodes.length; i++){
+			spaces += 4;
+			margin_left += 10;
+			level++;
+			parse_wadl_html(myNode.childNodes[i]);
+		}
+	}
+}
+
+function printAttributes(myNode, spanElem){
+	// print myNode's attributes
+	for (var i = 0; i < myNode.attributes.length; i++){
+		// SPECIAL CASE: don't print attribute 'hasVariableID' 
+		if (myNode.attributes[i].name !== "hasVariableID"){
+			if (wadl_attribute_edit_mode){
+				html_wadl_string += 		 "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + "<input type='text' onchange=\"updateAttribute('" + myNode.my_id + "', '" + myNode.attributes[i].nodeName + "', this.value );\" value=\"" + htmlentities( myNode.attributes[i].value ) + "\"></input>" + "\"" + "</i></font>";
+				strapped_html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
+				spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
+			} else {
+				html_wadl_string += 		 "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+				strapped_html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+				spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+			}
+			xml_wadl_string += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
+		}
+	}
+}
+
+function printAddElementButtons(myNode){
+
 	var addBtnsSize = "xs";			// 'xs' for extra small, 'sm' for small
 	var addBtnsType = "default";	// 'default' for white, ..
 
-	// printing the add 'element(s)' buttons
 	if (myNode.nodeName == 'resources'){
 		addSpacesTwo();
 		var addResourceBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addResource('" + myNode.my_id + "')\">Add Resource</button>";
@@ -1560,34 +1649,6 @@ function parse_wadl_html(myNode){
 		html_wadl_string += addFaultBtn;
 		html_wadl_string += "</br>";
 	}
-
-	elemClassName = myNode.my_id + "line_end";
-	spanElem = "";
-	spanElem += "<div data-lineNumber=\"" + '15' + "\" style=\"padding-left: " + padding_left + "px\" id='" + myNode.my_id + "line_end' class='" + elemClassName + "'>";
-	spanElem += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
-	spanElem += "</div>";
-
-	appendToHTML("left", spanElem, elemClassName);
-
-	// print the end element of myNode
-	addSpaces();
-	level--;
-	padding_left = level * 13;
-	xml_wadl_string += "</" + myNode.nodeName + ">";
-	xml_wadl_string += "\n";
-
-	strapped_html_wadl_string += "<span id='" + myNode.my_id + "line'>";
-	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
-	strapped_html_wadl_string += "</span>";
-	strapped_html_wadl_string += "</div>";
-	strapped_html_wadl_string += "</div>";
-
-	html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
-	html_wadl_string += "</span>";
-	html_wadl_string += "</br>";
-
-	// decrease spaces as the recursion is going down in the element hierarchy
-	spaces -= 4;
 }
 
 function runSampleTest(process){
