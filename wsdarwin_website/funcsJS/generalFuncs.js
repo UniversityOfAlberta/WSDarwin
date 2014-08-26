@@ -1383,22 +1383,8 @@ function appendToHTML(side, str, elemClassName){
 function parse_wadl_html(myNode){
 	addSpaces();
 
-	// if 'myNode' has any child nodes, then it can be expanded/minimized; otherwise, it can't
-	// SPECIAL CASE: don't print any child of xs:element
-	if ( (myNode.childNodes.length > 0) && (myNode.nodeName !== "xs:element") ){
-		// if the node is not minimized, add an onClick 'hideNode' action; else, add an onClick 'showNode' action
-		if (myNode.minimized){
-			// remove element button
-			var showNodesChildrenBtn = "<button type=\"button\" class=\"btn btn-default btn-xs\" onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";
-			html_wadl_string += showNodesChildrenBtn;
-			//html_wadl_string += "<button onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";			
-		} else {
-			// remove element button
-			var hideNodesChildrenBtn = "<button type=\"button\" class=\"btn btn-default btn-xs\" onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";
-			html_wadl_string += hideNodesChildrenBtn;
-			//html_wadl_string += "<button onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";			// remove element button
-		}
-	}
+	// if 'myNode' has any child nodes, then it can be expanded/minimized
+	printMinimizeMaximizeBtn(myNode);
 
 	html_wadl_string += "<span id='" + myNode.my_id + "'>";
 	html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
@@ -1421,23 +1407,6 @@ function parse_wadl_html(myNode){
 	xml_wadl_string += "<" + myNode.nodeName;
 	
 	printAttributes(myNode, spanElem);
-
-	/*// print myNode's attributes
-	for (var i = 0; i < myNode.attributes.length; i++){
-		// SPECIAL CASE: don't print attribute 'hasVariableID' 
-		if (myNode.attributes[i].name !== "hasVariableID"){
-			if (wadl_attribute_edit_mode){
-				html_wadl_string += 		 "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + "<input type='text' onchange=\"updateAttribute('" + myNode.my_id + "', '" + myNode.attributes[i].nodeName + "', this.value );\" value=\"" + htmlentities( myNode.attributes[i].value ) + "\"></input>" + "\"" + "</i></font>";
-				strapped_html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
-				spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
-			} else {
-				html_wadl_string += 		 "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
-				strapped_html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
-				spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
-			}
-			xml_wadl_string += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
-		}
-	}*/
 
 	xml_wadl_string += ">";
 	xml_wadl_string += "\n";
@@ -1463,19 +1432,7 @@ function parse_wadl_html(myNode){
 	}
 	html_wadl_string += "</br>";
 	
-	//printChildren(myNode);
-	// only print myNode's children nodes if myNode is not minimized
-	// SPECIAL CASE: don't print any child of xs:element
-	//if ( (!myNode.minimized) ){
-	if ( (!myNode.minimized) && (myNode.nodeName !== "xs:element") ){
-		// print myNode's children nodes
-		for (var i = 0; i < myNode.childNodes.length; i++){
-			spaces += 4;
-			margin_left += 10;
-			level++;
-			parse_wadl_html(myNode.childNodes[i]);
-		}
-	}
+	printChildren(myNode);
 
 	printAddElementButtons(myNode);
 
@@ -1509,11 +1466,36 @@ function parse_wadl_html(myNode){
 	spaces -= 4;
 }
 
+// expand/minimize buttons for showing/hiding a node's children
+function printMinimizeMaximizeBtn(myNode){
+	// if 'myNode' has any child nodes, then it can be expanded/minimized; otherwise, it can't
+	// SPECIAL CASE: don't print any child of xs:element
+	if ( (myNode.childNodes.length > 0) && (myNode.nodeName !== "xs:element") ){
+		// if the node is not minimized, add an onClick 'hideNode' action; else, add an onClick 'showNode' action
+		if (myNode.minimized){
+			// remove element button
+			var showNodesChildrenBtn = "<button type=\"button\" class=\"btn btn-default btn-xs\" onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";
+			html_wadl_string += showNodesChildrenBtn;
+			//html_wadl_string += "<button onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";			
+		} else {
+			// remove element button
+			var hideNodesChildrenBtn = "<button type=\"button\" class=\"btn btn-default btn-xs\" onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";
+			html_wadl_string += hideNodesChildrenBtn;
+			//html_wadl_string += "<button onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";			// remove element button
+		}
+	}
+}
+
 function printChildren(myNode){
 	// only print myNode's children nodes if myNode is not minimized
 	// SPECIAL CASE: don't print any child of xs:element
 	//if ( (!myNode.minimized) ){
 	if ( (!myNode.minimized) && (myNode.nodeName !== "xs:element") ){
+		
+		//
+		// TODO: have to analyze xs:element's children ( valueFrequency and typeFrequency in order to be able to determine
+		// 		 and actually create an appropriate simpleType )
+
 		// print myNode's children nodes
 		for (var i = 0; i < myNode.childNodes.length; i++){
 			spaces += 4;
