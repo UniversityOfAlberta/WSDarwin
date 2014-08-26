@@ -322,6 +322,6 @@ public class XSDComplexType implements Comparable<XSDComplexType>, XSDIType{
 	@Override
 	public String getIdentifier() {
 		// TODO Auto-generated method stub
-		return null;
+		return name;
 	}
 }
