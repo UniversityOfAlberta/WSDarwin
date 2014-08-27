@@ -5,7 +5,7 @@
 var tomcat_server_path				= "http://localhost:8080/";
 //var tomcat_server_path			= "http://ssrg17.cs.ualberta.ca:8080/";
 
-var server_api_url 				= tomcat_server_path + "wsdarwin_1.0.0/jaxrs/api/";
+var server_api_url 					= tomcat_server_path + "wsdarwin_1.0.0/jaxrs/api/";
 
 // for java_diff: ( if true, appends text line by line, otherwise it prints it all in a tree-hierarchy way)
 var parsing_html_mode 			= true;
@@ -40,6 +40,8 @@ var xmlDoc;
 
 var oldRootDoc;
 var newRootDoc;
+
+var enumConvertedArray = new Array();
 
 var firstWADL = "";
 var secondWADL = "";
@@ -311,12 +313,10 @@ function runAnalysis(process_mode){
 
 				console.debug("delta comparison url is: " + delta_comparison_url);
 				java_diff(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
-				//text_diff_JS(1);														// text comparison diff
-				
+				//text_diff_JS(1);														// text comparison diff				
 				//saveWADLtoFile();
 
 	        	if (jsonObj[4] != null){
-
 
 	        		//var listOfMappings = jsonObj[4];
 	        		var n = 0;
@@ -708,12 +708,12 @@ function init_element_ids(myNode, idSubname){
 	}
 }
 
-function highlightDiv(divid){
+function highlightRemovingDiv(divid){
 	//$("#"+divid).css('background-color', 'red');
 	$("#"+divid).css('text-decoration', 'line-through');
 }
 
-function unhighlight(divid){
+function unhighlightRemovingDiv(divid){
 	//$("#"+divid).css('background-color', '');
 	$("#"+divid).css('text-decoration', '');
 }
@@ -1354,8 +1354,6 @@ function setup_wadl_print(){
 
 	$("#wadlOutput").html(html_wadl_string);
 	initBootstrapJS_tooltips();
-
-	
 }
 
 // initializing bootstrap js tooltips
@@ -1378,7 +1376,7 @@ function appendToHTML(side, str, elemClassName){
 		$("." + elemClassName).attr("data-lineNumber", lineNumber + "_b");
 	}	
 }
-
+var spanElem = "";
 // parses the wadl/xml document recursively and print it out
 function parse_wadl_html(myNode){
 	addSpaces();
@@ -1399,14 +1397,14 @@ function parse_wadl_html(myNode){
 	strapped_html_wadl_string += "<span id='" + myNode.my_id + "line'>";
 	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
 
-	var spanElem = "";
+	spanElem = "";
 	var elemClassName = myNode.my_id + "line";
 
 	spanElem += "<div data-lineNumber=\"" + lineNumber + "\" style=\"padding-left: " + padding_left + "px;\" id='" + myNode.my_id + "line' class='" + elemClassName + "' >";
 	spanElem += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
 	xml_wadl_string += "<" + myNode.nodeName;
 	
-	printAttributes(myNode, spanElem);
+	printAttributes(myNode);
 
 	xml_wadl_string += ">";
 	xml_wadl_string += "\n";
@@ -1418,16 +1416,25 @@ function parse_wadl_html(myNode){
 	spanElem += "</div>";
 	appendToHTML("left", spanElem, elemClassName);
 
-	var removeNodeBtn = "<button style=\"margin-left: 10px;\" type=\"button\""+
-						"class=\"btn btn-danger btn-xs\" onmouseout=\"unhighlight('" + myNode.my_id + "');\""+ 
-						"onmouseover=\"highlightDiv('" + myNode.my_id + "');\""+
+	var removeNodeBtn = "<button style=\"margin-left: 10px;\" type=\"button\"" +
+						"class=\"btn btn-danger btn-xs\" onmouseout=\"unhighlightRemovingDiv('" + myNode.my_id + "');\""+ 
+						"onmouseover=\"highlightRemovingDiv('" + myNode.my_id + "');\"" +
 						"onClick=\"removeNode('" + myNode.my_id + "')\">X</button>";
 
 	html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
 	html_wadl_string += removeNodeBtn;
 	if (myNode.nodeName === "xs:element"){
-		var hintTypeTooltip = "<a href='#' data-toggle='tooltip' data-placement='right'"+
-		" title='Click to convert to an Enumeration type'>Hover over me</a>";
+		var hintTypeTooltip;
+		if (myNode.convertedToEnumType){
+			hintTypeTooltip = 	"<button type='button' class=\"btn btn-default btn-xs\" data-toggle='tooltip' " + 
+								"onClick='reverseEnumToNormalTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
+								" title='Click to convert to an Enumeration type'><></button>";
+		} else {
+			hintTypeTooltip = 	"<button type='button' class=\"btn btn-default btn-xs\" data-toggle='tooltip' " + 
+								"onClick='createEnumSimpleTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
+								" title='Click to convert to an Enumeration type'><></button>";
+		}
+
 		html_wadl_string += hintTypeTooltip;
 	}
 	html_wadl_string += "</br>";
@@ -1474,16 +1481,145 @@ function printMinimizeMaximizeBtn(myNode){
 		// if the node is not minimized, add an onClick 'hideNode' action; else, add an onClick 'showNode' action
 		if (myNode.minimized){
 			// remove element button
-			var showNodesChildrenBtn = "<button type=\"button\" class=\"btn btn-default btn-xs\" onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";
+			var showNodesChildrenBtn = 	"<button type=\"button\" class=\"btn btn-default btn-xs\" " + 
+										"onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";
 			html_wadl_string += showNodesChildrenBtn;
 			//html_wadl_string += "<button onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";			
 		} else {
 			// remove element button
-			var hideNodesChildrenBtn = "<button type=\"button\" class=\"btn btn-default btn-xs\" onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";
+			var hideNodesChildrenBtn = 	"<button type=\"button\" class=\"btn btn-default btn-xs\" " +
+										"onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";
 			html_wadl_string += hideNodesChildrenBtn;
 			//html_wadl_string += "<button onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";			// remove element button
 		}
 	}
+}
+/*
+<xs:element name="gender" type="xs:string">
+    <valueFrequencies>
+        <vf frequency="1" value="male">
+        <vf frequency="2" value="female">
+        </vf>
+    </valueFrequencies>
+    <typeFrequencies>
+        <tf frequency="3" type="xs:string">
+        </tf>
+    </typeFrequencies>
+</xs:element>
+
+---------------------------------
+=====> to:
+---------------------------------
+
+<xs:element name="gender" type="tns:genderType"/>
+
+<xs:simpleType name="genderType">
+  <xs:restriction base="xs:string">
+  	<tf frequency="3" type="xs:string"/>
+    <xs:enumeration value="female">
+    	<vf frequency="2" value="female">
+    	</vf>
+    </xs:enumeration>
+
+    <xs:enumeration value="male"/>
+    	<vf frequency="1" value="male">
+    	</vf>
+  	</xs:enumeration>
+  </xs:restriction>
+</xs:simpleType>
+
+*/
+
+var reverseEnumToNormalTypeHandler = function(myNode_id, btn){
+	var foundNode = find_node(rootNode, myNode_id);
+
+	// useful for determining the type of onclick eventlistener is defined for node 'foundNode'
+	foundNode.convertedToEnumType = false;
+
+	for (var i = 0; i < enumConvertedArray.length; i++){
+		// console.debug("enumConvertedArray: " + enumConvertedArray[i].old_xselement.attributes.getNamedItem('type').value);
+		if (foundNode == enumConvertedArray[i].new_xselement){
+			var parentOfFoundNode = foundNode.parentNode;
+			parentOfFoundNode.appendChild(enumConvertedArray[i].old_xselement);
+			parentOfFoundNode.removeChild(foundNode);
+			var schemaNode = rootNode.childNodes[0].childNodes[0];
+			schemaNode.removeChild(enumConvertedArray[i].new_simpletype);
+			enumConvertedArray.splice(i, 1);
+		}
+	}
+	// {console.debug("enumConvertedArray::::: "  + enumConvertedArray.length); }
+
+	setup_wadl_print();
+}
+
+// other possible name: createSimpleTypeForXSElement
+var createEnumSimpleTypeHandler = function(myNode_id, btn){
+	console.debug("creating simple type ! node name: " + myNode_id);
+	var foundNode = find_node(rootNode, myNode_id);
+	console.debug("node name value: " + foundNode.attributes[0].value + " === " + 
+				   foundNode.attributes.getNamedItem('name').value );
+	var attribute_name_val = foundNode.attributes.getNamedItem('name').value;
+	var attribute_type_val = foundNode.attributes.getNamedItem('type').value;
+	var oldNode = foundNode.cloneNode();
+
+	// changes the attribute 'type' of the node
+	foundNode.attributes.getNamedItem("type").value = "tns:" + attribute_name_val + "Type";
+	// useful for determining the type of onclick eventlistener is defined for node 'foundNode'
+	foundNode.convertedToEnumType = true;
+
+	// creating the xs:simpleType element
+	var simpleTypeNode = xmlDoc.createElement("xs:simpleType");
+	var nameAttr = xmlDoc.createAttribute("name");
+	nameAttr.value = attribute_name_val + "Type";
+	simpleTypeNode.setAttributeNode(nameAttr);
+
+	var restrictionTypeNode = xmlDoc.createElement("xs:restriction");
+	var baseAttr = xmlDoc.createAttribute("base");
+	baseAttr.value = attribute_type_val;
+	restrictionTypeNode.setAttributeNode(baseAttr);
+	
+	for (var i = 0; i < foundNode.childNodes.length; i++){
+		// if the found element has a childNode 'valueFrequencies'
+		if (foundNode.childNodes[i].nodeName === "valueFrequencies"){
+			var valueFrequenciesNode = foundNode.childNodes[i];
+			for (var j = 0; j < valueFrequenciesNode.childNodes.length; j++){
+				var valFreqNode = valueFrequenciesNode.childNodes[j];
+				var enumerationNode = xmlDoc.createElement("xs:enumeration");
+				var enumValueAttr = xmlDoc.createAttribute("value");
+				enumValueAttr.value = valFreqNode.attributes.getNamedItem('value').value;
+				enumerationNode.setAttributeNode(enumValueAttr);
+				enumerationNode.appendChild(valFreqNode);
+				restrictionTypeNode.appendChild(enumerationNode);
+			}
+			foundNode.removeChild(valueFrequenciesNode);
+		}
+		// if the found element has a childNode 'typeFrequencies'
+		if (foundNode.childNodes[i].nodeName === "typeFrequencies"){
+			var typeFrequenciesNode = foundNode.childNodes[i];
+			for (var j = 0; j < typeFrequenciesNode.childNodes.length; j++){
+				var typeFreqNode = typeFrequenciesNode.childNodes[j];
+				restrictionTypeNode.appendChild(typeFreqNode);
+			}
+			foundNode.removeChild(typeFrequenciesNode);
+		}
+	}
+
+	simpleTypeNode.appendChild(restrictionTypeNode);
+	
+	var schemaNode = rootNode.childNodes[0].childNodes[0];
+	schemaNode.appendChild(simpleTypeNode);
+
+	var obj = {};
+	obj.old_xselement 	= oldNode;
+	obj.new_xselement 	= foundNode;
+	obj.new_simpletype 	= simpleTypeNode;
+	enumConvertedArray.push(obj);
+
+	// change this button's onClick action
+	//btn.onClick = reverseEnumToNormalType(myNode_id, btn);
+	
+	//btn.addEventListener("click", reverseEnumToNormalTypeHandler(myNode_id, btn));
+	setup_wadl_print();
 }
 
 function printChildren(myNode){
@@ -1491,11 +1627,19 @@ function printChildren(myNode){
 	// SPECIAL CASE: don't print any child of xs:element
 	//if ( (!myNode.minimized) ){
 	if ( (!myNode.minimized) && (myNode.nodeName !== "xs:element") ){
-		
-		//
-		// TODO: have to analyze xs:element's children ( valueFrequency and typeFrequency in order to be able to determine
-		// 		 and actually create an appropriate simpleType )
+		/*if (myNode.nodeName === "xs:element"){
+			console.debug("XS ELEMENT: " + myNode.attributes[0].name);
+			console.debug("XS ELEMENT: " + myNode.attributes[0].value);
+			for (var i = 0; i < myNode.childNodes.length; i++){
+				//createEnumSimpleTypeHandler(myNode);
+				console.debug("child node name: " + myNode.childNodes[i].nodeName);
+			}
 
+		}*/
+		//
+		// TODO: have to analyze xs:element's children (valueFrequency and 
+		// typeFrequency in order to be able to determine and actually create an appropriate simpleType )
+		
 		// print myNode's children nodes
 		for (var i = 0; i < myNode.childNodes.length; i++){
 			spaces += 4;
@@ -1506,7 +1650,7 @@ function printChildren(myNode){
 	}
 }
 
-function printAttributes(myNode, spanElem){
+function printAttributes(myNode){
 	// print myNode's attributes
 	for (var i = 0; i < myNode.attributes.length; i++){
 		// SPECIAL CASE: don't print attribute 'hasVariableID' 
