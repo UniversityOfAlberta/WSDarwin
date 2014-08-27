@@ -1376,10 +1376,18 @@ function appendToHTML(side, str, elemClassName){
 		$("." + elemClassName).attr("data-lineNumber", lineNumber + "_b");
 	}	
 }
+
 var spanElem = "";
 // parses the wadl/xml document recursively and print it out
 function parse_wadl_html(myNode){
 	addSpaces();
+
+	// TO DO: optimize these prints, they are everywhere and seem too random;
+	// ALSO: the names are not specific enough, such as html_wadl_string, spanElem.. there needs to be a logic name for each
+	// ALSO: rename functions ( such as parse_wadl_html ); create separate classes that parse/print wadls
+	// etc..
+	// the cross service comparison highlighting part is a big module itself, so it should be separated
+	// ALSO: separate the normal comparison from the cross service comparison; the latter depends on the first.
 
 	// if 'myNode' has any child nodes, then it can be expanded/minimized
 	printMinimizeMaximizeBtn(myNode);
@@ -1424,18 +1432,33 @@ function parse_wadl_html(myNode){
 	html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
 	html_wadl_string += removeNodeBtn;
 	if (myNode.nodeName === "xs:element"){
-		var hintTypeTooltip;
+		var hintTypeBtnTooltip;
 		if (myNode.convertedToEnumType){
-			hintTypeTooltip = 	"<button type='button' class=\"btn btn-default btn-xs\" data-toggle='tooltip' " + 
-								"onClick='reverseEnumToNormalTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
-								" title='Click to convert to an Enumeration type'><></button>";
+			hintTypeBtnTooltip = 	"<button type='button' class=\"btn btn-default btn-xs\" data-toggle='tooltip' " + 
+									"onClick='reverseEnumToNormalTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
+									" title='Click to convert to an Enumeration type'><></button>";
 		} else {
-			hintTypeTooltip = 	"<button type='button' class=\"btn btn-default btn-xs\" data-toggle='tooltip' " + 
-								"onClick='createEnumSimpleTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
-								" title='Click to convert to an Enumeration type'><></button>";
+			hintTypeBtnTooltip =	"<button type='button' class=\"btn btn-default btn-xs\" data-toggle='tooltip' " + 
+									"onClick='createEnumSimpleTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
+									" title='Click to convert to an Enumeration type'><></button>";
 		}
+		/* *************************************** TO DO:start here tomorrow morning ! line 1437
+		var typeFrequenciesNode = getChildNodeNamed(myNode, 'typeFrequencies'); // ** THIS IS NOT VALID SOMEHOW.. !?!?!
+		if (typeFrequenciesNode.childNodes){
+			for (var i = 0; i < typeFrequenciesNode.childNodes.length; i++){
+				console.debug("tf " + i + ": " + typeFrequenciesNode.childNodes[i].attributes.getNamedItem('type').value );
+			}
+		}
+		*/
 
-		html_wadl_string += hintTypeTooltip;
+		// have to check if myNode has childNode 'typeFrequency' ( if it doesn't, don't display );
+		// calculate typefrequency from it !
+		var typeConfidenceBtnTooltip = "<button style='margin-left: 5px; width: 15px; height: 15px; border-radius: 15px;' type='button' class=\"btn btn-danger btn-xs\" data-toggle='tooltip' " + 
+									"data-placement='right'" +
+									" title='Click to convert to an Enumeration type'></button>";
+
+		html_wadl_string += hintTypeBtnTooltip;
+		html_wadl_string += typeConfidenceBtnTooltip;
 	}
 	html_wadl_string += "</br>";
 	
@@ -1471,6 +1494,17 @@ function parse_wadl_html(myNode){
 	
 	// decrease spaces as the recursion is going down in the element hierarchy
 	spaces -= 4;
+}
+
+// utility function
+// gets a child node named 'childNodeName' node given a node 'myNode'
+function getChildNodeNamed(myNode, childNodeName){
+	for (var i = 0; i < myNode.childNodes.length; i++){
+		if (myNode.childNodes[i].nodeName == childNodeName){
+			console.debug("ALA BALA: " + childNodeName);
+			return myNode.childNodes[i];
+		}
+	}
 }
 
 // expand/minimize buttons for showing/hiding a node's children
@@ -1609,16 +1643,14 @@ var createEnumSimpleTypeHandler = function(myNode_id, btn){
 	var schemaNode = rootNode.childNodes[0].childNodes[0];
 	schemaNode.appendChild(simpleTypeNode);
 
+	// keep track of the elements that have been converted from their original 'type' to
+	// the enum type.
 	var obj = {};
 	obj.old_xselement 	= oldNode;
 	obj.new_xselement 	= foundNode;
 	obj.new_simpletype 	= simpleTypeNode;
 	enumConvertedArray.push(obj);
 
-	// change this button's onClick action
-	//btn.onClick = reverseEnumToNormalType(myNode_id, btn);
-	
-	//btn.addEventListener("click", reverseEnumToNormalTypeHandler(myNode_id, btn));
 	setup_wadl_print();
 }
 
