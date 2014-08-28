@@ -27,6 +27,12 @@ var html_wadl_string 			= '';
 var strapped_html_wadl_string 	= '';
 var xml_wadl_string 			= '';
 
+// type confidence colors
+var typeConfidence0_24 		= "#c9302c";
+var typeConfidence24_49 	= "#F0854E";
+var typeConfidence50_74 	= "#f0ad4e";
+var typeConfidence75_100 	= "#449d44";
+
 var oldCompare 	= '';
 var newCompare 	= '';
 var rightSideID = "b";
@@ -539,8 +545,6 @@ function saveWADLtoFile(){
     });
 }
 
-
-
 function downloadWADL(){
 	saveWADLtoFile();
 	window.open("http://pokemonpacific.com/wsdarwin/funcsPHP/wadlFile.wadl", '_blank', 'download');
@@ -685,6 +689,28 @@ function find_node(mynode, sid){
 		find_node(mynode.childNodes[i], sid);
 	}
 	return window.foundNode;
+}
+
+var foundNode2 = {};
+// this function is used only once, and has been made in order to be able to also save an 
+// element's position where it was found, if applicable;
+
+// TO DO: fix 'find_node' ( the implementation below does not work properly either)
+function find_node_2(mynode, sid){
+	if (mynode.my_id == sid){
+		foundNode2['node'] 		= mynode;
+		foundNode2['position'] 	= -1;	//	Not applicable
+	}
+	for (var i = 0; i < mynode.childNodes.length; i++){
+		if (mynode.childNodes[i].my_id == sid){
+			foundNode2['node'] 		= mynode.childNodes[i];
+			foundNode2['position'] 	= i;
+			console.log('[find_node_2] found node name is ' + window.foundNode2['node'].nodeName);
+			return foundNode2;
+		}
+		find_node_2(mynode.childNodes[i], sid);
+	}
+	return foundNode2;
 }
 
 function init_node(myNode, idSubname){
@@ -1431,35 +1457,55 @@ function parse_wadl_html(myNode){
 
 	html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
 	html_wadl_string += removeNodeBtn;
+
 	if (myNode.nodeName === "xs:element"){
 		var hintTypeBtnTooltip;
 		if (myNode.convertedToEnumType){
-			hintTypeBtnTooltip = 	"<button type='button' class=\"btn btn-default btn-xs\" data-toggle='tooltip' " + 
+			hintTypeBtnTooltip = 	"<button type='button' class=\"convertToEnum btn btn-default btn-xs\" data-toggle='tooltip' " + 
 									"onClick='reverseEnumToNormalTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
-									" title='Click to convert to an Enumeration type'><></button>";
+									" title='Reset to its original type'>Reset Type</button>";
 		} else {
-			hintTypeBtnTooltip =	"<button type='button' class=\"btn btn-default btn-xs\" data-toggle='tooltip' " + 
+			hintTypeBtnTooltip =	"<button type='button' class=\"convertToEnum btn btn-default btn-xs\" data-toggle='tooltip' " + 
 									"onClick='createEnumSimpleTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
-									" title='Click to convert to an Enumeration type'><></button>";
+									" title='Click to convert to an Enumeration type'>Enum?</button>";
 		}
-		/* *************************************** TO DO:start here tomorrow morning ! line 1437
-		var typeFrequenciesNode = getChildNodeNamed(myNode, 'typeFrequencies'); // ** THIS IS NOT VALID SOMEHOW.. !?!?!
-		if (typeFrequenciesNode.childNodes){
-			for (var i = 0; i < typeFrequenciesNode.childNodes.length; i++){
-				console.debug("tf " + i + ": " + typeFrequenciesNode.childNodes[i].attributes.getNamedItem('type').value );
+		
+		var typeConfidenceMap = calculateTypeConfidence(myNode);
+		var typeConfStr  	  = "";
+		//var chosenKey;
+		var max_percent		  = 0;
+		var typeConfidenceColor;
+		for (var key in typeConfidenceMap){
+			if (typeConfidenceMap.hasOwnProperty(key)){
+				typeConfStr += key + "  " + typeConfidenceMap[key] + "%";
+				if (typeConfidenceMap[key] > max_percent){
+					max_percent = typeConfidenceMap[key];
+					//chosenKey 	= key;
+					if ( (max_percent > 0) && (max_percent <= 24) ){
+						typeConfidenceColor = typeConfidence0_24;
+					} else if ( (max_percent > 24) && (max_percent <= 49) ){
+						typeConfidenceColor = typeConfidence24_49;
+					} else if ( (max_percent > 49) && (max_percent <= 74) ){
+						typeConfidenceColor = typeConfidence50_74;
+					} else if ( (max_percent > 74) && (max_percent <= 100) ){
+						typeConfidenceColor = typeConfidence75_100;
+					}
+				}
 			}
 		}
-		*/
 
 		// have to check if myNode has childNode 'typeFrequency' ( if it doesn't, don't display );
 		// calculate typefrequency from it !
-		var typeConfidenceBtnTooltip = "<button style='margin-left: 5px; width: 15px; height: 15px; border-radius: 15px;' type='button' class=\"btn btn-danger btn-xs\" data-toggle='tooltip' " + 
-									"data-placement='right'" +
-									" title='Click to convert to an Enumeration type'></button>";
+		var typeConfidenceBtnTooltip = "<button style='margin-left: 5px; width: 15px; height: 15px; " + 
+									"background-color: " + typeConfidenceColor + "; " +
+									"border-radius: 15px;' type='button' class=\"btn btn-xs " + typeConfidenceColor + "\" " +
+									"data-toggle='tooltip' data-placement='right'" +
+									" title='" + typeConfStr + "'></button>";
 
 		html_wadl_string += hintTypeBtnTooltip;
 		html_wadl_string += typeConfidenceBtnTooltip;
 	}
+
 	html_wadl_string += "</br>";
 	
 	printChildren(myNode);
@@ -1496,12 +1542,36 @@ function parse_wadl_html(myNode){
 	spaces -= 4;
 }
 
+function calculateTypeConfidence(myNode){
+	var totalFrequency = 0;
+	var typeConfidenceArray = {};
+	
+	var typeFrequenciesNode = getChildNodeNamed(myNode, 'typeFrequencies');
+	if (typeFrequenciesNode){
+		if (typeFrequenciesNode.childNodes.length > 0){
+			// calculating the sum of the frequencies / TO DO: will get this value from the <typeFrequencies> after it's added there
+			for (var i = 0; i < typeFrequenciesNode.childNodes.length; i++){
+				totalFrequency += typeFrequenciesNode.childNodes[i].attributes.getNamedItem('frequency').value;
+			}
+			for (var i = 0; i < typeFrequenciesNode.childNodes.length; i++){
+				var typeValue  	 = typeFrequenciesNode.childNodes[i].attributes.getNamedItem('type').value;
+				var freqValue	 = typeFrequenciesNode.childNodes[i].attributes.getNamedItem('frequency').value;
+				var percentValue = (freqValue / totalFrequency) * 100;
+				typeConfidenceArray[typeValue] = percentValue;
+				totalFrequency += typeFrequenciesNode.childNodes[i].attributes.getNamedItem('frequency').value;
+			}
+		}
+	} else {
+		// this (xs:element) node most likely has no child nodes
+	}
+	return typeConfidenceArray;
+}
+
 // utility function
 // gets a child node named 'childNodeName' node given a node 'myNode'
 function getChildNodeNamed(myNode, childNodeName){
 	for (var i = 0; i < myNode.childNodes.length; i++){
 		if (myNode.childNodes[i].nodeName == childNodeName){
-			console.debug("ALA BALA: " + childNodeName);
 			return myNode.childNodes[i];
 		}
 	}
@@ -1528,41 +1598,6 @@ function printMinimizeMaximizeBtn(myNode){
 		}
 	}
 }
-/*
-<xs:element name="gender" type="xs:string">
-    <valueFrequencies>
-        <vf frequency="1" value="male">
-        <vf frequency="2" value="female">
-        </vf>
-    </valueFrequencies>
-    <typeFrequencies>
-        <tf frequency="3" type="xs:string">
-        </tf>
-    </typeFrequencies>
-</xs:element>
-
----------------------------------
-=====> to:
----------------------------------
-
-<xs:element name="gender" type="tns:genderType"/>
-
-<xs:simpleType name="genderType">
-  <xs:restriction base="xs:string">
-  	<tf frequency="3" type="xs:string"/>
-    <xs:enumeration value="female">
-    	<vf frequency="2" value="female">
-    	</vf>
-    </xs:enumeration>
-
-    <xs:enumeration value="male"/>
-    	<vf frequency="1" value="male">
-    	</vf>
-  	</xs:enumeration>
-  </xs:restriction>
-</xs:simpleType>
-
-*/
 
 var reverseEnumToNormalTypeHandler = function(myNode_id, btn){
 	var foundNode = find_node(rootNode, myNode_id);
@@ -1574,14 +1609,25 @@ var reverseEnumToNormalTypeHandler = function(myNode_id, btn){
 		// console.debug("enumConvertedArray: " + enumConvertedArray[i].old_xselement.attributes.getNamedItem('type').value);
 		if (foundNode == enumConvertedArray[i].new_xselement){
 			var parentOfFoundNode = foundNode.parentNode;
-			parentOfFoundNode.appendChild(enumConvertedArray[i].old_xselement);
+
+			// Option #1 start: inserting element at the end of the list
+			// parentOfFoundNode.appendChild(enumConvertedArray[i].old_xselement);
+			// Option #1 end
+
+			// Option #2 start: inserting element at the same position where it was originally
+			var indexToInsertAt = enumConvertedArray[i].elem_position;
+			for (var j = 0; j < parentOfFoundNode.childNodes.length; j++){
+				if (indexToInsertAt == j){
+					parentOfFoundNode.insertBefore(enumConvertedArray[i].old_xselement, parentOfFoundNode.childNodes[j]);
+				}
+			}
+			// Option #2 end
 			parentOfFoundNode.removeChild(foundNode);
 			var schemaNode = rootNode.childNodes[0].childNodes[0];
 			schemaNode.removeChild(enumConvertedArray[i].new_simpletype);
 			enumConvertedArray.splice(i, 1);
 		}
 	}
-	// {console.debug("enumConvertedArray::::: "  + enumConvertedArray.length); }
 
 	setup_wadl_print();
 }
@@ -1589,17 +1635,19 @@ var reverseEnumToNormalTypeHandler = function(myNode_id, btn){
 // other possible name: createSimpleTypeForXSElement
 var createEnumSimpleTypeHandler = function(myNode_id, btn){
 	console.debug("creating simple type ! node name: " + myNode_id);
-	var foundNode = find_node(rootNode, myNode_id);
-	console.debug("node name value: " + foundNode.attributes[0].value + " === " + 
-				   foundNode.attributes.getNamedItem('name').value );
-	var attribute_name_val = foundNode.attributes.getNamedItem('name').value;
-	var attribute_type_val = foundNode.attributes.getNamedItem('type').value;
-	var oldNode = foundNode.cloneNode();
+	//var foundNode  = find_node(rootNode, myNode_id);
+	var foundNode2 = find_node_2(rootNode, myNode_id);
+	
+	console.debug("node name value: " + foundNode2['node'].attributes[0].value + " === " + 
+				   foundNode2['node'].attributes.getNamedItem('name').value );
+	var attribute_name_val = foundNode2['node'].attributes.getNamedItem('name').value;
+	var attribute_type_val = foundNode2['node'].attributes.getNamedItem('type').value;
+	var oldNode = foundNode2['node'].cloneNode(true);
 
 	// changes the attribute 'type' of the node
-	foundNode.attributes.getNamedItem("type").value = "tns:" + attribute_name_val + "Type";
-	// useful for determining the type of onclick eventlistener is defined for node 'foundNode'
-	foundNode.convertedToEnumType = true;
+	foundNode2['node'].attributes.getNamedItem("type").value = "tns:" + attribute_name_val + "Type";
+	// useful for determining the type of onclick eventlistener is defined for node 'foundNode2['node']'
+	foundNode2['node'].convertedToEnumType = true;
 
 	// creating the xs:simpleType element
 	var simpleTypeNode = xmlDoc.createElement("xs:simpleType");
@@ -1612,10 +1660,10 @@ var createEnumSimpleTypeHandler = function(myNode_id, btn){
 	baseAttr.value = attribute_type_val;
 	restrictionTypeNode.setAttributeNode(baseAttr);
 	
-	for (var i = 0; i < foundNode.childNodes.length; i++){
+	for (var i = 0; i < foundNode2['node'].childNodes.length; i++){
 		// if the found element has a childNode 'valueFrequencies'
-		if (foundNode.childNodes[i].nodeName === "valueFrequencies"){
-			var valueFrequenciesNode = foundNode.childNodes[i];
+		if (foundNode2['node'].childNodes[i].nodeName === "valueFrequencies"){
+			var valueFrequenciesNode = foundNode2['node'].childNodes[i];
 			for (var j = 0; j < valueFrequenciesNode.childNodes.length; j++){
 				var valFreqNode = valueFrequenciesNode.childNodes[j];
 				var enumerationNode = xmlDoc.createElement("xs:enumeration");
@@ -1625,16 +1673,16 @@ var createEnumSimpleTypeHandler = function(myNode_id, btn){
 				enumerationNode.appendChild(valFreqNode);
 				restrictionTypeNode.appendChild(enumerationNode);
 			}
-			foundNode.removeChild(valueFrequenciesNode);
+			foundNode2['node'].removeChild(valueFrequenciesNode);
 		}
 		// if the found element has a childNode 'typeFrequencies'
-		if (foundNode.childNodes[i].nodeName === "typeFrequencies"){
-			var typeFrequenciesNode = foundNode.childNodes[i];
+		if (foundNode2['node'].childNodes[i].nodeName === "typeFrequencies"){
+			var typeFrequenciesNode = foundNode2['node'].childNodes[i];
 			for (var j = 0; j < typeFrequenciesNode.childNodes.length; j++){
 				var typeFreqNode = typeFrequenciesNode.childNodes[j];
 				restrictionTypeNode.appendChild(typeFreqNode);
 			}
-			foundNode.removeChild(typeFrequenciesNode);
+			foundNode2['node'].removeChild(typeFrequenciesNode);
 		}
 	}
 
@@ -1646,8 +1694,9 @@ var createEnumSimpleTypeHandler = function(myNode_id, btn){
 	// keep track of the elements that have been converted from their original 'type' to
 	// the enum type.
 	var obj = {};
+	obj.elem_position	= foundNode2['position'];
 	obj.old_xselement 	= oldNode;
-	obj.new_xselement 	= foundNode;
+	obj.new_xselement 	= foundNode2['node'];
 	obj.new_simpletype 	= simpleTypeNode;
 	enumConvertedArray.push(obj);
 
@@ -1659,18 +1708,6 @@ function printChildren(myNode){
 	// SPECIAL CASE: don't print any child of xs:element
 	//if ( (!myNode.minimized) ){
 	if ( (!myNode.minimized) && (myNode.nodeName !== "xs:element") ){
-		/*if (myNode.nodeName === "xs:element"){
-			console.debug("XS ELEMENT: " + myNode.attributes[0].name);
-			console.debug("XS ELEMENT: " + myNode.attributes[0].value);
-			for (var i = 0; i < myNode.childNodes.length; i++){
-				//createEnumSimpleTypeHandler(myNode);
-				console.debug("child node name: " + myNode.childNodes[i].nodeName);
-			}
-
-		}*/
-		//
-		// TODO: have to analyze xs:element's children (valueFrequency and 
-		// typeFrequency in order to be able to determine and actually create an appropriate simpleType )
 		
 		// print myNode's children nodes
 		for (var i = 0; i < myNode.childNodes.length; i++){

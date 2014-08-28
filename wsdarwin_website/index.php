@@ -107,7 +107,6 @@
 	</div>
 </body>
 </html>
-
 		<script>
 			function onLoad() {
 		    	$('#fileInput').click();
