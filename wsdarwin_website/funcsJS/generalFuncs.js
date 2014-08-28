@@ -27,11 +27,14 @@ var html_wadl_string 			= '';
 var strapped_html_wadl_string 	= '';
 var xml_wadl_string 			= '';
 
+var wadl_download_str			= '';
+var extended_wadl_download_str	= '';
+
 // type confidence colors
-var typeConfidence0_24 		= "#c9302c";
-var typeConfidence24_49 	= "#F0854E";
-var typeConfidence50_74 	= "#f0ad4e";
-var typeConfidence75_100 	= "#449d44";
+var typeConfidence0_24 			= "#c9302c";
+var typeConfidence24_49 		= "#F0854E";
+var typeConfidence50_74 		= "#f0ad4e";
+var typeConfidence75_100 		= "#449d44";
 
 var oldCompare 	= '';
 var newCompare 	= '';
@@ -270,9 +273,9 @@ function runAnalysis(process_mode){
 				add_elements_mode = false;
 
 				getWADL(analysis_merged_wadl_url_path);
-				firstWADL = xml_wadl_string;
+				firstWADL = wadl_download_str;
 				getWADL(compare_merged_wadl_url_path);
-				secondWADL = xml_wadl_string;
+				secondWADL = wadl_download_str;
 
 				compareXMLDoc = loadXMLDoc(analysis_merged_wadl_url_path);
 				oldRootDoc = compareXMLDoc.documentElement;
@@ -306,9 +309,9 @@ function runAnalysis(process_mode){
 				add_elements_mode = false;
 
 				getWADL(analysis_merged_wadl_url_path);
-				firstWADL = xml_wadl_string;
+				firstWADL = wadl_download_str;
 				getWADL(compare_merged_wadl_url_path);
-				secondWADL = xml_wadl_string;
+				secondWADL = wadl_download_str;
 
 				compareXMLDoc = loadXMLDoc(analysis_merged_wadl_url_path);
 				oldRootDoc = compareXMLDoc.documentElement;
@@ -527,27 +530,26 @@ function text_diff_JS(viewingType) {
 
 }
 
-function saveWADLtoFile(){
+function downloadWADL(extended){
     console.log("saving wadl file");
+    var dl_url = "/wsdarwin/funcsPHP/downloadWADLfile.php";
+
+
     $.ajax({
-    	url: "/wsdarwin/funcsPHP/downloadWADLfile.php",
+    	url: dl_url,
         type: "POST",
-        data: { wadlString: xml_wadl_string },
+        data: { wadlString: wadl_download_str },
         dataType: "html",
         success: function(response) {
         	console.log("success?? response: " + response);
         	onclick="this.target='_blank';"
+        	window.location = dl_url;
         },
         error: function(xhr, status, error) {
 		  console.log("Error acccesing downloadWADLfile.");
 		}
 
     });
-}
-
-function downloadWADL(){
-	saveWADLtoFile();
-	window.open("http://pokemonpacific.com/wsdarwin/funcsPHP/wadlFile.wadl", '_blank', 'download');
 }
 
 function removeURLField(id){
@@ -747,11 +749,14 @@ function unhighlightRemovingDiv(divid){
 function setup_wadl_print_free(){
 	html_wadl_string = '';
 	strapped_html_wadl_string = '';
-	xml_wadl_string = '';
+	// these two strings will be the download-able wadl files
+	wadl_download_str 			= '';
+	extended_wadl_download_str 	= '';
+
 	spaces = 0;
 	parse_wadl_html(rootNode);
 	//parse_wadl_html_two(rootNode);
-	$("#wadlOutput").html(xml_wadl_string);
+	$("#wadlOutput").html(wadl_download_str);
 }
 
 function addSpaces(){
@@ -759,7 +764,8 @@ function addSpaces(){
 	while (n < spaces){
 		html_wadl_string += "&nbsp;";
 		//strapped_html_wadl_string is using relative margin-left
-		xml_wadl_string += " ";
+		wadl_download_str 			+= " ";
+		extended_wadl_download_str 	+= " ";
 		n++;
 	}
 }
@@ -1372,7 +1378,9 @@ function loadXMLDoc(filename){
 function setup_wadl_print(){
 	html_wadl_string = '';
 	strapped_html_wadl_string = '';
-	xml_wadl_string = '';
+
+	wadl_download_str 			= '';
+	extended_wadl_download_str 	= '';
 	spaces = 0;
 	init_element_ids(rootNode, "");
 
@@ -1403,21 +1411,7 @@ function appendToHTML(side, str, elemClassName){
 	}	
 }
 
-var spanElem = "";
-// parses the wadl/xml document recursively and print it out
-function parse_wadl_html(myNode){
-	addSpaces();
-
-	// TO DO: optimize these prints, they are everywhere and seem too random;
-	// ALSO: the names are not specific enough, such as html_wadl_string, spanElem.. there needs to be a logic name for each
-	// ALSO: rename functions ( such as parse_wadl_html ); create separate classes that parse/print wadls
-	// etc..
-	// the cross service comparison highlighting part is a big module itself, so it should be separated
-	// ALSO: separate the normal comparison from the cross service comparison; the latter depends on the first.
-
-	// if 'myNode' has any child nodes, then it can be expanded/minimized
-	printMinimizeMaximizeBtn(myNode);
-
+function printStartTags(myNode, elemClassName){
 	html_wadl_string += "<span id='" + myNode.my_id + "'>";
 	html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
 
@@ -1432,16 +1426,19 @@ function parse_wadl_html(myNode){
 	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
 
 	spanElem = "";
-	var elemClassName = myNode.my_id + "line";
 
+	//var elemClassName = myNode.my_id + "line"
 	spanElem += "<div data-lineNumber=\"" + lineNumber + "\" style=\"padding-left: " + padding_left + "px;\" id='" + myNode.my_id + "line' class='" + elemClassName + "' >";
 	spanElem += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
-	xml_wadl_string += "<" + myNode.nodeName;
-	
-	printAttributes(myNode);
+	wadl_download_str 			+= "<" + myNode.nodeName;
+	extended_wadl_download_str 	+= "<" + myNode.nodeName;
+}
 
-	xml_wadl_string += ">";
-	xml_wadl_string += "\n";
+function printOtherTags(myNode, elemClassName){
+	wadl_download_str += ">";
+	wadl_download_str += "\n";
+	extended_wadl_download_str += ">";
+	extended_wadl_download_str += "\n";
 
 	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
 	strapped_html_wadl_string += "</span>";
@@ -1507,11 +1504,9 @@ function parse_wadl_html(myNode){
 	}
 
 	html_wadl_string += "</br>";
-	
-	printChildren(myNode);
+}
 
-	printAddElementButtons(myNode);
-
+function printEndTags(myNode, elemClassName){
 	elemClassName = myNode.my_id + "line_end";
 	spanElem = "";
 	spanElem += "<div data-lineNumber=\"" + '15' + "\" style=\"padding-left: " + padding_left + "px\" id='" + myNode.my_id + "line_end' class='" + elemClassName + "'>";
@@ -1525,9 +1520,11 @@ function parse_wadl_html(myNode){
 	level--;
 	padding_left = level * 13;
 	
-	xml_wadl_string += "</" + myNode.nodeName + ">";
-	xml_wadl_string += "\n";
-	
+	wadl_download_str += "</" + myNode.nodeName + ">";
+	wadl_download_str += "\n";
+	extended_wadl_download_str += "</" + myNode.nodeName + ">";
+	extended_wadl_download_str += "\n";
+
 	strapped_html_wadl_string += "<span id='" + myNode.my_id + "line'>";
 	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
 	strapped_html_wadl_string += "</span>";
@@ -1540,6 +1537,161 @@ function parse_wadl_html(myNode){
 	
 	// decrease spaces as the recursion is going down in the element hierarchy
 	spaces -= 4;
+}
+
+var spanElem = "";
+// parses the wadl/xml document recursively and print it out
+function parse_wadl_html(myNode, extendedWADL){
+	if (typeof extendedWADL == "undefined"){
+		extendedWADL = false;
+	}
+
+	addSpaces();
+
+	// TO DO: optimize these prints, they are everywhere and seem too random;
+	// ALSO: the names are not specific enough, such as html_wadl_string, spanElem.. there needs to be a logic name for each
+	// ALSO: rename functions ( such as parse_wadl_html ); create separate classes that parse/print wadls
+	// etc..
+	// the cross service comparison highlighting part is a big module itself, so it should be separated
+	// ALSO: separate the normal comparison from the cross service comparison; the latter depends on the first.
+
+	// if 'myNode' has any child nodes, then it can be expanded/minimized
+	printMinimizeMaximizeBtn(myNode);
+
+	var elemClassName = myNode.my_id + "line";
+	printStartTags(myNode, elemClassName);
+	/*html_wadl_string += "<span id='" + myNode.my_id + "'>";
+	html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
+
+	strapped_html_wadl_string += "<div id='" + myNode.my_id + "_all'>";
+	var marginMinus = -level*10;
+	var marginLeftCalc = 10;
+
+	padding_left = level * 13;
+
+	strapped_html_wadl_string += "<div style=\"margin-left: 10px;\" id='" + myNode.my_id + "'>";
+	strapped_html_wadl_string += "<span id='" + myNode.my_id + "line'>";
+	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
+
+	spanElem = "";
+	var elemClassName = myNode.my_id + "line";
+
+	spanElem += "<div data-lineNumber=\"" + lineNumber + "\" style=\"padding-left: " + padding_left + "px;\" id='" + myNode.my_id + "line' class='" + elemClassName + "' >";
+	spanElem += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
+	wadl_download_str 			+= "<" + myNode.nodeName;
+	extended_wadl_download_str 	+= "<" + myNode.nodeName;
+	*/
+	printAttributes(myNode);
+
+	printOtherTags(myNode, elemClassName);
+
+	/*wadl_download_str += ">";
+	wadl_download_str += "\n";
+	extended_wadl_download_str += ">";
+	extended_wadl_download_str += "\n";
+
+	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
+	strapped_html_wadl_string += "</span>";
+
+	spanElem += "<font color='#008080'>" + htmlentities(">") + "</font>";
+	spanElem += "</div>";
+	appendToHTML("left", spanElem, elemClassName);
+
+	var removeNodeBtn = "<button style=\"margin-left: 10px;\" type=\"button\"" +
+						"class=\"btn btn-danger btn-xs\" onmouseout=\"unhighlightRemovingDiv('" + myNode.my_id + "');\""+ 
+						"onmouseover=\"highlightRemovingDiv('" + myNode.my_id + "');\"" +
+						"onClick=\"removeNode('" + myNode.my_id + "')\">X</button>";
+
+	html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
+	html_wadl_string += removeNodeBtn;
+
+	if (myNode.nodeName === "xs:element"){
+		var hintTypeBtnTooltip;
+		if (myNode.convertedToEnumType){
+			hintTypeBtnTooltip = 	"<button type='button' class=\"convertToEnum btn btn-default btn-xs\" data-toggle='tooltip' " + 
+									"onClick='reverseEnumToNormalTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
+									" title='Reset to its original type'>Reset Type</button>";
+		} else {
+			hintTypeBtnTooltip =	"<button type='button' class=\"convertToEnum btn btn-default btn-xs\" data-toggle='tooltip' " + 
+									"onClick='createEnumSimpleTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
+									" title='Click to convert to an Enumeration type'>Enum?</button>";
+		}
+		
+		var typeConfidenceMap = calculateTypeConfidence(myNode);
+		var typeConfStr  	  = "";
+		//var chosenKey;
+		var max_percent		  = 0;
+		var typeConfidenceColor;
+		for (var key in typeConfidenceMap){
+			if (typeConfidenceMap.hasOwnProperty(key)){
+				typeConfStr += key + "  " + typeConfidenceMap[key] + "%";
+				if (typeConfidenceMap[key] > max_percent){
+					max_percent = typeConfidenceMap[key];
+					//chosenKey 	= key;
+					if ( (max_percent > 0) && (max_percent <= 24) ){
+						typeConfidenceColor = typeConfidence0_24;
+					} else if ( (max_percent > 24) && (max_percent <= 49) ){
+						typeConfidenceColor = typeConfidence24_49;
+					} else if ( (max_percent > 49) && (max_percent <= 74) ){
+						typeConfidenceColor = typeConfidence50_74;
+					} else if ( (max_percent > 74) && (max_percent <= 100) ){
+						typeConfidenceColor = typeConfidence75_100;
+					}
+				}
+			}
+		}
+
+		// have to check if myNode has childNode 'typeFrequency' ( if it doesn't, don't display );
+		// calculate typefrequency from it !
+		var typeConfidenceBtnTooltip = "<button style='margin-left: 5px; width: 15px; height: 15px; " + 
+									"background-color: " + typeConfidenceColor + "; " +
+									"border-radius: 15px;' type='button' class=\"btn btn-xs " + typeConfidenceColor + "\" " +
+									"data-toggle='tooltip' data-placement='right'" +
+									" title='" + typeConfStr + "'></button>";
+
+		html_wadl_string += hintTypeBtnTooltip;
+		html_wadl_string += typeConfidenceBtnTooltip;
+	}
+
+	html_wadl_string += "</br>";
+	*/
+	printChildren(myNode);
+
+	printAddElementButtons(myNode);
+
+	printEndTags(myNode, elemClassName);
+	/*
+	elemClassName = myNode.my_id + "line_end";
+	spanElem = "";
+	spanElem += "<div data-lineNumber=\"" + '15' + "\" style=\"padding-left: " + padding_left + "px\" id='" + myNode.my_id + "line_end' class='" + elemClassName + "'>";
+	spanElem += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
+	spanElem += "</div>";
+
+	appendToHTML("left", spanElem, elemClassName);
+
+	// print the end element of myNode
+	addSpaces();
+	level--;
+	padding_left = level * 13;
+	
+	wadl_download_str += "</" + myNode.nodeName + ">";
+	wadl_download_str += "\n";
+	extended_wadl_download_str += "</" + myNode.nodeName + ">";
+	extended_wadl_download_str += "\n";
+
+	strapped_html_wadl_string += "<span id='" + myNode.my_id + "line'>";
+	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
+	strapped_html_wadl_string += "</span>";
+	strapped_html_wadl_string += "</div>";
+	strapped_html_wadl_string += "</div>";
+
+	html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
+	html_wadl_string += "</span>";
+	html_wadl_string += "</br>";
+	
+	// decrease spaces as the recursion is going down in the element hierarchy
+	spaces -= 4;
+	*/
 }
 
 function calculateTypeConfidence(myNode){
@@ -1706,15 +1858,18 @@ var createEnumSimpleTypeHandler = function(myNode_id, btn){
 function printChildren(myNode){
 	// only print myNode's children nodes if myNode is not minimized
 	// SPECIAL CASE: don't print any child of xs:element
-	//if ( (!myNode.minimized) ){
-	if ( (!myNode.minimized) && (myNode.nodeName !== "xs:element") ){
-		
+	if ( (!myNode.minimized) ){
+	//if ( (!myNode.minimized) && (myNode.nodeName !== "xs:element") ){
+		var extendedWADL = false;
+		if (myNode.nodeName !== "xs:element"){
+			extendedWADL = true;
+		}
 		// print myNode's children nodes
 		for (var i = 0; i < myNode.childNodes.length; i++){
 			spaces += 4;
 			margin_left += 10;
 			level++;
-			parse_wadl_html(myNode.childNodes[i]);
+			parse_wadl_html(myNode.childNodes[i], extendedWADL);
 		}
 	}
 }
@@ -1733,7 +1888,8 @@ function printAttributes(myNode){
 				strapped_html_wadl_string += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
 				spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
 			}
-			xml_wadl_string += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
+			wadl_download_str += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
+			extended_wadl_download_str += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
 		}
 	}
 }

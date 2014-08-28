@@ -8,14 +8,16 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 
-<!-- Bootstrap css sheets 
+<!-- Bootstrap css sheets 3.2.0 -->
 <link href="css/bootstrap.min.css" rel="stylesheet">
 <link href="css/bootstrap.css" rel="stylesheet">
--->
+
 <!-- css sheets -->
 <link rel="stylesheet" href="<?= $GLOBALS['baseURL']; ?>css/diffview.css" type="text/CSS">
+<!-- Bootstrap css sheets 3.1.1 
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+-->
 <link rel="stylesheet" href="<?= $GLOBALS['baseURL']; ?>css/first.css" type="text/CSS">
 
 
@@ -58,7 +60,16 @@
 			<div id='analyzeSubmitBtn' class="submitBtnDiv">
 				<button type="button" id='analyzeBtn' onClick="analyzeBtn()" style="width: 84px;" class="btn btn-success">Analyze</button>
 				<button type="button" onClick="runSampleTest('analyze')" class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button>
-				<button type="button" id='downloadAnalyzeWADL' class="btn btn-default" style="margin-left: 7px;">Save WADL</button>
+				<!-- Download WADL button -->
+				<div class="btn-group">
+				  <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
+				    Download <span class="caret"></span>
+				  </button>
+				  <ul class="dropdown-menu" role="menu">
+				    <li><a href="#" onClick="downloadWADL()">WADL</a></li>
+				    <li><a href="#" onClick="">Extended WADL</a></li>
+				  </ul>
+				</div>
 			</div>
 
 			<!-- Compare the input(s) -->
