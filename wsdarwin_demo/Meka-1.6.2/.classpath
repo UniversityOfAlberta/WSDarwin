@@ -3,6 +3,6 @@
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Users/mihai/Desktop/projects/mulan/mulan-1.4.0/weka-3.7.6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Marios/Documents/GitHub/WSDarwin/wsdarwin_demo/Meka-1.6.2/lib/weka.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

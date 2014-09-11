@@ -279,3 +279,11 @@ p {
 .list-group-item {
 	padding: 2px 3px;
 }
+
+.hintPopup {
+
+}
+
+.convertToEnum {
+	margin-left: 5px;
+}
