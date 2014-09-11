@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.TreeMap;
 
+import wsdarwin.wadlgenerator.model.Resource;
 import wsdarwin.wadlgenerator.model.WADLElement;
 
 public class XSDElement implements Comparable<XSDElement>, WADLElement{
@@ -18,18 +19,19 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 	private HashSet<Object> value;
 	private int minOccurs;
 	private String maxOccurs;
-	private TreeMap<String, Integer> typeFrequencies;
-	private TreeMap<Object, Integer> valueFrequencies;
+	private HashMap<String, Integer> typeFrequencies;
+	private HashMap<Object, Integer> valueFrequencies;
 	private TreeMap<String, Object> type2valueMap;
 	private HashMap<XSDElement, Double> elementDistanceMap;
+	private HashMap<XSDIType, HashSet<XSDElement>> changedTypes;
 	
 	public XSDElement(String name, XSDIType type, Object value) {
 		this.name = name;
 		this.type = type;
 		this.value = new HashSet<Object>();
 		this.value.add(value);
-		this.typeFrequencies = new TreeMap<String, Integer>();
-		this.valueFrequencies = new TreeMap<Object, Integer>();
+		this.typeFrequencies = new HashMap<String, Integer>();
+		this.valueFrequencies = new HashMap<Object, Integer>();
 		this.type2valueMap = new TreeMap<String, Object>();
 		this.elementDistanceMap = new HashMap<XSDElement, Double>();
 		if (type instanceof XSDPrimitiveType || type instanceof XSDSimpleType) {
@@ -37,15 +39,17 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 			this.addTypeFrequency(type.getIdentifier(), 1);
 			this.addValueFrequency(value, 1);
 		}
+		this.changedTypes = new HashMap<XSDIType, HashSet<XSDElement>>();
 	}
 	
 	public XSDElement(String name, XSDIType type) {
 		this.name = name;
 		this.type = type;
 		this.value = new HashSet<Object>();
-		this.typeFrequencies = new TreeMap<String, Integer>();
-		this.valueFrequencies = new TreeMap<Object, Integer>();
+		this.typeFrequencies = new HashMap<String, Integer>();
+		this.valueFrequencies = new HashMap<Object, Integer>();
 		this.type2valueMap = new TreeMap<String, Object>();
+		this.changedTypes = new HashMap<XSDIType, HashSet<XSDElement>>();
 	}
 
 	public int getMinOccurs() {
@@ -98,11 +102,11 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 		}
 	}
 
-	public TreeMap<String, Integer> getTypeFrequencies() {
+	public HashMap<String, Integer> getTypeFrequencies() {
 		return typeFrequencies;
 	}
 
-	public TreeMap<Object, Integer> getValueFrequencies() {
+	public HashMap<Object, Integer> getValueFrequencies() {
 		return this.valueFrequencies;
 	}
 
@@ -171,7 +175,7 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 			if (other.name != null) {
 				return false;
 			}
-		} else if (!name.equals(other.name)) {
+		} else if (!name.equals(other.name) || !(this.equalsAfterRename(other))) {
 			return false;
 		}
 		/*if (type == null) {
@@ -225,7 +229,7 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 	@Override
 	public boolean equalsAfterRename(Object o) {
 		if(o instanceof XSDElement) {
-			return type.getName().equals(((XSDElement)o).type.getName());
+			return type.getName().equals(((XSDElement)o).type.getName()) || type.equalsAfterRename(((XSDElement)o).type);
 		}
 		else {
 			return false;
@@ -241,7 +245,13 @@ public class XSDElement implements Comparable<XSDElement>, WADLElement{
 	@Override
 	public String getIdentifier() {
 		// TODO Auto-generated method stub
-		return null;
+		return name;
+	}
+
+	public void setVariableID(boolean hasVariableID) {
+		type.setVariableID(Resource.VARIABLE_ID+"Type");
+		name = Resource.VARIABLE_ID;
+		
 	}
 
 

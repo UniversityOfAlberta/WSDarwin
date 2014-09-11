@@ -20,25 +20,29 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import wsdarwin.wadlgenerator.model.Representation;
+import wsdarwin.wadlgenerator.model.Resource;
 import wsdarwin.wadlgenerator.model.WADLElement;
 
 public class XSDFile implements WADLElement {
 
-	private HashMap<String, XSDIType> types;
+	//private HashMap<String, XSDIType> types;
 	private HashMap<String, XSDElement> elements;
 	private XSDElement responseElement;
+	private HashMap<XSDElement, HashSet<XSDElement>> changedElements;
 	// newly added in order to keep track of value frequency of all xsdelements
 	//private TreeMap<XSDElement, Integer> valueFrequencies;
 
-	public XSDFile(HashMap<String, XSDIType> types,
-			HashMap<String, XSDElement> elements) {
-		this.types = types;
+	public XSDFile(HashMap<String, XSDElement> elements) {
+		//this.types = types;
 		this.elements = elements;
+		this.changedElements = new HashMap<XSDElement, HashSet<XSDElement>>();
 	}
 	
 	public XSDFile() {
-		this.types = new HashMap<String, XSDIType>();
+		//this.types = new HashMap<String, XSDIType>();
 		this.elements = new HashMap<String, XSDElement>();
+		this.changedElements = new HashMap<XSDElement, HashSet<XSDElement>>();
 	}
 	
 	//public TreeMap<XSDElement, Integer> getValueFrequencies() {
@@ -46,20 +50,26 @@ public class XSDFile implements WADLElement {
 	//}
 	
 	public void addElement(String name, XSDElement element) {
-		elements.put(name, element);
+		XSDElement thisElement = isNewElement(element);
+		if (thisElement == null) {
+			elements.put(name, element);
+		}
+		else {
+			thisElement.getType().compareToMerge(element.getType());
+		}
 	}
 
-	public void addType(String name, XSDIType type) {
+	/*public void addType(String name, XSDIType type) {
 		types.put(name, type);
-	}
+	}*/
 
 	/*public String getFilename() {
 		return filename;
 	}*/
 
-	public HashMap<String, XSDIType> getTypes() {
+	/*public HashMap<String, XSDIType> getTypes() {
 		return types;
-	}
+	}*/
 
 	public HashMap<String, XSDElement> getElements() {
 		return elements;
@@ -73,13 +83,13 @@ public class XSDFile implements WADLElement {
 		this.responseElement = responseType;
 	}
 
-	public ArrayList<String> sortedElementAndTypeNames() {
+	/*public ArrayList<String> sortedElementAndTypeNames() {
 		ArrayList<String> names = new ArrayList<String>();
 		names.addAll(elements.keySet());
-		names.addAll(types.keySet());
+		//names.addAll(types.keySet());
 		Collections.sort(names, String.CASE_INSENSITIVE_ORDER);
 		return names;
-	}
+	}*/
 	
 	// ***************************************** BELOW UNCOMMENTED
 	
@@ -118,7 +128,7 @@ public class XSDFile implements WADLElement {
 				//TODO: Find cases when variableName can be null ?
 				
 				XSDComplexType type = new XSDComplexType(childNode.getAttributes().getNamedItem("name").getNodeValue(), variableName);
-				this.addType(type.getName(), type);
+				//this.addType(type.getName(), type);
 				NodeList typeChildren = childNode.getChildNodes();
 				for (int k = 0; k < typeChildren.getLength(); k++) {
 					if (typeChildren.item(k).getNodeName().equals("sequence")) {
@@ -224,9 +234,9 @@ public class XSDFile implements WADLElement {
 			return XSDPrimitiveType.BOOLEAN;
 		} else if (name.equals("double")) {
 			return XSDPrimitiveType.DOUBLE;
-		} else if (this.getTypes().containsKey(name)) {
+		} /*else if (this.getTypes().containsKey(name)) {
 			return this.getTypes().get(name);
-		} else {								//TODO: when does this occur .. ?
+		}*/ else {								//TODO: when does this occur .. ?
 			//return new XSDComplexType(name);	// originally..
 			return XSDPrimitiveType.STRING;		// wrong; just a placeholder.
 		}
@@ -243,40 +253,56 @@ public class XSDFile implements WADLElement {
 	}
 
 	public void compareToMerge(XSDFile file) {
-		if(this.responseElement == null && file.responseElement != null) {
+		/*if(this.responseElement == null && file.responseElement != null) {
 			this.setResponseElement(file.getResponseElement());
-		}
+		}*/
 		HashSet<XSDElement> elementsAdded = new HashSet<XSDElement>();
-		HashSet<XSDIType> typesAdded = new HashSet<XSDIType>();
-		HashMap<XSDIType, HashSet<XSDElement>> changedTypes = new HashMap<XSDIType, HashSet<XSDElement>>();
 		for (String element : file.getElements().keySet()) {
 			if (!this.getElements().containsKey(element)) {
-				elementsAdded.add(file.getElements().get(element));
+				XSDElement thisElement = isNewElement(file.getElements().get(element));
+				if (thisElement == null) {
+					elementsAdded.add(file.getElements().get(element));
+				}
+				else {
+					changedElements.put(thisElement, thisElement.getType().compareToMerge(file.getElements().get(element).getType()));
+				}
+			}
+			else {
+				changedElements.put(this.elements.get(element), this.elements.get(element).getType().compareToMerge(file.getElements().get(element).getType()));
 			}
 		}
 
-		for (String type : file.getTypes().keySet()) {
+		/*for (String type : file.getTypes().keySet()) {
 			if (!this.getTypes().containsKey(type)) {
 				typesAdded.add(file.getTypes().get(type));
 			} else {
-				changedTypes.put(this.getTypes().get(type), this.getTypes()
-						.get(type).diff(file.getTypes().get(type)));
+				changedElements.put(this.getTypes().get(type), this.getTypes()
+						.get(type).compareToMerge(file.getTypes().get(type)));
+			}
+		}*/
+
+		mergeXSDFiles(elementsAdded);
+	}
+	
+	private XSDElement isNewElement(XSDElement element) {
+		for(XSDElement thisElement : this.elements.values()) {
+			if(thisElement.equalsAfterRename(element)) {
+				//thisElement.setVariableID(true);
+				return thisElement;
 			}
 		}
-
-		mergeXSDFiles(elementsAdded, typesAdded, changedTypes);
+		return null;
 	}
 
-	private void mergeXSDFiles(HashSet<XSDElement> elementsAdded,
-			HashSet<XSDIType> typesAdded,
-			HashMap<XSDIType, HashSet<XSDElement>> changedTypes) {
+	private void mergeXSDFiles(HashSet<XSDElement> elementsAdded) {
 		putAllElements(elementsAdded);
-		putAllTypes(typesAdded);
-		for (XSDIType type : changedTypes.keySet()) {
+		//putAllTypes(typesAdded);
+		for (XSDElement element : changedElements.keySet()) {
+			XSDIType type = element.getType();
 			if (type instanceof XSDComplexType) {
 				XSDComplexType xSDComplexType = (XSDComplexType)type;
-				for (XSDElement element : changedTypes.get(type)) {
-					xSDComplexType.addElement(element);
+				for (XSDElement addedElement : changedElements.get(element)) {
+					xSDComplexType.addElement(addedElement);
 				}
 			}
 			else if (type instanceof XSDSimpleType) {
@@ -285,11 +311,11 @@ public class XSDFile implements WADLElement {
 		}
 	}
 
-	private void putAllTypes(Set<XSDIType> types) {
+	/*private void putAllTypes(Set<XSDIType> types) {
 		for (XSDIType type : types) {
 			this.types.put(type.getName(), type);
 		}
-	}
+	}*/
 
 	private void putAllElements(Set<XSDElement> elements) {
 		for (XSDElement element : elements) {
@@ -454,8 +480,12 @@ public class XSDFile implements WADLElement {
 
 	@Override
 	public boolean equalsAfterRename(Object o) {
-		// TODO Auto-generated method stub
-		return false;
+		if(o instanceof XSDFile) {
+			return responseElement.equalsAfterRename(((XSDFile)o).responseElement);
+		}
+		else {
+			return false;
+		}
 	}
 
 	@Override
@@ -467,7 +497,13 @@ public class XSDFile implements WADLElement {
 	@Override
 	public String getIdentifier() {
 		// TODO Auto-generated method stub
-		return null;
+		return this.responseElement.getIdentifier();
 	}
 
+	@Override
+	public String toString() {
+		return responseElement.getIdentifier();
+	}
+
+	
 }

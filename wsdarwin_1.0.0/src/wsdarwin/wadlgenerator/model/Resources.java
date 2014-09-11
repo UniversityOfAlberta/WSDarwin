@@ -72,13 +72,27 @@ public class Resources implements WADLElement {
 		
 		for(String path : resources.getResourceElements().keySet()) {
 			if(!this.getResourceElements().containsKey(path)) {
-				resourceAdded.add(resources.getResourceElements().get(path));
+				if(isNewResource(resources.getResourceElements().get(path))) {
+					resourceAdded.add(resources.getResourceElements().get(path));
+				}
 			} else { // already exists > compare
 				changedResource.put(this.getResourceElements().get(path), this.getResourceElements().get(path).compareToMerge(resources.getResourceElements().get(path)));
 			}
 		}
 
 		return resourceAdded;
+	}
+
+	private boolean isNewResource(Resource resource) {
+		for(Resource thisResource : this.getResourceElements().values()) {
+			if(thisResource.equalsAfterRename(resource)) {
+				thisResource.setVariableID(true);
+				resource.setVariableID(true);
+				changedResource.put(thisResource, thisResource.compareToMerge(resource));
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public void mergeResources(HashSet<Resource> addedResourceElements) {

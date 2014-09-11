@@ -52,7 +52,7 @@ public class RequestAnalyzer extends Uri {
 	public String batchRequestAnalysis(ArrayList<String> requests) {
 		resolve(requests.get(0));
 		String base = getAuthority();
-		HashMap<String,Integer> pathTokenFrequencies = new HashMap<String,Integer>();
+		/*HashMap<String,Integer> pathTokenFrequencies = new HashMap<String,Integer>();
 		for(String request : requests) {
 			resolve(request);
 			String[] tokens = this.getPathComponents();
@@ -72,7 +72,7 @@ public class RequestAnalyzer extends Uri {
 		}
 		if(this.getPathComponentsAfterBase(base).length == 0) {
 			base = getAuthority();
-		}
+		}*/
 		resourceBase = base;
 		return base;
 	}

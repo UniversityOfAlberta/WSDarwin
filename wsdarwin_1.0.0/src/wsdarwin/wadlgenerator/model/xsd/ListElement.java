@@ -79,7 +79,7 @@ public class ListElement implements XSDIType {
 	}
 
 	@Override
-	public HashSet<XSDElement> diff(XSDIType xSDIType) {
+	public HashSet<XSDElement> compareToMerge(XSDIType xSDIType) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -94,6 +94,12 @@ public class ListElement implements XSDIType {
 	public String getIdentifier() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void setVariableID(String variableId) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

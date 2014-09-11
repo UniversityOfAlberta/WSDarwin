@@ -2,23 +2,26 @@ package wsdarwin.wadlgenerator.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import wsdarwin.comparison.delta.*;
 import wsdarwin.model.ComplexType;
 import wsdarwin.model.WSElement;
 import wsdarwin.util.DeltaUtil;
+import wsdarwin.wadlgenerator.model.xsd.XSDComplexType;
 import wsdarwin.wadlgenerator.model.xsd.XSDElement;
+import wsdarwin.wadlgenerator.model.xsd.XSDFile;
 
 
 public class Representation implements WADLElement {
 
 	private String mediaType;
-	private XSDElement element;					// TODO will be changed to an XSD element
+	private XSDFile responseXSDFile;					// TODO will be changed to an XSD responseXSDFile
 
-	public Representation(String mediaType, XSDElement element) {
+	public Representation(String mediaType, XSDFile element) {
 		setMediaType(mediaType);
-		setIdentifier(element);
-		this.element = element;
+		//setIdentifier(responseXSDFile.getResponseElement());
+		this.responseXSDFile = element;
 	}
 	
 	
@@ -32,29 +35,33 @@ public class Representation implements WADLElement {
 	}
 
 	public XSDElement getElement() {
-		return element;
+		return responseXSDFile.getResponseElement();
+	}
+	
+	public XSDFile getResponseXSDFile() {
+		return this.responseXSDFile;
 	}
 
-	public void setElement(XSDElement element) {
-		this.element = element;
+	public void setResponseXSDFile(XSDFile xsdFile) {
+		this.responseXSDFile = xsdFile;
 	}
 
 	public String getIdentifier() {
-		return element.getName();
+		return responseXSDFile.getResponseElement().getName();
 	}
 	/**
-	 * Main identifier is the element-attribute. For comparison both mediaType and element get compared.
-	 * @param element
-	 */
-	public void setIdentifier(XSDElement element) {
-		this.element = element;
-	}
+	 * Main identifier is the responseXSDFile-attribute. For comparison both mediaType and responseXSDFile get compared.
+	 * @param responseXSDFile
+	 *//*
+	public void setIdentifier(XSDFile xsdFile) {
+		this.element = responseXSDFile;
+	}*/
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((element == null) ? 0 : element.hashCode());
+		result = prime * result + ((responseXSDFile == null) ? 0 : responseXSDFile.hashCode());
 		result = prime * result
 				+ ((mediaType == null) ? 0 : mediaType.hashCode());
 		return result;
@@ -69,10 +76,10 @@ public class Representation implements WADLElement {
 		if (getClass() != obj.getClass())
 			return false;
 		Representation other = (Representation) obj;
-		if (element == null) {
-			if (other.element != null)
+		if (responseXSDFile == null) {
+			if (other.responseXSDFile != null)
 				return false;
-		} else if (!element.equals(other.element))
+		} else if (!responseXSDFile.equals(other.responseXSDFile))
 			return false;
 		if (mediaType == null) {
 			if (other.mediaType != null)
@@ -83,15 +90,15 @@ public class Representation implements WADLElement {
 	}
 
 	public String toString() {
-		return element.getName();
-		//		return "<representation> MEDIATYPE="+mediaType+" , ELEMENT="+element;
+		return responseXSDFile.getResponseElement().getName();
+		//		return "<representation> MEDIATYPE="+mediaType+" , ELEMENT="+responseXSDFile;
 	}
 
 	@Override
 	public boolean equalsByName(Object o) {
 		if(o instanceof Representation) {
 			return (mediaType.equals(((Representation)o).mediaType) 
-					&& element.equals(((Representation)o).element));
+					&& responseXSDFile.equals(((Representation)o).responseXSDFile));
 		}
 		else {
 			return false;
@@ -100,15 +107,19 @@ public class Representation implements WADLElement {
 
 	@Override
 	public boolean equalsAfterRename(Object o) {
-		// TODO Auto-generated method stub
-		return false;
+		if(o instanceof Representation) {
+			return responseXSDFile.equalsAfterRename(((Representation)o).responseXSDFile);
+		}
+		else {
+			return false;
+		}
 	}
 
 	/*@Override
-	public Delta compare(WSElement element) {
+	public Delta compare(WSElement responseXSDFile) {
 		Representation representation = null;
-		if(element instanceof Representation) {
-			representation = (Representation)element;
+		if(responseXSDFile instanceof Representation) {
+			representation = (Representation)responseXSDFile;
 		} else {
 			return null;
 		}
@@ -119,7 +130,7 @@ public class Representation implements WADLElement {
 
 		// compare ELEMENT
 		if(!representation.getIdentifier().equals(this.getIdentifier())) {
-			elementDelta = new ChangeDelta(this, representation, "element", this.getIdentifier(), representation.getIdentifier());
+			elementDelta = new ChangeDelta(this, representation, "responseXSDFile", this.getIdentifier(), representation.getIdentifier());
 		}
 		// compare mediaType
 		if(!representation.getMediaType().equals(this.getMediaType())) {
@@ -137,7 +148,7 @@ public class Representation implements WADLElement {
 
 		// TODO
 		// @Marios will implement the compare method
-		// connection to the XSD files needed (for element-attribute)
+		// connection to the XSD files needed (for responseXSDFile-attribute)
 
 
 
@@ -192,9 +203,9 @@ public class Representation implements WADLElement {
 	private void mapByID(WADLElement element, HashMap<String, XSDElement> mapped, HashMap<String, XSDElement> added, HashMap<String, XSDElement> deleted) {
 		if(element instanceof Representation){
 			Representation representation = (Representation)element;
-			String complexTypeName = this.element.getName();
+			String complexTypeName = this.responseXSDFile.getResponseElement().getName();
 			if(complexTypeName.equals(representation.getElement().getName())){
-				mapped.put(complexTypeName, this.element);
+				mapped.put(complexTypeName, this.responseXSDFile.getResponseElement());
 			}else {
 				added.put(complexTypeName, representation.getElement());
 			}
@@ -203,5 +214,11 @@ public class Representation implements WADLElement {
 				deleted.put(complexTypeName,this.getElement());
 			}	
 		}
+	}
+
+
+
+	public void compareToMerge(Representation representation) {
+		this.responseXSDFile.compareToMerge(representation.responseXSDFile);
 	}
 }

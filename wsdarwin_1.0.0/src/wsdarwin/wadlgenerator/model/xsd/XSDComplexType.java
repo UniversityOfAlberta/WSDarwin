@@ -102,7 +102,7 @@ public class XSDComplexType implements Comparable<XSDComplexType>, XSDIType{
 		return o.name.compareTo(name);
 	}
 
-	public HashSet<XSDElement> diff(XSDIType type) {
+	public HashSet<XSDElement> compareToMerge(XSDIType type) {
 		
 		HashSet<XSDElement> elementsAdded = new HashSet<XSDElement>();
 		XSDComplexType xSDComplexType = null;
@@ -116,20 +116,20 @@ public class XSDComplexType implements Comparable<XSDComplexType>, XSDIType{
 			if(!this.getElements().containsKey(element)) {
 				
 				if (xSDComplexType.getElements().get(element).getType() instanceof XSDPrimitiveType) {
-					/*complexType.getElements().get(element).addTypeFrequency(complexType.getElements().get(element).getType().getName(), 1);
-					complexType.getElements().get(element).addValueFrequency(complexType.getElements().get(element).getValue(), 1);
-					complexType.getElements().get(element).addType2Value(complexType.getElements().get(element).getType().getName(), complexType.getElements().get(element).getValue());*/
+					xSDComplexType.getElements().get(element).addTypeFrequency(xSDComplexType.getElements().get(element).getType().getName(), 1);
+					xSDComplexType.getElements().get(element).addValueFrequency(xSDComplexType.getElements().get(element).getValue(), 1);
+					xSDComplexType.getElements().get(element).addType2Value(xSDComplexType.getElements().get(element).getType().getName(), xSDComplexType.getElements().get(element).getValue());
 				}
 				elementsAdded.add(xSDComplexType.getElements().get(element));
 			}
 			else {
 				XSDElement retrievedElement = this.elements.get(element);
 				if (retrievedElement.getType() instanceof XSDPrimitiveType) {
-					/*retrievedElement.addTypeFrequency(
+					retrievedElement.addTypeFrequency(
 							retrievedElement.getType().getName(), 1);
 					retrievedElement.addValueFrequency(
 							retrievedElement.getValue(), 1);
-					retrievedElement.addType2Value(retrievedElement.getType().getName(), retrievedElement.getValue());*/
+					retrievedElement.addType2Value(retrievedElement.getType().getName(), retrievedElement.getValue());
 				}
 			}
 		}
@@ -323,5 +323,11 @@ public class XSDComplexType implements Comparable<XSDComplexType>, XSDIType{
 	public String getIdentifier() {
 		// TODO Auto-generated method stub
 		return name;
+	}
+
+	@Override
+	public void setVariableID(String variableId) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -468,7 +468,7 @@ public class WSDarwinService extends Application{
 			mergedXSDFile.compareToMerge(xsdFile);
 			
 		    //WADLFile newWADL = new WADLFile(FILENAME_DIR+FILENAME_WADL, urlLine, xsdBuilder.convertFromXSD(mergedXSDFile.getResponseType()));
-			WADLFile newWADL = new WADLFile(FILENAME_DIR_TWO +FILENAME_WADL, urlLine, mergedXSDFile.getResponseElement());
+			WADLFile newWADL = new WADLFile(FILENAME_DIR_TWO +FILENAME_WADL, urlLine, mergedXSDFile);
 			grammarSet.add(xsdFile);		// TODO later change to Identifier + XSDElement
 			newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
 		    generator.createWADL(newWADL);
@@ -477,10 +477,10 @@ public class WSDarwinService extends Application{
 		    mergedWADL.compareToMerge(newWADL);
 		    
 			// calculating the value frequency of all XSDElements
-		    HashMap<String, XSDIType> xsdtypes = xsdFile.getTypes();
+		    HashMap<String, XSDElement> xsdElements = xsdFile.getElements();
 		    System.out.println("============== START of printing all elements of xsdfile ================ ");
-		    for (String typeString: xsdtypes.keySet()){
-		    	getXSDElementsValueFrequencies(xsdtypes.get(typeString), valueFrequencies);
+		    for (String elementName: xsdElements.keySet()){
+		    	getXSDElementsValueFrequencies(xsdElements.get(elementName), valueFrequencies);
 		    }
 		    System.out.println("============== END of printing all elements of xsdfile ================ ");
 		    
@@ -538,7 +538,7 @@ public class WSDarwinService extends Application{
 			// (#2) No unique session ids ( no caching )
 			// Overwrites the same files every time
 	        // Create empty merged WADL file
-			WADLFile mergedWADL = new WADLFile(mergedWADLFileName, null, null);
+			WADLFile mergedWADL = new WADLFile(mergedWADLFileName, null, new XSDFile());
 			if(DEBUG) System.out.println("** Merged WADLFile: "+mergedWADL.getIdentifier()+" **");
 			// -------------------------------------------
 			

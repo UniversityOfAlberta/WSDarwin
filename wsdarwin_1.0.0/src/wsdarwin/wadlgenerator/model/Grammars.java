@@ -16,27 +16,27 @@ public class Grammars implements WADLElement {
 	/* Grammars can be included inline or by reference. In our case 
 	 * we will only use them by reference, therefore the includeType 
 	 * is not needed. */
-	private HashSet<XSDFile> includedGrammars;		// Set of "href"-values of XSD-files
+	private HashMap<String, XSDFile> includedGrammars;		// Set of "href"-values of XSD-files
 
 
 	public Grammars() {
-		includedGrammars = new HashSet<XSDFile>();
+		includedGrammars = new HashMap<String, XSDFile>();
 	}
 
 	public String getIdentifier() {
 		return includedGrammars.toString();
 	}
 
-	public HashSet<XSDFile> getIncludedGrammars() {
+	public HashMap<String, XSDFile> getIncludedGrammars() {
 		return includedGrammars;
 	}
 
-	public void addIncludedGrammar(XSDFile schema) {
-		includedGrammars.add(schema);
+	public void addIncludedGrammar(String responseElement, XSDFile schema) {
+		includedGrammars.put(responseElement, schema);
 	}	
 
-	public void addAllIncludedGrammars(Set<XSDFile> includes) {
-		includedGrammars.addAll(includes);
+	public void addAllIncludedGrammars(Map<String, XSDFile> includes) {
+		includedGrammars.putAll(includes);
 	}
 
 	/*public Grammars diff(Grammars grammars) {
@@ -113,15 +113,15 @@ public class Grammars implements WADLElement {
 	private void mapByID(WADLElement element, HashSet<XSDFile> mapped, HashSet<XSDFile> added, HashSet<XSDFile> deleted) {
 		if(element instanceof Grammars){
 			Grammars grammars2 = (Grammars)element;
-			for(XSDFile schema : grammars2.includedGrammars) {
-				if(this.getIncludedGrammars().contains(schema)){
+			for(XSDFile schema : grammars2.includedGrammars.values()) {
+				if(this.getIncludedGrammars().containsValue(schema)){
 					mapped.add(schema);
 				}else{
 					added.add(schema);
 				}
 			}
 
-			for(XSDFile schema : this.includedGrammars) {
+			for(XSDFile schema : this.includedGrammars.values()) {
 				if(!mapped.contains(schema)){
 					deleted.add(schema);
 				}

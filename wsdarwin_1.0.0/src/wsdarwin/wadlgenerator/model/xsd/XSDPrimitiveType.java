@@ -28,7 +28,8 @@ public enum XSDPrimitiveType implements XSDIType {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
+	
 	/*
 	 * @Override public Delta compare(WSElement element) { XSDPrimitiveType type
 	 * = null; if(element instanceof XSDPrimitiveType) { type =
@@ -51,7 +52,7 @@ public enum XSDPrimitiveType implements XSDIType {
 	}
 
 	@Override
-	public HashSet<XSDElement> diff(XSDIType xSDIType) {
+	public HashSet<XSDElement> compareToMerge(XSDIType xSDIType) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -71,6 +72,12 @@ public enum XSDPrimitiveType implements XSDIType {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void setVariableID(String variableId) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

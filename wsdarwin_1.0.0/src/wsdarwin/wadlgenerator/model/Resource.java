@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import wsdarwin.comparison.delta.*;
+import wsdarwin.model.ComplexType;
 import wsdarwin.model.WSElement;
 import wsdarwin.util.DeltaUtil;
 
@@ -16,6 +17,7 @@ public class Resource implements WADLElement {
 //	private String type;
 //	private String queryType;
 	
+	public static final String VARIABLE_ID = "{id}";
 	private String path;
 	private boolean variableID;
 	private HashMap<String, Method> methodElements;
@@ -47,6 +49,12 @@ public class Resource implements WADLElement {
 	}
 
 	public void setVariableID(boolean variableID) {
+		if (methodElements.size()==1 && methodElements.containsKey(path)) {
+			Method method = methodElements.remove(path);
+			method.setVariableID(Resource.VARIABLE_ID);
+			methodElements.put(method.getIdentifier(), method);
+		}
+		path = Resource.VARIABLE_ID;
 		this.variableID = variableID;
 	}
 
@@ -154,8 +162,22 @@ public class Resource implements WADLElement {
 
 	@Override
 	public boolean equalsAfterRename(Object o) {
-		// TODO Auto-generated method stub
-		return false;
+		if (o instanceof Resource) {
+			return resourceElements.equals(((Resource) o).resourceElements) && (methodElements.equals(((Resource)o ).methodElements) || methodElementsEqualAfterRename(((Resource)o).methodElements));
+		} else {
+			return false;
+		}
+	}
+	
+	public boolean methodElementsEqualAfterRename(HashMap<String, Method> methodElements) {
+		for(Method thisMethod : this.methodElements.values()) {
+			for(Method method : methodElements.values()) {
+				if(!thisMethod.equals(method) && !thisMethod.equalsAfterRename(method)) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	/*@Override

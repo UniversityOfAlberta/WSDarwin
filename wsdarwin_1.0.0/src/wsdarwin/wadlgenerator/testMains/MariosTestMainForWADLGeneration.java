@@ -85,7 +85,7 @@ public class MariosTestMainForWADLGeneration {
 	        System.out.println("[Interface retrieval]");
 			
 			// create empty merged WADL file
-			WADLFile mergedWADL = new WADLFile(FILENAME_DIR+VENDOR+"Merged.wadl", null, null);
+			WADLFile mergedWADL = new WADLFile(FILENAME_DIR+VENDOR+"Merged.wadl", null, new XSDFile());
 			if(DEBUG) System.out.println("** Merged WADLFile: "+mergedWADL.getIdentifier()+" **");
 			HashSet<XSDFile> grammarSet = new HashSet<XSDFile>();
 			// Looping over test queries
@@ -124,15 +124,15 @@ public class MariosTestMainForWADLGeneration {
 	        
 				xsdBuilder.buildXSDFromJSON(RESPONSE_DIR+FILENAME_XML, analyzer.getMethodID());
 				XSDFile xsdFile = xsdBuilder.getXSDFile();
-				XSDFile mergedXSDFile = responses.get(analyzer.getMethodID());
+				//XSDFile mergedXSDFile = responses.get(analyzer.getMethodID());
 				
-				mergedXSDFile.compareToMerge(xsdFile);
+				//mergedXSDFile.compareToMerge(xsdFile);
 				
-		        WADLFile newWADL = new WADLFile(FILENAME_DIR+FILENAME_WADL, urlLine, mergedXSDFile.getResponseElement());
+		        WADLFile newWADL = new WADLFile(FILENAME_DIR+FILENAME_WADL, urlLine, xsdFile);
 		        
 		        grammarSet.add(xsdFile);		// TODO later change to Identifier + XSDElement
 		        newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
-		        generator.createWADL(newWADL);
+		        //generator.createWADL(newWADL);
 		        // Call diff&merge methods from sub-objects 
 		        mergedWADL.compareToMerge(newWADL);
 		        

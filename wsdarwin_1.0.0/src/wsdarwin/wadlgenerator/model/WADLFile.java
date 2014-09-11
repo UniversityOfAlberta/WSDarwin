@@ -37,9 +37,9 @@ public class WADLFile implements WADLElement {
 
 	private String wadlFilename;
 	private String requestURI;
-	private XSDElement response;
+	//private XSDFile response;
 
-	private Grammars grammarsElements;
+	private XSDFile schema;
 	private HashMap<String, Resources> resourcesElements;
 	private HashSet<MapDelta> mapDeltas;
 	public ArrayList<ArrayList<String>> elemMappingArray;
@@ -59,12 +59,11 @@ public class WADLFile implements WADLElement {
 //	TODO implement support for multiple namespaces
 
 	public WADLFile(String filename,
-			String requestURI, XSDElement response) {
+			String requestURI, XSDFile schema) {
 
 		this.wadlFilename = filename;
 		this.requestURI = requestURI;
-		this.response = response;
-		this.grammarsElements = new Grammars();			
+		this.schema = schema;		
 		this.resourcesElements = new HashMap<String, Resources>();
 		this.mapDeltas = new HashSet<MapDelta>();
 		this.elemMappingArray = new ArrayList<ArrayList<String>>();
@@ -72,10 +71,10 @@ public class WADLFile implements WADLElement {
 
 	public WADLFile(String filename) {
 
-		this.wadlFilename = filename;
-		this.grammarsElements = new Grammars();			
+		this.wadlFilename = filename;		
 		this.resourcesElements = new HashMap<String, Resources>();
 		this.mapDeltas = new HashSet<MapDelta>();
+		this.schema = new XSDFile();
 	}
 	
 	public ArrayList<ArrayList<String>> getElementMappings(){
@@ -98,16 +97,16 @@ public class WADLFile implements WADLElement {
 		this.requestURI = requestURI;
 	}
 
-	public Grammars getGrammarsElements() {
-		return grammarsElements;
+	public XSDFile getSchema() {
+		return schema;
+	}
+	
+	public void setSchema(XSDFile schema) {
+		this.schema = schema;
 	}
 	
 	public HashSet<MapDelta> getMapDeltas() {
 		return mapDeltas;
-	}
-
-	public void addGrammarsElement(XSDFile schema) {
-		grammarsElements.addIncludedGrammar(schema);
 	}
 
 	public HashMap<String, Resources> getResourcesElements() {
@@ -120,12 +119,14 @@ public class WADLFile implements WADLElement {
 
 	public String toString() {
 		return wadlFilename;
-		//		return "<application>/[WADLFile]: FILENAME="+wadlFilename+", #Grammars="+grammarsElements.getIncludedGrammars().size()
+		//		return "<application>/[WADLFile]: FILENAME="+wadlFilename+", #Grammars="+schema.getIncludedGrammars().size()
 		//				+", #resourcesElements="+resourcesElements.size();
 	}
 
 	public void buildWADL(HashSet<XSDFile> xsdFilenames, RequestAnalyzer analyzer, String resourceBase, String methodName, int status) {
-        grammarsElements.addAllIncludedGrammars(xsdFilenames);
+        for(XSDFile xsd : xsdFilenames) {
+        	schema.compareToMerge(xsd);
+        }
         
         // Create all WADL objects
         Resources resources = new Resources(resourceBase);
@@ -153,8 +154,8 @@ public class WADLFile implements WADLElement {
         Response response = new Response(status);
         method.addResponseElement(status, response);
         
-        Representation representation = new Representation("application/"+analyzer.getRepresentationMediaType(), this.response);
-        response.addRepresentationElement(XMLGenerator.TARGET_SCHEMA_NAMESPACE+this.response, representation);
+        Representation representation = new Representation("application/"+analyzer.getRepresentationMediaType(), this.schema);
+        response.addRepresentationElement(XMLGenerator.TARGET_SCHEMA_NAMESPACE+this.schema, representation);
         
         // Call URI Analyzer
         //System.out.println("============== ANALYZING PARAMS ! ===============");
@@ -164,16 +165,12 @@ public class WADLFile implements WADLElement {
        	}
 	
 	public void compareToMerge(WADLFile file) {
-		Grammars grammarsAdded = new Grammars();
+		//HashSet<XSDFile> grammarsAdded = new HashSet<XSDFile>();
 		HashSet<Resources> resourcesAdded = new HashSet<Resources>();
 		HashMap<Resources, HashSet<Resource>> changedResources = new HashMap<Resources, HashSet<Resource>>();
+		HashMap<XSDFile, HashSet<XSDElement>> changedGrammars = new HashMap<XSDFile, HashSet<XSDElement>>();
 
-		Grammars grammars = file.getGrammarsElements(); 
-		for(XSDFile key : grammars.getIncludedGrammars()) {
-			if(!this.getGrammarsElements().getIncludedGrammars().contains(key)) {
-				grammarsAdded.addIncludedGrammar(key);
-			}
-		}	
+		this.schema.compareToMerge(file.getSchema());
 
 		for(String base : file.getResourcesElements().keySet()) {
 			if(!this.getResourcesElements().containsKey(base)) {
@@ -183,14 +180,15 @@ public class WADLFile implements WADLElement {
 			}
 		}
 
-		mergeWADLFiles(grammarsAdded, resourcesAdded, changedResources);						
+		mergeWADLFiles(resourcesAdded, changedResources);						
 	}
 
-	private void mergeWADLFiles(Grammars grammarsAdded,
-			HashSet<Resources> resourcesAdded,
+	private void mergeWADLFiles(HashSet<Resources> resourcesAdded,
 			HashMap<Resources, HashSet<Resource>> changedResources) {
 		// add grammars
-		this.grammarsElements.addAllIncludedGrammars(grammarsAdded.getIncludedGrammars());
+		/*for(XSDFile xsd : grammarsAdded) {
+			this.schema.put(xsd.getIdentifier(), xsd);
+		}*/
 		// add resources
 		for(Resources resource : resourcesAdded) {
 			this.resourcesElements.put(resource.getIdentifier(), resource);
@@ -235,7 +233,7 @@ public class WADLFile implements WADLElement {
 				Grammars grammarsElementAdded = null;
 		Grammars grammarsElementDeleted = null;
 
-		if(grammarsElements == null) {
+		if(schema == null) {
 			grammarsElementAdded = application.getGrammarsElements();
 			AddDelta delta = new AddDelta(null, grammarsElementAdded);
 			WADLFile.addChildrenElements(grammarsElementAdded, delta);
@@ -457,22 +455,22 @@ public class WADLFile implements WADLElement {
 		//System.out.println("XML DOC: " + this.wadlFilename);
 		
 		//add grammars
-		NodeList grammars = xmlDoc.getElementsByTagName("grammars");
-		this.grammarsElements = new Grammars();
+		//NodeList grammars = xmlDoc.getElementsByTagName("grammars");
+		/*this.schema = new HashMap<String, XSDFile>();
 		NodeList includes = grammars.item(0).getChildNodes();
 		for(int i=0; i<includes.getLength(); i++) {
 			if(includes.item(i).getNodeName().equals("include")) {
 				//this.grammarsElements.addIncludedGrammar(includes.item(i).getAttributes().getNamedItem("href").getNodeValue());
 				//System.out.println(this.grammarsElements.toString());
 			}
-		}
+		}*/
 		
 		// Processing the <grammars> of the WADL
 		XSDFile xsdFile = new XSDFile();
 		//NodeList schemas = grammars.item(0).getChildNodes();	// list of schema elements
 		//System.out.println("THIS IS: " + schemas.item(0).getNodeName() + ", chillen: " + schemas.item(0).getChildNodes().getLength());
 		xsdFile.readXSD(xmlDoc);
-		this.addGrammarsElement(xsdFile);
+		this.setSchema( xsdFile);
 		
 		
 		/*
@@ -572,7 +570,7 @@ public class WADLFile implements WADLElement {
 		//System.out.println("MAP ELEMENT WADLFILE");
 		if(element instanceof WADLFile){
 			WADLFile file2 = (WADLFile)element;
-			this.grammarsElements.mapElement(file2.getGrammarsElements());
+			//this.grammarsElements.mapElement(file2.getGrammarsElements());
 			HashMap<String, Resources> mapped = new HashMap<String, Resources>();
 			HashMap<String, Resources> added = new HashMap<String, Resources>();
 			HashMap<String, Resources> deleted = new HashMap<String, Resources>();

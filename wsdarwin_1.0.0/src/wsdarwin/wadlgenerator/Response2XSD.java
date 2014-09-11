@@ -66,20 +66,17 @@ public class Response2XSD {
 
 	public void buildXSDFromXML(String sourceXMLFilename) {
 		Document document = getDocumentFromXMLFile(sourceXMLFilename);
-		HashMap<String, XSDIType> types = new HashMap<String, XSDIType>();
 		HashMap<String, XSDElement> elements = new HashMap<String, XSDElement>();
-		xsdFile = new XSDFile(types, elements);
+		xsdFile = new XSDFile(elements);
 		XSDElement element = getElementFromNode(document.getFirstChild());
 		xsdFile.setResponseElement(element);
-		xsdFile.addType(element.getType().getName(), element.getType());
 	}
 
 	public void buildXSDFromJSON(String sourceJSONFilename, String methodID) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		File source = new File(sourceJSONFilename);
-		HashMap<String, XSDIType> types = new HashMap<String, XSDIType>();
 		HashMap<String, XSDElement> elements = new HashMap<String, XSDElement>();
-		xsdFile = new XSDFile(types, elements);
+		xsdFile = new XSDFile(elements);
 		BufferedReader in = new BufferedReader(new FileReader(source));
 		String firstLine = in.readLine();
 		if (firstLine.startsWith("[")) {
@@ -87,24 +84,19 @@ public class Response2XSD {
 					new TypeReference<List<Map<String, Object>>>() {
 					});
 			if (!jsonList.isEmpty()) {
-				XSDComplexType type = getTypeFromJSONNode(jsonList.get(0), "",
-						methodID);
 				XSDElement element = getElementFromJSONNode(jsonList.get(0), "",
 						methodID);
-				for (Map<String, Object> map : jsonList) {
-					type.diff(getTypeFromJSONNode(map, "", methodID));
-				}
+				/*for (Map<String, Object> map : jsonList) {
+					element.compareToMerge(getElementFromJSONNode(map, "", methodID));
+				}*/
 				xsdFile.setResponseElement(element);
-				xsdFile.addType(type.getName(), type);
 			}
 		} else {
 			Map<String, Object> jsonMap = mapper.readValue(source,
 					new TypeReference<Map<String, Object>>() {
 					});
-			XSDComplexType type = getTypeFromJSONNode(jsonMap, "", methodID);
 			XSDElement element = getElementFromJSONNode(jsonMap, "", methodID);
 			xsdFile.setResponseElement(element);
-			xsdFile.addType(type.getName(), type);
 		}
 		in.close();
 	}
@@ -113,15 +105,14 @@ public class Response2XSD {
 		XSDComplexType type = null;
 		XSDElement element = null;
 		if (typeName.equals("")) {
-			type = new XSDComplexType(methodID+"ResponseType", "response");
-			element = new XSDElement("response", type);
+			type = new XSDComplexType(methodID+"ResponseType", methodID+"Response");
+			element = new XSDElement(methodID+"Response", type);
 		}
 		else {
 			type = new XSDComplexType(typeName, lowerFirstLetter(typeName.replace("Type", "")));
 			element = new XSDElement(lowerFirstLetter(type.getNameWithoutType()), type);
 		}
 		xsdFile.addElement(element.getName(), element);
-		xsdFile.addType(type.getName(), type);
 		for(String s : map.keySet()) {
 			type.addElement(processJSONChildren(s, map.get(s)));
 		}
@@ -132,15 +123,14 @@ public class Response2XSD {
 		XSDComplexType type = null;
 		XSDElement element = null;
 		if (typeName.equals("")) {
-			type = new XSDComplexType(methodID+"ResponseType", "response");
-			element = new XSDElement("response", type);
+			type = new XSDComplexType(methodID+"ResponseType", methodID+"Response");
+			element = new XSDElement(methodID+"Response", type);
 		}
 		else {
 			type = new XSDComplexType(typeName, lowerFirstLetter(typeName.replace("Type", "")));
 			element = new XSDElement(lowerFirstLetter(type.getNameWithoutType()), type);
 		}
 		xsdFile.addElement(element.getName(), element);
-		xsdFile.addType(type.getName(), type);
 		for(String s : map.keySet()) {
 			type.addElement(processJSONChildren(s, map.get(s)));
 		}
@@ -153,8 +143,8 @@ public class Response2XSD {
 		if(object instanceof Map) {
 			//System.out.println(object + " [is a Map]");
 			XSDComplexType type = null;
-			if(xsdFile.getTypes().containsKey(s+"Type")) {
-				type = (XSDComplexType)xsdFile.getTypes().get(s+"Type");
+			if(xsdFile.getElements().containsKey(s)) {
+				type = (XSDComplexType)xsdFile.getElements().get(s).getType();
 			}
 			else {
 				type = new XSDComplexType(s + "Type", s);
@@ -166,13 +156,12 @@ public class Response2XSD {
 				type.addElement(processJSONChildren(key, map.get(key)));
 			}
 			xsdFile.addElement(element.getName(), element);
-			xsdFile.addType(type.getName(), type);
 		}
 		else if(object instanceof List) {
 			//System.out.println(object + " [is a List]");
 			XSDComplexType listType = null;
-			if(xsdFile.getTypes().containsKey(s+"ListType")) {
-				listType = (XSDComplexType)xsdFile.getTypes().get(s+"ListType");
+			if(xsdFile.getElements().containsKey(s)) {
+				listType = (XSDComplexType)xsdFile.getElements().get(s).getType();
 			}
 			else {
 				listType = new XSDComplexType(s + "ListType", s);
@@ -229,7 +218,6 @@ public class Response2XSD {
 					XSDElement xsdElement = new XSDElement(
 							lowerFirstLetter(type.getNameWithoutType()), type);
 					xsdFile.addElement(xsdElement.getName(), xsdElement);
-					xsdFile.addType(type.getName(), type);
 					XSDElement listElement = new XSDElement(s + "ItemType-item", type);
 					listElement.setMinOccurs(0);
 					listElement.setMaxOccurs("unbounded");
@@ -237,7 +225,6 @@ public class Response2XSD {
 				}
 				element = new XSDElement(s, listType);
 				xsdFile.addElement(element.getName(), element);
-				xsdFile.addType(listType.getName(), listType);
 			}
 		}
 		else {
@@ -385,7 +372,6 @@ public class Response2XSD {
 			XSDElement element = new XSDElement(
 					lowerFirstLetter(type.getNameWithoutType()), type);
 			xsdFile.addElement(element.getName(), element);
-			xsdFile.addType(type.getName(), type);
 			for (int i = 0; i < node.getChildNodes().getLength(); i++) {
 				if (!isText(node.getChildNodes().item(i))) {
 					type.addElement(processChildren(node.getChildNodes()
@@ -393,7 +379,6 @@ public class Response2XSD {
 				}
 			}
 		}
-		xsdFile.addType(type.getName(), type);
 		return type;
 	}
 	
@@ -405,7 +390,6 @@ public class Response2XSD {
 			element = new XSDElement(
 					lowerFirstLetter(type.getNameWithoutType()), type);
 			xsdFile.addElement(element.getName(), element);
-			xsdFile.addType(type.getName(), type);
 			for (int i = 0; i < node.getChildNodes().getLength(); i++) {
 				if (!isText(node.getChildNodes().item(i))) {
 					type.addElement(processChildren(node.getChildNodes()
@@ -413,7 +397,6 @@ public class Response2XSD {
 				}
 			}
 		}
-		xsdFile.addType(type.getName(), type);
 		return element;
 	}
 
@@ -424,7 +407,6 @@ public class Response2XSD {
 			element = new XSDElement(
 					lowerFirstLetter(type.getNameWithoutType()), type);
 			xsdFile.addElement(element.getName(), element);
-			xsdFile.addType(type.getName(), type);
 			for (int i = 0; i < node.getChildNodes().getLength(); i++) {
 				if (!isText(node.getChildNodes().item(i))) {
 					type.addElement(processChildren(node.getChildNodes()

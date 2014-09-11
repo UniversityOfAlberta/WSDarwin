@@ -4,7 +4,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import wsdarwin.comparison.delta.*;
+import wsdarwin.model.ComplexType;
 import wsdarwin.model.WSElement;
+import wsdarwin.wadlgenerator.model.xsd.XSDComplexType;
+import wsdarwin.wadlgenerator.model.xsd.XSDElement;
+import wsdarwin.wadlgenerator.model.xsd.XSDFile;
 
 public class Method implements WADLElement {
 
@@ -144,8 +148,11 @@ public class Method implements WADLElement {
 
 	@Override
 	public boolean equalsAfterRename(Object o) {
-		// TODO Auto-generated method stub
-		return false;
+		if (o instanceof Method) {
+			return requestElement.equals(((Method) o).requestElement) && responseElements.equals(((Method)o).responseElements);
+		} else {
+			return false;
+		}
 	}
 
 	/*@Override
@@ -377,5 +384,24 @@ public class Method implements WADLElement {
 	public boolean mapElement(WADLElement element) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	public void setVariableID(String id) {
+		this.id = id;
+		for(Integer status : responseElements.keySet()) {
+			for(String representationElement : responseElements.get(status).getRepresentationElements().keySet()) {
+				Representation representation = responseElements.get(status).getRepresentationElements().get(representationElement);
+				XSDElement element = representation.getElement();
+				XSDFile xsdFile = representation.getResponseXSDFile();
+				xsdFile.getElements().remove(element.getIdentifier());
+				element.setName("response");
+				XSDComplexType type = (XSDComplexType)element.getType();
+				type.setVariableID("response");
+				type.setName("responseType");
+				xsdFile.addElement(element.getIdentifier(), element);
+				
+			}
+		}
+		
 	}
 }

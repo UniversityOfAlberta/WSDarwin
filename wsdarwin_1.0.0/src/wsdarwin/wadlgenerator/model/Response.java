@@ -8,19 +8,21 @@ import java.util.HashSet;
 import wsdarwin.comparison.delta.*;
 import wsdarwin.model.WSElement;
 import wsdarwin.util.DeltaUtil;
+import wsdarwin.wadlgenerator.model.xsd.XSDComplexType;
 import wsdarwin.wadlgenerator.model.xsd.XSDElement;
+import wsdarwin.wadlgenerator.model.xsd.XSDFile;
 
 public class Response implements WADLElement {
 
 	private int status;
 	private HashMap<String, Representation> representationElements;
-	private HashSet<Representation> changedRepresentation;
+	//private HashMap<Representation, XSDFile> changedRepresentation;
 
 	public Response(int status) {
 		super();
 		this.status = status;
 		this.representationElements = new HashMap<String, Representation>();
-		this.changedRepresentation = new HashSet<Representation>();
+		//this.changedRepresentation = new HashMap<Representation, XSDFile>();
 	}
 
 	public String getIdentifier() {
@@ -66,6 +68,8 @@ public class Response implements WADLElement {
 		Response other = (Response) obj;
 		if (status != other.status)
 			return false;
+		if(!representationElements.equals(other.representationElements))
+			return false;
 		return true;
 	}
 
@@ -87,14 +91,20 @@ public class Response implements WADLElement {
 
 		for(String element : response.getRepresentationElements().keySet()) {
 			if(!this.getRepresentationElements().containsKey(element)) {
-				representationAdded.add(response.getRepresentationElements().get(element));
-				// + set frequency to 1
-				XSDElement xsdElement = response.getRepresentationElements().get(element).getElement();
-				xsdElement.addTypeFrequency(xsdElement.getType().getIdentifier(), 1);
-				xsdElement.addValueFrequency(xsdElement.getValue(), 1);
+				if (isNewRepresentation(response.getRepresentationElements().get(element))) {
+					representationAdded.add(response
+							.getRepresentationElements().get(element));
+					// + set frequency to 1
+					XSDElement xsdElement = response
+							.getRepresentationElements().get(element)
+							.getElement();
+					xsdElement.addTypeFrequency(xsdElement.getType()
+							.getIdentifier(), 1);
+					xsdElement.addValueFrequency(xsdElement.getValue(), 1);
+				}
 			} else {
 					// + increase frequency
-				changedRepresentation.add(this.getRepresentationElements().get(element));
+				this.getRepresentationElements().get(element).compareToMerge(response.getRepresentationElements().get(element));
 				XSDElement xsdElement = this.getRepresentationElements().get(element).getElement();
 				xsdElement.addTypeFrequency(xsdElement.getType().getIdentifier(), 1);
 				xsdElement.addValueFrequency(xsdElement.getValue(), 1);
@@ -103,6 +113,16 @@ public class Response implements WADLElement {
 		return representationAdded;
 	}
 	
+	private boolean isNewRepresentation(Representation representation) {
+		for(Representation thisRepresentation : this.representationElements.values()) {
+			if(thisRepresentation.equalsAfterRename(representation)) {
+				thisRepresentation.compareToMerge(representation);
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public void mergeRepresentations(HashSet<Representation> addedRepresentationElements) {
 		for(Representation r : addedRepresentationElements) {
 			this.representationElements.put(r.getMediaType(), r);

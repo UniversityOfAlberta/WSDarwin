@@ -8,6 +8,8 @@ public interface XSDIType extends WADLElement {
 	
 	public String getName();
 
-	public HashSet<XSDElement> diff(XSDIType xSDIType);
+	public HashSet<XSDElement> compareToMerge(XSDIType xSDIType);
+
+	public void setVariableID(String variableId);
 
 }
