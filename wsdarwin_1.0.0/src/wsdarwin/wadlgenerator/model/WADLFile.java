@@ -170,8 +170,14 @@ public class WADLFile implements WADLElement {
 		HashMap<Resources, HashSet<Resource>> changedResources = new HashMap<Resources, HashSet<Resource>>();
 		HashMap<XSDFile, HashSet<XSDElement>> changedGrammars = new HashMap<XSDFile, HashSet<XSDElement>>();
 
-		this.schema.compareToMerge(file.getSchema());
-
+		if (!this.schema.getElements().isEmpty()) {
+			this.schema.compareToMerge(file.getSchema());
+		}
+		else {
+			for(String element : file.getSchema().getElements().keySet()) {
+				this.schema.addElement(element, file.getSchema().getElements().get(element));
+			}
+		}
 		for(String base : file.getResourcesElements().keySet()) {
 			if(!this.getResourcesElements().containsKey(base)) {
 				resourcesAdded.add(file.getResourcesElements().get(base));

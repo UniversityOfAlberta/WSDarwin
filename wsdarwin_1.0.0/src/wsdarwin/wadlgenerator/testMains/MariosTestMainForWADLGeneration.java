@@ -107,7 +107,7 @@ public class MariosTestMainForWADLGeneration {
 		        System.out.println(" Request #"+id+"");
 		        
 		        // URLConnection
-				/*URL yahoo = new URL(urlLine);
+				URL yahoo = new URL(urlLine);
 		        URLConnection yc = yahoo.openConnection();
 		        BufferedReader in = new BufferedReader(
                     new InputStreamReader(yc.getInputStream()));
@@ -119,7 +119,7 @@ public class MariosTestMainForWADLGeneration {
 		            out.newLine();
 		        }
 		        in.close();
-		        out.close();*/
+		        out.close();
 		        Response2XSD xsdBuilder = new Response2XSD();
 	        
 				xsdBuilder.buildXSDFromJSON(RESPONSE_DIR+FILENAME_XML, analyzer.getMethodID());

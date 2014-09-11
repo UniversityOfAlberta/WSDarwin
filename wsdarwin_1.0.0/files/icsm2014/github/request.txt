@@ -1,2 +1,2 @@
-001 GET https://api.github.com/users
-002 GET https://api.github.com/repositories
+001 GET https://api.github.com/users/fokaefs/repos
+002 GET https://api.github.com/users/penguinsource/repos

@@ -86,9 +86,9 @@ public class Response2XSD {
 			if (!jsonList.isEmpty()) {
 				XSDElement element = getElementFromJSONNode(jsonList.get(0), "",
 						methodID);
-				/*for (Map<String, Object> map : jsonList) {
-					element.compareToMerge(getElementFromJSONNode(map, "", methodID));
-				}*/
+				for (Map<String, Object> map : jsonList) {
+					element.getType().compareToMerge(getElementFromJSONNode(map, "", methodID).getType());
+				}
 				xsdFile.setResponseElement(element);
 			}
 		} else {
