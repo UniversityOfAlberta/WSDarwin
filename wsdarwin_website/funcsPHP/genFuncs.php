@@ -1,25 +1,25 @@
 <?php
 
-$localhostON = 5;
+$server_host = 5;
 
-if ($localhostON == 0){
+if ($server_host == 0){
         $baseURL = "http://" . $_SERVER['HTTP_HOST'] . "/";				// 000webhost:  blackmarket5.hostei.com
         $basehref = "<base href='//blackmarket5.hostei.com' \/>";
-} else if ($localhostON == 1){
+} else if ($server_host == 1){
         $baseURL = "http://localhost/abc/";	// localhost mihai
         $basehref = "<base href=\"http://localhost/abc/\" target='_blank' />";
-} else if ($localhostON == 2){
+} else if ($server_host == 2){
         //$baseURL = "http://cs410-06.cs.ualberta.ca/";
         //$baseURL = "http://cs410.cs.ualberta.ca:41061/";
         $baseURL = "/";
         $basehref = "<base href=\"//cs410.cs.ualberta.ca:41061\" />";
-} else if ($localhostON == 3){
+} else if ($server_host == 3){
         $baseURL = "http://96.52.101.188/pokemonpacific/";	// localhost mihai
         $basehref = "<base href=\"http://96.52.101.188/pokemonpacific/\" />";
-} else if ($localhostON == 4){
+} else if ($server_host == 4){
         $baseURL = "http://pokemonpacific.com/wsdarwin/";	// localhost mihai
         $basehref = "<base href=\"http://pokemonpacific/wsdarwin/\" />";
-} else if ($localhostON == 5){
+} else if ($server_host == 5){
         $baseURL = "http://ssrg17.cs.ualberta.ca/wsdarwin/";       // localhost mihai
         $basehref = "<base href=\"http://ssrg17.cs.ualberta.ca/wsdarwin/\" />";
 }

@@ -67,7 +67,7 @@
 				  </button>
 				  <ul class="dropdown-menu" role="menu">
 				    <li><a href="#" onClick="downloadWADL()">WADL</a></li>
-				    <li><a href="#" onClick="">Extended WADL</a></li>
+				    <li><a href="#" onClick="downloadWADL(true)">Extended WADL</a></li>
 				  </ul>
 				</div>
 			</div>
@@ -336,7 +336,7 @@ function printCompareA(){
 		  		<div style=\"display: inline-block; vertical-align: top;\">
 					<button type=\"button\" onClick=\"addURLField()\" class=\"btn btn-default\">Add URL</button>
 				</div>	
-				<div id=\"uploadAWADLA\" class=\"uploadAWADL\">
+				<div id=\"uploadAWADLA\" class=\"uploadAWADL\" style=\"width: 148px;\">
 					<button id='files' type=\"button\" onClick=\"onLoad()\" class=\"btn btn-default\">Upload a WADL File</button>
 					<!--	FOR MULTIPLE FILES TO BE UPLOADED 	-->
  					<!-- <input style='height: 0; width: 0; visibility: hidden' id='fileInput' onchange=\"handleFiles(this.files)\" type=\"file\" multiple> -->
@@ -344,6 +344,9 @@ function printCompareA(){
 					<!--	FOR ONLY A SINGLE FILE TO BE UPLOADED 	-->
 					<input style='height: 0; width: 0; visibility: hidden' id='fileInput' onchange=\"handleFiles(this.files)\" type=\"file\">
 					<!-- <input type=\"submit\"> -->
+				</div>
+				<div id=\"helpPopup\" class=\"helpPopup\">
+					<a href=\"#\" tabindex=\"0\" class=\"btn btn-danger\" data-toggle=\"popover\" data-trigger=\"focus\" title=\"Help\" data-content=\"And here's some amazing content. It's very engaging. Right?\">Help</a>
 				</div>
 			</div>
 			<!-- holds all the url inputs for Analysis -->

@@ -69,6 +69,13 @@ p {
 	margin-left: 7px;
 }
 
+.helpPopup {
+	padding-bottom: 15px;
+	display: inline-block;
+	vertical-align: top;
+	margin-left: 11px;
+}
+
 .uploadWADLcontent {
 	padding-bottom: 10px;
 	padding-top: 10px;

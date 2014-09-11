@@ -1,9 +1,10 @@
-//import "ObjTree.js";
-//import "jsdiff.js";
-
 // tomcat server path/location
 var tomcat_server_path				= "http://localhost:8080/";
 //var tomcat_server_path			= "http://ssrg17.cs.ualberta.ca:8080/";
+
+$('document').ready(function(){
+	initBootstrapJS_popover();
+});
 
 var server_api_url 					= tomcat_server_path + "wsdarwin_1.0.0/jaxrs/api/";
 
@@ -533,12 +534,11 @@ function text_diff_JS(viewingType) {
 function downloadWADL(extended){
     console.log("saving wadl file");
     var dl_url = "/wsdarwin/funcsPHP/downloadWADLfile.php";
-
-
+    var wadl_to_download = (extended) ? extended_wadl_download_str : wadl_download_str;
     $.ajax({
     	url: dl_url,
         type: "POST",
-        data: { wadlString: wadl_download_str },
+        data: { wadlString: wadl_to_download },
         dataType: "html",
         success: function(response) {
         	console.log("success?? response: " + response);
@@ -758,26 +758,6 @@ function setup_wadl_print_free(){
 
 	//parse_wadl_html_two(rootNode);
 	$("#wadlOutput").html(wadl_download_str);
-}
-
-function addSpaces(){
-	var n = 0;
-	while (n < spaces){
-		html_wadl_string += "&nbsp;";
-		//strapped_html_wadl_string is using relative margin-left
-		wadl_download_str 			+= " ";
-		extended_wadl_download_str 	+= " ";
-		n++;
-	}
-}
-
-function addSpacesTwo(){
-	var n = 0;
-	while (n < spaces){
-		html_wadl_string += "&nbsp;";
-		//strapped_html_wadl_string += " ";
-		n++;
-	}
 }
 
 function java_diff(deltas_path, oldDocNode, newDocNode, process_type){
@@ -1398,6 +1378,11 @@ function initBootstrapJS_tooltips(){
 	jQuery('[data-toggle=tooltip]').tooltip();
 }
 
+function initBootstrapJS_popover(){
+	console.log('init');
+	jQuery('a[data-toggle=popover]').popover();
+}
+
 var margin_left = 0;
 var padding_left = 0;
 var level = 1;
@@ -1413,191 +1398,257 @@ function appendToHTML(side, str, elemClassName){
 }
 
 // expand/minimize buttons for showing/hiding a node's children
-function printMinimizeMaximizeBtn(myNode){
-	// if 'myNode' has any child nodes, then it can be expanded/minimized; otherwise, it can't
-	// SPECIAL CASE: don't print any child of xs:element
-	if ( (myNode.childNodes.length > 0) && (myNode.nodeName !== "xs:element") ){
-		// if the node is not minimized, add an onClick 'hideNode' action; else, add an onClick 'showNode' action
-		if (myNode.minimized){
-			// remove element button
-			var showNodesChildrenBtn = 	"<button type=\"button\" class=\"btn btn-default btn-xs\" " + 
-										"onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";
-			html_wadl_string += showNodesChildrenBtn;
-			//html_wadl_string += "<button onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";			
-		} else {
-			// remove element button
-			var hideNodesChildrenBtn = 	"<button type=\"button\" class=\"btn btn-default btn-xs\" " +
-										"onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";
-			html_wadl_string += hideNodesChildrenBtn;
-			//html_wadl_string += "<button onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";			// remove element button
+function printMinimizeMaximizeBtn(myNode, extendedWADL){
+	if (!extendedWADL){
+		//console.log("printMinimizeMaximizeBtn: ", extendedWADL);
+		// if 'myNode' has any child nodes, then it can be expanded/minimized; otherwise, it can't
+		// SPECIAL CASE: don't print any child of xs:element
+		if ( (myNode.childNodes.length > 0) && (myNode.nodeName !== "xs:element") ){
+			// if the node is not minimized, add an onClick 'hideNode' action; else, add an onClick 'showNode' action
+			if (myNode.minimized){
+				// remove element button
+				var showNodesChildrenBtn = 	"<button type=\"button\" class=\"btn btn-default btn-xs\" " + 
+											"onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";
+				html_wadl_string += showNodesChildrenBtn;
+				//html_wadl_string += "<button onClick=\"showNodesChildren('" + myNode.my_id + "')\">+</button>";			
+			} else {
+				// remove element button
+				var hideNodesChildrenBtn = 	"<button type=\"button\" class=\"btn btn-default btn-xs\" " +
+											"onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";
+				html_wadl_string += hideNodesChildrenBtn;
+				//html_wadl_string += "<button onClick=\"hideNodesChildren('" + myNode.my_id + "')\">-</button>";			// remove element button
+			}
 		}
+	} else {
+		//console.log("printMinimizeMaximizeBtn: ", extendedWADL);
 	}
+
 }
 
 function printStartTags(myNode, elemClassName, extendedWADL){
-	html_wadl_string += "<span id='" + myNode.my_id + "'>";
-	html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
+	if (!extendedWADL){
+		html_wadl_string += "<span id='" + myNode.my_id + "'>";
+		html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
 
-	strapped_html_wadl_string += "<div id='" + myNode.my_id + "_all'>";
-	var marginMinus = -level*10;
-	var marginLeftCalc = 10;
+		strapped_html_wadl_string += "<div id='" + myNode.my_id + "_all'>";
+		var marginMinus = -level*10;
+		var marginLeftCalc = 10;
 
-	padding_left = level * 13;
+		padding_left = level * 13;
 
-	strapped_html_wadl_string += "<div style=\"margin-left: 10px;\" id='" + myNode.my_id + "'>";
-	strapped_html_wadl_string += "<span id='" + myNode.my_id + "line'>";
-	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
+		strapped_html_wadl_string += "<div style=\"margin-left: 10px;\" id='" + myNode.my_id + "'>";
+		strapped_html_wadl_string += "<span id='" + myNode.my_id + "line'>";
+		strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
 
-	spanElem = "";
+		spanElem = "";
 
-	//var elemClassName = myNode.my_id + "line"
-	spanElem += "<div data-lineNumber=\"" + lineNumber + "\" style=\"padding-left: " + padding_left + "px;\" id='" + myNode.my_id + "line' class='" + elemClassName + "' >";
-	spanElem += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
-	wadl_download_str 			+= "<" + myNode.nodeName;
-	extended_wadl_download_str 	+= "<" + myNode.nodeName;
+		//var elemClassName = myNode.my_id + "line"
+		spanElem += "<div data-lineNumber=\"" + lineNumber + "\" style=\"padding-left: " + padding_left + "px;\" id='" + myNode.my_id + "line' class='" + elemClassName + "' >";
+		spanElem += "<font color='#008080'>" + htmlentities("<" + myNode.nodeName) + "</font>";
+		wadl_download_str 			+= "<" + myNode.nodeName;
+		extended_wadl_download_str 	+= "<" + myNode.nodeName;
+	} else {
+		extended_wadl_download_str 	+= "<" + myNode.nodeName;
+	}
 }
 
 function printAttributes(myNode, extendedWADL){
-	// print myNode's attributes
-	for (var i = 0; i < myNode.attributes.length; i++){
-		// SPECIAL CASE: don't print attribute 'hasVariableID' 
-		if (myNode.attributes[i].name !== "hasVariableID"){
-			if (wadl_attribute_edit_mode){
-				html_wadl_string 			+= "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + "<input type='text' onchange=\"updateAttribute('" + myNode.my_id + "', '" + myNode.attributes[i].nodeName + "', this.value );\" value=\"" + htmlentities( myNode.attributes[i].value ) + "\"></input>" + "\"" + "</i></font>";
-				strapped_html_wadl_string 	+= "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
-				spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
+	//if (!extendedWADL){
+		// print myNode's attributes
+		for (var i = 0; i < myNode.attributes.length; i++){
+			if (!extendedWADL){
+				// SPECIAL CASE: don't print attribute 'hasVariableID' 
+				if (myNode.attributes[i].name !== "hasVariableID"){
+					if (wadl_attribute_edit_mode){
+						html_wadl_string 			+= "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + "<input type='text' onchange=\"updateAttribute('" + myNode.my_id + "', '" + myNode.attributes[i].nodeName + "', this.value );\" value=\"" + htmlentities( myNode.attributes[i].value ) + "\"></input>" + "\"" + "</i></font>";
+						strapped_html_wadl_string 	+= "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
+						spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + "\"" + htmlentities( myNode.attributes[i].value ) + "\"" + "</i></font>";
+					} else {
+						html_wadl_string 			+= "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+						strapped_html_wadl_string 	+= "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+						spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+					}
+					wadl_download_str += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
+					extended_wadl_download_str += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
+				}
 			} else {
-				html_wadl_string 			+= "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
-				strapped_html_wadl_string 	+= "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
-				spanElem += "<font color='#7B277C'>" + htmlentities(" " + myNode.attributes[i].name ) + "</font>" + "=" + "<font color='#4152A3'><i>" + htmlentities("\"" + myNode.attributes[i].value + "\"" ) + "</i></font>";
+				// SPECIAL CASE: don't print attribute 'hasVariableID' 
+				if (myNode.attributes[i].name !== "hasVariableID"){
+					extended_wadl_download_str += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
+				}
 			}
-			wadl_download_str += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
-			extended_wadl_download_str += " " + myNode.attributes[i].name + "=" + "\"" + myNode.attributes[i].value + "\"";
+
 		}
-	}
+	//} else {
+
+	//}
 }
 
 function printOtherTags(myNode, elemClassName, extendedWADL){
-	wadl_download_str += ">";
-	wadl_download_str += "\n";
-	extended_wadl_download_str += ">";
-	extended_wadl_download_str += "\n";
+	if (!extendedWADL){
+		wadl_download_str += ">";
+		wadl_download_str += "\n";
+		extended_wadl_download_str += ">";
+		extended_wadl_download_str += "\n";
 
-	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
-	strapped_html_wadl_string += "</span>";
+		strapped_html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
+		strapped_html_wadl_string += "</span>";
 
-	spanElem += "<font color='#008080'>" + htmlentities(">") + "</font>";
-	spanElem += "</div>";
-	appendToHTML("left", spanElem, elemClassName);
+		spanElem += "<font color='#008080'>" + htmlentities(">") + "</font>";
+		spanElem += "</div>";
+		appendToHTML("left", spanElem, elemClassName);
 
-	var removeNodeBtn = "<button style=\"margin-left: 10px;\" type=\"button\"" +
-						"class=\"btn btn-danger btn-xs\" onmouseout=\"unhighlightRemovingDiv('" + myNode.my_id + "');\""+ 
-						"onmouseover=\"highlightRemovingDiv('" + myNode.my_id + "');\"" +
-						"onClick=\"removeNode('" + myNode.my_id + "')\">X</button>";
+		var removeNodeBtn = "<button style=\"margin-left: 10px;\" type=\"button\"" +
+							"class=\"btn btn-danger btn-xs\" onmouseout=\"unhighlightRemovingDiv('" + myNode.my_id + "');\""+ 
+							"onmouseover=\"highlightRemovingDiv('" + myNode.my_id + "');\"" +
+							"onClick=\"removeNode('" + myNode.my_id + "')\">X</button>";
 
-	html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
-	html_wadl_string += removeNodeBtn;
+		html_wadl_string += "<font color='#008080'>" + htmlentities(">") + "</font>";
+		html_wadl_string += removeNodeBtn;
 
-	if (myNode.nodeName === "xs:element"){
-		var hintTypeBtnTooltip;
-		if (myNode.convertedToEnumType){
-			hintTypeBtnTooltip = 	"<button type='button' class=\"convertToEnum btn btn-default btn-xs\" data-toggle='tooltip' " + 
-									"onClick='reverseEnumToNormalTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
-									" title='Reset to its original type'>Reset Type</button>";
-		} else {
-			hintTypeBtnTooltip =	"<button type='button' class=\"convertToEnum btn btn-default btn-xs\" data-toggle='tooltip' " + 
-									"onClick='createEnumSimpleTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
-									" title='Click to convert to an Enumeration type'>Enum?</button>";
-		}
-		
-		var typeConfidenceMap = calculateTypeConfidence(myNode);
-		var typeConfStr  	  = "";
-		//var chosenKey;
-		var max_percent		  = 0;
-		var typeConfidenceColor;
-		for (var key in typeConfidenceMap){
-			if (typeConfidenceMap.hasOwnProperty(key)){
-				typeConfStr += key + "  " + typeConfidenceMap[key] + "%";
-				if (typeConfidenceMap[key] > max_percent){
-					max_percent = typeConfidenceMap[key];
-					//chosenKey 	= key;
-					if ( (max_percent > 0) && (max_percent <= 24) ){
-						typeConfidenceColor = typeConfidence0_24;
-					} else if ( (max_percent > 24) && (max_percent <= 49) ){
-						typeConfidenceColor = typeConfidence24_49;
-					} else if ( (max_percent > 49) && (max_percent <= 74) ){
-						typeConfidenceColor = typeConfidence50_74;
-					} else if ( (max_percent > 74) && (max_percent <= 100) ){
-						typeConfidenceColor = typeConfidence75_100;
+		if (myNode.nodeName === "xs:element"){
+			var hintTypeBtnTooltip;
+			if (myNode.convertedToEnumType){
+				hintTypeBtnTooltip = 	"<button type='button' class=\"convertToEnum btn btn-default btn-xs\" data-toggle='tooltip' " + 
+										"onClick='reverseEnumToNormalTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
+										" title='Reset to its original type'>Reset Type</button>";
+			} else {
+				hintTypeBtnTooltip =	"<button type='button' class=\"convertToEnum btn btn-default btn-xs\" data-toggle='tooltip' " + 
+										"onClick='createEnumSimpleTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
+										" title='Click to convert to an Enumeration type'>Enum?</button>";
+			}
+			
+			var typeConfidenceMap = calculateTypeConfidence(myNode);
+			var typeConfStr  	  = "";
+			//var chosenKey;
+			var max_percent		  = 0;
+			var typeConfidenceColor;
+			for (var key in typeConfidenceMap){
+				if (typeConfidenceMap.hasOwnProperty(key)){
+					typeConfStr += key + "  " + typeConfidenceMap[key] + "%";
+					if (typeConfidenceMap[key] > max_percent){
+						max_percent = typeConfidenceMap[key];
+						//chosenKey 	= key;
+						if ( (max_percent > 0) && (max_percent <= 24) ){
+							typeConfidenceColor = typeConfidence0_24;
+						} else if ( (max_percent > 24) && (max_percent <= 49) ){
+							typeConfidenceColor = typeConfidence24_49;
+						} else if ( (max_percent > 49) && (max_percent <= 74) ){
+							typeConfidenceColor = typeConfidence50_74;
+						} else if ( (max_percent > 74) && (max_percent <= 100) ){
+							typeConfidenceColor = typeConfidence75_100;
+						}
 					}
 				}
 			}
+
+			// have to check if myNode has childNode 'typeFrequency' ( if it doesn't, don't display );
+			// calculate typefrequency from it !
+			var typeConfidenceBtnTooltip = "<button style='margin-left: 5px; width: 15px; height: 15px; " + 
+										"background-color: " + typeConfidenceColor + "; " +
+										"border-radius: 15px;' type='button' class=\"btn btn-xs " + typeConfidenceColor + "\" " +
+										"data-toggle='tooltip' data-placement='right'" +
+										" title='" + typeConfStr + "'></button>";
+
+			html_wadl_string += hintTypeBtnTooltip;
+			html_wadl_string += typeConfidenceBtnTooltip;
 		}
 
-		// have to check if myNode has childNode 'typeFrequency' ( if it doesn't, don't display );
-		// calculate typefrequency from it !
-		var typeConfidenceBtnTooltip = "<button style='margin-left: 5px; width: 15px; height: 15px; " + 
-									"background-color: " + typeConfidenceColor + "; " +
-									"border-radius: 15px;' type='button' class=\"btn btn-xs " + typeConfidenceColor + "\" " +
-									"data-toggle='tooltip' data-placement='right'" +
-									" title='" + typeConfStr + "'></button>";
-
-		html_wadl_string += hintTypeBtnTooltip;
-		html_wadl_string += typeConfidenceBtnTooltip;
+		html_wadl_string += "</br>";
+	} else {
+		extended_wadl_download_str += ">";
+		extended_wadl_download_str += "\n";
 	}
-
-	html_wadl_string += "</br>";
 }
 
 function printChildren(myNode, extendedWADL){
 	// only print myNode's children nodes if myNode is not minimized
 	// SPECIAL CASE: don't print any child of xs:element
-	//if ( (!myNode.minimized) ){
-	if ( (!myNode.minimized) && ( (myNode.nodeName !== "xs:element") || (extendedWADL) ) ){
-		//if (myNode.nodeName === "xs:element"){
-		//	extendedWADL = true;
-		//}
+	if ( (!myNode.minimized) ){
+	//if ( (!myNode.minimized) && ( (myNode.nodeName !== "xs:element") || (extendedWADL) ) ){
 		// print myNode's children nodes
 		for (var i = 0; i < myNode.childNodes.length; i++){
-			spaces += 4;
-			margin_left += 10;
-			level++;
-			parse_wadl_html(myNode.childNodes[i], extendedWADL);
+			if ((myNode.nodeName === "xs:element") || (extendedWADL)){
+				parse_wadl_html(myNode.childNodes[i], true);
+			} else {
+				spaces += 4;
+				margin_left += 10;
+				level++;
+				parse_wadl_html(myNode.childNodes[i], false);
+			}
 		}
 	}
 }
 
 function printEndTags(myNode, elemClassName, extendedWADL){
-	elemClassName = myNode.my_id + "line_end";
-	spanElem = "";
-	spanElem += "<div data-lineNumber=\"" + '15' + "\" style=\"padding-left: " + padding_left + "px\" id='" + myNode.my_id + "line_end' class='" + elemClassName + "'>";
-	spanElem += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
-	spanElem += "</div>";
+	if (!extendedWADL){
+		elemClassName = myNode.my_id + "line_end";
+		spanElem = "";
+		spanElem += "<div data-lineNumber=\"" + '15' + "\" style=\"padding-left: " + padding_left + "px\" id='" + myNode.my_id + "line_end' class='" + elemClassName + "'>";
+		spanElem += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
+		spanElem += "</div>";
 
-	appendToHTML("left", spanElem, elemClassName);
+		appendToHTML("left", spanElem, elemClassName);
 
-	// print the end element of myNode
-	addSpaces();
-	level--;
-	padding_left = level * 13;
+		// print the end element of myNode
+		addSpaces(extendedWADL);
+		level--;
+		padding_left = level * 13;
+		
+		wadl_download_str += "</" + myNode.nodeName + ">";
+		wadl_download_str += "\n";
+		extended_wadl_download_str += "</" + myNode.nodeName + ">";
+		extended_wadl_download_str += "\n";
+
+		strapped_html_wadl_string += "<span id='" + myNode.my_id + "line'>";
+		strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
+		strapped_html_wadl_string += "</span>";
+		strapped_html_wadl_string += "</div>";
+		strapped_html_wadl_string += "</div>";
+
+		html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
+		html_wadl_string += "</span>";
+		html_wadl_string += "</br>";
+		
+		// decrease spaces as the recursion is going down in the element hierarchy
+		spaces -= 4;
+	} else {
+		// print the end element of myNode
+		addSpaces(extendedWADL);
+
+		extended_wadl_download_str += "</" + myNode.nodeName + ">";
+		extended_wadl_download_str += "\n";
+
+	}
+}
+
+function addSpaces(extendedWADL){
 	
-	wadl_download_str += "</" + myNode.nodeName + ">";
-	wadl_download_str += "\n";
-	extended_wadl_download_str += "</" + myNode.nodeName + ">";
-	extended_wadl_download_str += "\n";
+	var n = 0;
+	while (n < spaces){
+		if (!extendedWADL){
+			html_wadl_string += "&nbsp;";
+			//strapped_html_wadl_string is using relative margin-left
+			wadl_download_str 			+= " ";
+			extended_wadl_download_str 	+= " ";
+			n++;
+		} else {
+			extended_wadl_download_str 	+= " ";
+			n++;
+		}
 
-	strapped_html_wadl_string += "<span id='" + myNode.my_id + "line'>";
-	strapped_html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
-	strapped_html_wadl_string += "</span>";
-	strapped_html_wadl_string += "</div>";
-	strapped_html_wadl_string += "</div>";
+	}
+}
 
-	html_wadl_string += "<font color='#008080'>" + htmlentities("</" + myNode.nodeName + ">") + "</font>";
-	html_wadl_string += "</span>";
-	html_wadl_string += "</br>";
-	
-	// decrease spaces as the recursion is going down in the element hierarchy
-	spaces -= 4;
+function addSpacesTwo(extendedWADL){
+	var n = 0;
+	while (n < spaces){
+		if (!extendedWADL){
+			html_wadl_string += "&nbsp;";
+			//strapped_html_wadl_string += " ";
+			n++;
+		}
+	}
 }
 
 var spanElem = "";
@@ -1606,8 +1657,8 @@ function parse_wadl_html(myNode, extendedWADL){
 	if (typeof extendedWADL == "undefined"){
 		extendedWADL = false;
 	}
-
-	addSpaces();
+	console.log("parse_wadl_html: ", myNode.nodeName, extendedWADL);
+	addSpaces(extendedWADL);
 
 	// TO DO: optimize these prints, they are everywhere and seem too random;
 	// ALSO: the names are not specific enough, such as html_wadl_string, spanElem.. there needs to be a logic name for each
@@ -1617,7 +1668,7 @@ function parse_wadl_html(myNode, extendedWADL){
 	// ALSO: separate the normal comparison from the cross service comparison; the latter depends on the first.
 	//
 	// if 'myNode' has any child nodes, then it can be expanded/minimized
-	printMinimizeMaximizeBtn(myNode);
+	printMinimizeMaximizeBtn(myNode, extendedWADL);
 
 	var elemClassName = myNode.my_id + "line";
 	printStartTags(myNode, elemClassName, extendedWADL);
@@ -1628,7 +1679,7 @@ function parse_wadl_html(myNode, extendedWADL){
 
 	printChildren(myNode, extendedWADL);
 
-	printAddElementButtons(myNode);
+	printAddElementButtons(myNode, extendedWADL);
 
 	printEndTags(myNode, elemClassName, extendedWADL);
 }
@@ -1691,6 +1742,7 @@ var reverseEnumToNormalTypeHandler = function(myNode_id, btn){
 				}
 			}
 			// Option #2 end
+
 			parentOfFoundNode.removeChild(foundNode);
 			var schemaNode = rootNode.childNodes[0].childNodes[0];
 			schemaNode.removeChild(enumConvertedArray[i].new_simpletype);
@@ -1771,111 +1823,114 @@ var createEnumSimpleTypeHandler = function(myNode_id, btn){
 	setup_wadl_print();
 }
 
-function printAddElementButtons(myNode){
+function printAddElementButtons(myNode, extendedWADL){
+	if (!extendedWADL){
+		var addBtnsSize = "xs";			// 'xs' for extra small, 'sm' for small
+		var addBtnsType = "default";	// 'default' for white, ..
 
-	var addBtnsSize = "xs";			// 'xs' for extra small, 'sm' for small
-	var addBtnsType = "default";	// 'default' for white, ..
+		if (myNode.nodeName == 'resources'){
+			addSpacesTwo(extendedWADL);
+			var addResourceBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addResource('" + myNode.my_id + "')\">Add Resource</button>";
+			html_wadl_string += addResourceBtn;
+			html_wadl_string += "</br>";
+			
+			addSpacesTwo(extendedWADL);
+			var addMethodBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addMethod('" + myNode.my_id + "')\">Add Method</button>";
+			html_wadl_string += addMethodBtn;
+			html_wadl_string += "</br>";
 
-	if (myNode.nodeName == 'resources'){
-		addSpacesTwo();
-		var addResourceBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addResource('" + myNode.my_id + "')\">Add Resource</button>";
-		html_wadl_string += addResourceBtn;
-		html_wadl_string += "</br>";
-		
-		addSpacesTwo();
-		var addMethodBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addMethod('" + myNode.my_id + "')\">Add Method</button>";
-		html_wadl_string += addMethodBtn;
-		html_wadl_string += "</br>";
-
-		addSpacesTwo();
-		var addParamBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";
-		html_wadl_string += addParamBtn;
-		html_wadl_string += "</br>";
-	} else if (myNode.nodeName == 'resource'){
-		addSpacesTwo();
-		var addResourceBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addResource('" + myNode.my_id + "')\">Add Resource</button>";
-		html_wadl_string += addResourceBtn;
-		html_wadl_string += "</br>";
-		
-		addSpacesTwo();
-		var addMethodBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addMethod('" + myNode.my_id + "')\">Add Method</button>";
-		html_wadl_string += addMethodBtn;
-		html_wadl_string += "</br>";
-		
-		addSpacesTwo();
-		var addParamBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";
-		html_wadl_string += addParamBtn;
-		html_wadl_string += "</br>";
-	} else if (myNode.nodeName == 'method'){
-		// a method element can only have one request and one response element
-		var hasRequest = false;
-		var hasResponse = false;
-		for (var j = 0; j < myNode.childNodes.length; j++){
-			if (myNode.childNodes[j].nodeName == 'request'){
-				hasRequest = true;
-			} else if (myNode.childNodes[j].nodeName == 'response'){
-				hasResponse = true;
+			addSpacesTwo(extendedWADL);
+			var addParamBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";
+			html_wadl_string += addParamBtn;
+			html_wadl_string += "</br>";
+		} else if (myNode.nodeName == 'resource'){
+			addSpacesTwo(extendedWADL);
+			var addResourceBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addResource('" + myNode.my_id + "')\">Add Resource</button>";
+			html_wadl_string += addResourceBtn;
+			html_wadl_string += "</br>";
+			
+			addSpacesTwo(extendedWADL);
+			var addMethodBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addMethod('" + myNode.my_id + "')\">Add Method</button>";
+			html_wadl_string += addMethodBtn;
+			html_wadl_string += "</br>";
+			
+			addSpacesTwo(extendedWADL);
+			var addParamBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";
+			html_wadl_string += addParamBtn;
+			html_wadl_string += "</br>";
+		} else if (myNode.nodeName == 'method'){
+			// a method element can only have one request and one response element
+			var hasRequest = false;
+			var hasResponse = false;
+			for (var j = 0; j < myNode.childNodes.length; j++){
+				if (myNode.childNodes[j].nodeName == 'request'){
+					hasRequest = true;
+				} else if (myNode.childNodes[j].nodeName == 'response'){
+					hasResponse = true;
+				}
 			}
-		}
-		
-		if (!hasRequest){
-			addSpacesTwo();
-			var addRequestBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addRequest('" + myNode.my_id + "')\">Add Request</button>";
-			html_wadl_string += addRequestBtn;
-			html_wadl_string += "</br>";
-		}
-
-		if (!hasResponse){
-			addSpacesTwo();
-			var addResponseBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addResponse('" + myNode.my_id + "')\">Add Response</button>";
-			html_wadl_string += addResponseBtn;
-			html_wadl_string += "</br>";
-		}
-	} else if (myNode.nodeName == 'request'){
-		// a request element can only have one representation element
-		var hasRepresentation = false;
-		for (var j = 0; j < myNode.childNodes.length; j++){
-			if (myNode.childNodes[j].nodeName == 'representation'){
-				hasRepresentation = true;
+			
+			if (!hasRequest){
+				addSpacesTwo(extendedWADL);
+				var addRequestBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addRequest('" + myNode.my_id + "')\">Add Request</button>";
+				html_wadl_string += addRequestBtn;
+				html_wadl_string += "</br>";
 			}
-		}
 
-		if (!hasRepresentation){
-			addSpacesTwo();
-			var addRepresentationBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addRepresentation('" + myNode.my_id + "')\">Add Representation</button>";
-			html_wadl_string += addRepresentationBtn;
-			html_wadl_string += "</br>";
-		}
-
-		addSpacesTwo();
-		var addParamBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";
-		html_wadl_string += addParamBtn;
-		html_wadl_string += "</br>";
-	} else if (myNode.nodeName == 'response'){
-		// a response element can only have one representation element
-		var hasRepresentation = false;
-		for (var j = 0; j < myNode.childNodes.length; j++){
-			if (myNode.childNodes[j].nodeName == 'representation'){
-				hasRepresentation = true;
+			if (!hasResponse){
+				addSpacesTwo(extendedWADL);
+				var addResponseBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addResponse('" + myNode.my_id + "')\">Add Response</button>";
+				html_wadl_string += addResponseBtn;
+				html_wadl_string += "</br>";
 			}
-		}
+		} else if (myNode.nodeName == 'request'){
+			// a request element can only have one representation element
+			var hasRepresentation = false;
+			for (var j = 0; j < myNode.childNodes.length; j++){
+				if (myNode.childNodes[j].nodeName == 'representation'){
+					hasRepresentation = true;
+				}
+			}
 
-		if (!hasRepresentation){
-			addSpacesTwo();
-			var addRepresentationBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addRepresentation('" + myNode.my_id + "')\">Add Representation</button>";
-			html_wadl_string += addRepresentationBtn;
+			if (!hasRepresentation){
+				addSpacesTwo(extendedWADL);
+				var addRepresentationBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addRepresentation('" + myNode.my_id + "')\">Add Representation</button>";
+				html_wadl_string += addRepresentationBtn;
+				html_wadl_string += "</br>";
+			}
+
+			addSpacesTwo(extendedWADL);
+			var addParamBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";
+			html_wadl_string += addParamBtn;
+			html_wadl_string += "</br>";
+		} else if (myNode.nodeName == 'response'){
+			// a response element can only have one representation element
+			var hasRepresentation = false;
+			for (var j = 0; j < myNode.childNodes.length; j++){
+				if (myNode.childNodes[j].nodeName == 'representation'){
+					hasRepresentation = true;
+				}
+			}
+
+			if (!hasRepresentation){
+				addSpacesTwo(extendedWADL);
+				var addRepresentationBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addRepresentation('" + myNode.my_id + "')\">Add Representation</button>";
+				html_wadl_string += addRepresentationBtn;
+				html_wadl_string += "</br>";
+			}
+
+			addSpacesTwo(extendedWADL);
+			var addParamBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";
+			html_wadl_string += addParamBtn;
+			html_wadl_string += "</br>";
+
+			addSpacesTwo(extendedWADL);
+			var addFaultBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addFault('" + myNode.my_id + "')\">Add Fault</button>";
+			html_wadl_string += addFaultBtn;
 			html_wadl_string += "</br>";
 		}
+	} else {
 
-		addSpacesTwo();
-		var addParamBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addParam('" + myNode.my_id + "')\">Add Param</button>";
-		html_wadl_string += addParamBtn;
-		html_wadl_string += "</br>";
-
-		addSpacesTwo();
-		var addFaultBtn = "<button type=\"button\" class=\"btn btn-" + addBtnsType + " btn-" + addBtnsSize + "\" onClick=\"addFault('" + myNode.my_id + "')\">Add Fault</button>";
-		html_wadl_string += addFaultBtn;
-		html_wadl_string += "</br>";
 	}
 }
 
