@@ -1,10 +1,11 @@
-// tomcat server path/location
-var tomcat_server_path				= "http://localhost:8080/";
-//var tomcat_server_path			= "http://ssrg17.cs.ualberta.ca:8080/";
 
 $('document').ready(function(){
 	initBootstrapJS_popover();
 });
+
+// tomcat server path/location
+//var tomcat_server_path				= "http://localhost:8080/";
+var tomcat_server_path			= "http://ssrg17.cs.ualberta.ca:8080/";
 
 var server_api_url 					= tomcat_server_path + "wsdarwin_1.0.0/jaxrs/api/";
 
@@ -136,7 +137,7 @@ function activateView(viewid){
 }
 
 function addURLField(){
-
+	console.log("ADDING URL FIELD !!!!!!!!!");
 	var fullDiv = "	<div class='singleUrlDiv' id='singleURLdiv_" + noURLFields + "'>"+
 				  "	<select class='urlSelectBtn' id='requestType1'>"+
 				  "	<option value='get' selected>GET</option>"+
@@ -177,34 +178,104 @@ function get_input_urls(inputNo){
 	$('input.urlInputClass' + inputNo).each(function(index) {
 		urlArray.push( $('#urlInput' + inputNo + '_'+index).val() );
 	});
+
 	return urlArray;
 }
 
 var crossMappings = new Array();
 
 function crossServiceCompareBtn(){
-	runAnalysis("crossServiceCompare");
+	var api_call_url;
+	var ajaxData;
+	var process_mode = "crossServiceCompare";
+	// input urls
+	var analyzeDataJSON = JSON.stringify(get_input_urls('A'));
+	var compareDataJSON = JSON.stringify(get_input_urls('B'));
+
+	// WADL files uploaded..
+	var analyzed_wadls_URLs = [];
+	var compare_wadls_URLs = [];
+
+	for (var i = 0; i < uppedWADLurls.length; i++){
+		analyzed_wadls_URLs.push(uppedWADLurls[i]);
+	}
+	
+	for (var i = 0; i < compareWADLurls.length; i++){
+		compare_wadls_URLs.push(compareWADLurls[i]);
+	}
+	
+	var jsonWadlURLs 		= JSON.stringify(analyzed_wadls_URLs);
+	var jsonCompareWadlURLs = JSON.stringify(compare_wadls_URLs);
+
+	api_call_url = server_api_url + process_mode;
+	ajaxData = {newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id, compareURLs: compareDataJSON, compareWADLfiles: jsonCompareWadlURLs};
+
+	runAnalysis("crossServiceCompare", api_call_url, ajaxData);
 }
 
 function compareBtn(){
-	runAnalysis("compare");
+	var api_call_url;
+	var ajaxData;
+	var process_mode = "compare";
+	// input urls
+	var analyzeDataJSON = JSON.stringify(get_input_urls('A'));
+	var compareDataJSON = JSON.stringify(get_input_urls('B'));
+
+	// WADL files uploaded..
+	var analyzed_wadls_URLs = [];
+	var compare_wadls_URLs = [];
+
+	for (var i = 0; i < uppedWADLurls.length; i++){
+		analyzed_wadls_URLs.push(uppedWADLurls[i]);
+	}
+	
+	for (var i = 0; i < compareWADLurls.length; i++){
+		compare_wadls_URLs.push(compareWADLurls[i]);
+	}
+	
+	var jsonWadlURLs 		= JSON.stringify(analyzed_wadls_URLs);
+	var jsonCompareWadlURLs = JSON.stringify(compare_wadls_URLs);
+
+	api_call_url = server_api_url + process_mode;
+	ajaxData = {newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id, compareURLs: compareDataJSON, compareWADLfiles: jsonCompareWadlURLs};
+	
+	runAnalysis("compare", api_call_url, ajaxData);
 }
 
 function analyzeBtn(){
-	runAnalysis("analyze");
+	var api_call_url;
+	var ajaxData;
+	var process_mode = "analyze";
+
+	// input urls
+	var analyzeDataJSON = JSON.stringify(get_input_urls('A'));
+
+	// WADL files uploaded..
+	var analyzed_wadls_URLs = [];
+
+	for (var i = 0; i < uppedWADLurls.length; i++){
+		analyzed_wadls_URLs.push(uppedWADLurls[i]);
+	}
+
+	var jsonWadlURLs = JSON.stringify(analyzed_wadls_URLs);
+
+	api_call_url = server_api_url + "analyze";
+	ajaxData = { newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id };
+
+	runAnalysis("analyze", api_call_url, ajaxData);
 }
 
-function runAnalysis(process_mode){
+function runAnalysis(process_mode, api_call_url, ajaxData){
 	// reset html elements
 	$("#left_wadl_output").hide();
 	$("#right_wadl_output").hide();
 	$("#wadlOutput").show();
 	$("#wadlOutput").html('');
 
-	var api_call_url;
-	var ajaxData;
+	//var api_call_url;
+	//var ajaxData;
 
-	if (process_mode === "analyze"){
+	/*if (process_mode === "analyze"){
 		// input urls
 		var analyzeDataJSON = JSON.stringify(get_input_urls('A'));
 
@@ -240,11 +311,13 @@ function runAnalysis(process_mode){
 
 		api_call_url = server_api_url + process_mode;
 		ajaxData = {newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id, compareURLs: compareDataJSON, compareWADLfiles: jsonCompareWadlURLs};
-	}
+	}*/
 	
 	console.log("--------AJAX data:-------- ");
 	console.debug("api call: " 	+ api_call_url);
 	console.debug("ajax data: " + ajaxData);
+	console.debug(ajaxData);
+	console.log(ajaxData);
 	console.log("---------------- ");
     
     $.ajax({
@@ -265,7 +338,6 @@ function runAnalysis(process_mode){
 
 			console.log("merged #1_: " + analysis_merged_wadl_url_path);
 			console.log("merged #2_: " + compare_merged_wadl_url_path);
-			console.log("Compare or Analysis? :'" + process_mode + "'");
 
 			console.debug("jsonobj4 is " + jsonObj[4]);
 
@@ -561,6 +633,21 @@ function removeURLField(id){
 	}
 }
 
+function removeAllURLFields(side){
+	var container_div;
+	if (side == "A"){
+		container_div = "fieldUrlDiv";
+	} else if (side == "B"){
+		container_div = "fieldCompareUrlDiv";
+	}
+	console.log("container div is " + container_div);
+	while ($("#" + container_div).children().filter("div").length > 1){
+		console.log("removing index: " + $("#" + container_div).children().filter("div").length - 1);
+		removeURLField($("#" + container_div).children().filter("div").length - 1);
+	}
+	//reassignIDs();
+}
+
 function removeCompareURLField(id){
 	if ($("#fieldCompareUrlDiv").children().filter("div").length > 1){
 		$('#singleCompareUrlDiv_'+id).remove();
@@ -580,7 +667,7 @@ function reassignIDs(){
 
 	});
 
-	noURLFields = idcount;
+	noURLFields = idcount-1;
 }
 
 function removeNode(mynodeid){
@@ -1335,6 +1422,7 @@ function highlightXSElementWithName(xselementName, node, highlightColor ){
 }
 
 function getWADL(wadl_url_path){
+	console.log("WADL URL PATH IS " + wadl_url_path);
 	xmlDoc = loadXMLDoc(wadl_url_path);
 	rootNode=xmlDoc.documentElement;
 	// nodeName, attributes, childNodes
@@ -1931,6 +2019,42 @@ function printAddElementButtons(myNode, extendedWADL){
 		}
 	} else {
 
+	}
+}
+
+
+
+function runSampleAnalysis(testNumber){
+	if (testNumber == 1){
+		removeAllURLFields("A");
+		$('#urlInputA' + '_'+"0").val("https://api.github.com/users");
+		analyzeBtn();
+	} else if (testNumber == 2){
+		removeAllURLFields("A");
+		$('#urlInputA' + '_'+"0").val("https://api.github.com/users/penguinsource");
+		addURLField();
+		$('#urlInputA' + '_'+"1").val("https://api.github.com/users/fokaefs");
+		addURLField();
+		$('#urlInputA' + '_'+"2").val("https://api.github.com/users/lorencs");
+		analyzeBtn();
+	} else if (testNumber == 3){
+		removeAllURLFields("A");
+		$('#urlInputA' + '_'+"0").val("https://graph.facebook.com/oprescu3");
+		addURLField();
+		$('#urlInputA' + '_'+"1").val("https://graph.facebook.com/jack");
+		addURLField();
+		$('#urlInputA' + '_'+"2").val("https://graph.facebook.com/seinfeld");
+		addURLField();
+		$('#urlInputA' + '_'+"3").val("https://graph.facebook.com/arresteddevelopment");
+		analyzeBtn();
+	} else if (testNumber == 4){
+		removeAllURLFields("A");
+		$('#urlInputA' + '_'+"0").val("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=HeyThere");
+		analyzeBtn();
+	} else if (testNumber == 5){
+		removeAllURLFields("A");
+		$('#urlInputA' + '_'+"0").val("http://api.openweathermap.org/data/2.1/find/city?lat=55&lon=37&cnt=10");
+		analyzeBtn();
 	}
 }
 
