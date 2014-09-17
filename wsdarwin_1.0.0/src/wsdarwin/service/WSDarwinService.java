@@ -126,14 +126,6 @@ public class WSDarwinService extends Application{
 		returnArray.add(analysis_wadl_merged_path_url);
 		String ret = gson.toJson(returnArray);
 		
-		/*String regex = "\\b(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
-		if (Pattern.matches(regex, "http://google.com")){
-			System.out.println("BLAH ONE !");
-		}
-		if (Pattern.matches(regex, "https://avatars.githubusercontent.com/u/100?v=2")){
-			System.out.println("BLAH TWO !");
-		}*/
-		
 		return ret;
 		
 	}

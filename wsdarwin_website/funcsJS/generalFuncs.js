@@ -1,61 +1,27 @@
 
-$('document').ready(function(){
-	initBootstrapJS_popover();
-});
-
-// tomcat server path/location
-//var tomcat_server_path				= "http://localhost:8080/";
-var tomcat_server_path			= "http://ssrg17.cs.ualberta.ca:8080/";
-
-var server_api_url 					= tomcat_server_path + "wsdarwin_1.0.0/jaxrs/api/";
-
-// for java_diff: ( if true, appends text line by line, otherwise it prints it all in a tree-hierarchy way)
-var parsing_html_mode 			= true;
-var max_wadl_files_uploaded 	= 1;
 var sideToWriteTo 				= "";
-var crossService 				= true;
-
-var noURLFields 				= 0;
-var noCompareURLFields 			= 0;
-var uppedWADLurls 				= [];
-var compareWADLurls 			= [];
-
-//wadl html file
-var wadl_attribute_edit_mode 	= true;	// DEBUG (only applicable to 'analyze', not 'compare')
-var add_elements_mode 			= true;			// DEBUG (only applicable to 'analyze', not 'compare')
 
 var session_id 					= '';	// initially set in the java app
 var html_wadl_string 			= '';
 var strapped_html_wadl_string 	= '';
 var xml_wadl_string 			= '';
 
-var wadl_download_str			= '';
-var extended_wadl_download_str	= '';
-
-// type confidence colors
-var typeConfidence0_24 			= "#c9302c";
-var typeConfidence24_49 		= "#F0854E";
-var typeConfidence50_74 		= "#f0ad4e";
-var typeConfidence75_100 		= "#449d44";
+//var wadl_download_str			= '';
+//var extended_wadl_download_str	= '';
 
 var oldCompare 	= '';
 var newCompare 	= '';
 var rightSideID = "b";
 var leftSideID 	= "a";
 
-var lineNumber 	= 0;
-var spaces 		= 0;
-var node_id 	= 0;
-var rootNode;
-var xmlDoc;
-
-var oldRootDoc;
-var newRootDoc;
-
 var enumConvertedArray = new Array();
 
 var firstWADL = "";
 var secondWADL = "";
+
+var margin_left = 0;
+var padding_left = 0;
+var level = 1;
 
 // highlight colors
 var crossServiceMappingsHighlightColor = "#cdfeff";
@@ -77,109 +43,6 @@ function wadl_doc(){
 		return this.xmlDoc;
 	}
 
-}
-
-var analyzeObj = new wadl_doc();
-
-// User-action functions ---------------------------- 
-
-function activateView(viewid){
-	$("#" + 'analysisView').removeClass("active");
-	$("#" + 'comparisonView').removeClass("active");
-	$("#" + 'crossServiceComparisonView').removeClass("active");
-	$("#" + 'settingsView').removeClass("active");
-	$("#" + viewid).addClass("active");
-
-	if (viewid == "analysisView"){
-		window.location.hash = "analysisViewName";
-		//$("#compareA").show();
-		$("#compareB").hide();
-		$(".compareOptions").hide();
-		$("#analyzeSubmitBtn").show();
-		$("#compareSubmitBtn").hide();
-		$("#crossServiceCompareSubmitBtn").hide();
-
-		$("#files").text("Upload a WADL file");
-		$("#filesCompare").text("Upload a WADL file");
-
-		$("#uploadAWADLA").css("visibility", "");
-		$("#uploadAWADLB").css("visibility", "");
-	} else if (viewid == "comparisonView"){
-		window.location.hash = "compareViewName";
-		$(".compareOptions").show();
-		$("#compareB").show();
-		$("#analyzeSubmitBtn").hide();
-		$("#crossServiceCompareSubmitBtn").hide();
-		$("#compareSubmitBtn").show();
-
-		$("#files").text("Upload a WADL file");
-		$("#filesCompare").text("Upload a WADL file");
-		$("#uploadAWADLA").css("visibility", "");
-		$("#uploadAWADLB").css("visibility", "");
-
-	} else if (viewid == "crossServiceComparisonView"){
-		window.location.hash = "crossServiceViewName";
-
-		$(".compareOptions").hide();
-
-		$("#compareB").show();
-		$("#analyzeSubmitBtn").hide();	// need to be changed to upload .ser files for now
-		$("#compareSubmitBtn").hide();	// ..
-		$("#files").text("Upload a (.wsmeta) file");
-		$("#filesCompare").text("Upload a (.wsmeta) file");
-
-		$("#uploadAWADLA").css("visibility", "");
-		$("#uploadAWADLB").css("visibility", "");
-
-
-		$("#crossServiceCompareSubmitBtn").show();
-	}
-}
-
-function addURLField(){
-	console.log("ADDING URL FIELD !!!!!!!!!");
-	var fullDiv = "	<div class='singleUrlDiv' id='singleURLdiv_" + noURLFields + "'>"+
-				  "	<select class='urlSelectBtn' id='requestType1'>"+
-				  "	<option value='get' selected>GET</option>"+
-						"<option value='post'>POST</option>"+
-						"<option value='put'>PUT</option>"+
-						"<option value='delete'>DELETE</option>"+
-						"<option value='head'>HEAD</option>"+
-					"</select>"+
-					//"<input type='text' name='lname' id='urlInput_" + noURLFields + "' class='urlInput'>"+
-					"<input type=\"text\" name='lname' id='urlInputA_" + noURLFields + "' style='width: 70%; display: inline-block;' class=\"form-control urlInputClassA\" placeholder=\"Text input\">" +
-					//"<button id='analyzeSingleURL1' class='analyzeSingleURL' onClick=\"analyzeSingleURL('" + noURLFields + "')\"> Analyze </button>"+
-					"<button style='margin-left: 10px; vertical-align: top;' onClick=\"removeURLField('" + noURLFields + "')\" type=\"button\" class=\"btn btn-danger\">X</button>" +
-					//"<button class='singleUrlRemoveBtn' onClick=\"removeURLField('" + noURLFields + "')\">Remove</button>"+
-					"</div>";
-	$('#fieldUrlDiv').append(fullDiv);
-	noURLFields++;
-}
-
-function addCompareURLField(){
-	var fullDiv = "	<div class='singleUrlDiv' id='singleCompareUrlDiv_" + noCompareURLFields + "'>"+
-				  "	<select class='urlSelectBtn' id='requestType1'>"+
-				  "	<option value='get' selected>GET</option>"+
-						"<option value='post'>POST</option>"+
-						"<option value='put'>PUT</option>"+
-						"<option value='delete'>DELETE</option>"+
-						"<option value='head'>HEAD</option>"+
-					"</select>"+
-					"<input type=\"text\" name='comparelname' id='urlInputB_" + noCompareURLFields + "' style='width: 70%; display: inline-block;' class=\"form-control urlInputClassB\" placeholder=\"Text input\">" +
-					"<button style='margin-left: 10px; vertical-align: top;' onClick=\"removeCompareURLField('" + noCompareURLFields + "')\" type=\"button\" class=\"btn btn-danger\">X</button>" +
-					"</div>";
-	$('#fieldCompareUrlDiv').append(fullDiv);
-	noCompareURLFields++;
-}
-
-function get_input_urls(inputNo){
-	var urlArray = [];
-	// JSON urls to analyze
-	$('input.urlInputClass' + inputNo).each(function(index) {
-		urlArray.push( $('#urlInput' + inputNo + '_'+index).val() );
-	});
-
-	return urlArray;
 }
 
 var crossMappings = new Array();
@@ -271,55 +134,15 @@ function runAnalysis(process_mode, api_call_url, ajaxData){
 	$("#right_wadl_output").hide();
 	$("#wadlOutput").show();
 	$("#wadlOutput").html('');
-
-	//var api_call_url;
-	//var ajaxData;
-
-	/*if (process_mode === "analyze"){
-		// input urls
-		var analyzeDataJSON = JSON.stringify(get_input_urls('A'));
-
-		// WADL files uploaded..
-		var analyzed_wadls_URLs = [];
-
-		for (var i = 0; i < uppedWADLurls.length; i++){
-			analyzed_wadls_URLs.push(uppedWADLurls[i]);
-		}
-		var jsonWadlURLs = JSON.stringify(analyzed_wadls_URLs);
-
-		api_call_url = server_api_url + "analyze";
-		ajaxData = { newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id };
-	} else if ( (process_mode === 'compare') || (process_mode === 'crossServiceCompare') ){
-		// input urls
-		var analyzeDataJSON = JSON.stringify(get_input_urls('A'));
-		var compareDataJSON = JSON.stringify(get_input_urls('B'));
-
-		// WADL files uploaded..
-		var analyzed_wadls_URLs = [];
-		var compare_wadls_URLs = [];
-
-		for (var i = 0; i < uppedWADLurls.length; i++){
-			analyzed_wadls_URLs.push(uppedWADLurls[i]);
-		}
-		
-		for (var i = 0; i < compareWADLurls.length; i++){
-			compare_wadls_URLs.push(compareWADLurls[i]);
-		}
-		
-		var jsonWadlURLs 		= JSON.stringify(analyzed_wadls_URLs);
-		var jsonCompareWadlURLs = JSON.stringify(compare_wadls_URLs);
-
-		api_call_url = server_api_url + process_mode;
-		ajaxData = {newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id, compareURLs: compareDataJSON, compareWADLfiles: jsonCompareWadlURLs};
-	}*/
 	
-	console.log("--------AJAX data:-------- ");
-	console.debug("api call: " 	+ api_call_url);
-	console.debug("ajax data: " + ajaxData);
-	console.debug(ajaxData);
-	console.log(ajaxData);
-	console.log("---------------- ");
-    
+	if (DEBUG_PRINT){
+		console.log("function runAnalysis:");
+		console.debug("api call: " 	+ api_call_url);
+		console.debug("ajax data: ");
+		console.debug(ajaxData);
+		console.log("---------------- ");
+	}
+	
     $.ajax({
     	url: api_call_url,
         type: "GET",
@@ -334,15 +157,13 @@ function runAnalysis(process_mode, api_call_url, ajaxData){
         	var analysis_merged_wadl_url_path = jsonObj[1];
 			var compare_merged_wadl_url_path = jsonObj[2];
 			var delta_comparison_url = jsonObj[3];
-			console.log(delta_comparison_url);
 
-			console.log("merged #1_: " + analysis_merged_wadl_url_path);
-			console.log("merged #2_: " + compare_merged_wadl_url_path);
-
-			console.debug("jsonobj4 is " + jsonObj[4]);
-
-			if (process_mode == "compare"){
-				console.log("diffing the wadl's");
+			if (process_mode == "analyze"){
+				if (DEBUG_PRINT){console.log("analyzing wadl's");}
+				add_elements_mode = true;
+				getWADL(analysis_merged_wadl_url_path);
+			} else if (process_mode == "compare"){
+				if (DEBUG_PRINT){console.log("comparing wadl's");}
 				add_elements_mode = false;
 
 				getWADL(analysis_merged_wadl_url_path);
@@ -358,27 +179,15 @@ function runAnalysis(process_mode, api_call_url, ajaxData){
 				init_node(newRootDoc, "_b_");
 
 				if ( $('.diffTypeText:checked').val() ) {
-					//text_diff_JS(1);		
-					sideBySideDiff();												// text comparison diff
+					//text_diff_JS(1);								// different type of text comparison diff
+					sideBySideDiff();								// text comparison diff
 				} else if ( $('.diffTypeJava:checked').val() ) {
 					java_diff(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
 				}
 				
 				//saveWADLtoFile();
-			} else if (process_mode == "analyze"){
-				add_elements_mode = true;
-				getWADL(analysis_merged_wadl_url_path);
-
-				xmlDocTest = loadXMLDoc(analysis_merged_wadl_url_path);
-				//smNode=xmlDocTest.documentElement;
-				console.debug('! ! ! !analyze xml doc: ' + xmlDocTest);
-				
-				analyzeObj.setXmlDoc(xmlDocTest);
-
-				//saveWADLtoFile();
 			} else if (process_mode == "crossServiceCompare"){
-
-				console.log("diffing the wadl's");
+				if (DEBUG_PRINT){console.log("cross service comparing wadl's");}
 				add_elements_mode = false;
 
 				getWADL(analysis_merged_wadl_url_path);
@@ -393,18 +202,18 @@ function runAnalysis(process_mode, api_call_url, ajaxData){
 				init_node(oldRootDoc, "_a_");
 				init_node(newRootDoc, "_b_");
 
-				console.debug("delta comparison url is: " + delta_comparison_url);
-				java_diff(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
-				//text_diff_JS(1);														// text comparison diff				
-				//saveWADLtoFile();
+				if (DEBUG_PRINT){console.debug("delta comparison url is: " + delta_comparison_url);}
 
+				java_diff(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
+
+				// cross service comparison highlighting mappings
 	        	if (jsonObj[4] != null){
 
 	        		//var listOfMappings = jsonObj[4];
 	        		var n = 0;
 	        		var arrayInd = 0;
 	        		var listMappings = JSON.parse(jsonObj[4]);
-	        		console.debug("list of mappings: " + listMappings);
+	        		if (DEBUG_PRINT){console.debug("list of mappings: " + listMappings);}
 	        		var mappingRow = listMappings[n];
 	        		var elementsAnalyzed = new Array();
 
@@ -518,44 +327,6 @@ function runAnalysis(process_mode, api_call_url, ajaxData){
     });
 }
 
-function showCompareOptions(){
-	$("#showCompareBtn").html("- Hide Compare Tool");
-	$("#showCompareBtn").attr('onclick', "hideCompareOptions()");
-	$("#compareDiv").css('height', "inherit");
-}
-
-function hideCompareOptions(){
-	$("#showCompareBtn").html("+ Show Compare Tool");
-	$("#showCompareBtn").attr('onclick', "showCompareOptions()");
-	$("#compareDiv").css('height', "23px");
-}
-
-function showOptions() {
-	$("#showOptionsBtn").html("- Hide Options");
-	$("#showOptionsBtn").attr('onclick', "hideOptions()");
-	$("#optionsDiv").css('height', "inherit");
-}
-
-function hideOptions() {
-	$("#showOptionsBtn").html("+ Show Options");
-	$("#showOptionsBtn").attr('onclick', "showOptions()");
-	$("#optionsDiv").css('height', "23px");
-}
-
-// Utility functions ---------------------------- 
-
-function var_dump(obj) {
-    var out = '';
-    for (var i in obj) {
-        out += i + ": " + obj[i] + "\n";
-    }
-    console.log(out);
-}
-
-function htmlentities(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
 function sideBySideDiff() {
 	text_diff_JS(0);
 }
@@ -564,47 +335,9 @@ function inlineDiff() {
 	text_diff_JS(1);
 }
 
-function text_diff_JS(viewingType) {
-    // get the baseText and newText values from the two textboxes, and split them into lines
-
-    var base = difflib.stringAsLines( firstWADL );
-    var newtxt = difflib.stringAsLines( secondWADL );
-
-    // create a SequenceMatcher instance that diffs the two sets of lines
-    var sm = new difflib.SequenceMatcher(base, newtxt);
-
-    // get the opcodes from the SequenceMatcher instance
-    // opcodes is a list of 3-tuples describing what changes should be made to the base text
-    // in order to yield the new text
-    var opcodes = sm.get_opcodes();
-    var diffoutputdiv = $("wadlOutput");
-    while (diffoutputdiv.firstChild) diffoutputdiv.removeChild(diffoutputdiv.firstChild);
-    //var contextSize = $("contextSize").value;
-    //contextSize = contextSize ? contextSize : null;
-
-    // build the diff view and add it to the current DOM
-    var diffed_string = diffview.buildView({
-	        baseTextLines: base,
-	        newTextLines: newtxt,
-	        opcodes: opcodes,
-	        // set the display titles for each resource
-	        baseTextName: "Base Text",
-	        newTextName: "New Text",
-	        //contextSize: null,
-	        //viewType: $("comparisonDiffType").checked ? 1 : 0
-	        viewType: viewingType
-    	});
-    //);
-	$("#wadlOutput").show();
-	$("#left_wadl_output").hide();
-	$("#right_wadl_output").hide();
-
-    $("#wadlOutput").html( diffed_string );
-
-}
-
 function downloadWADL(extended){
-    console.log("saving wadl file");
+	if (DEBUG_PRINT){console.log("downloading wadl file. Extended? " + extended);}
+    
     var dl_url = "/wsdarwin/funcsPHP/downloadWADLfile.php";
     var wadl_to_download = (extended) ? extended_wadl_download_str : wadl_download_str;
     $.ajax({
@@ -622,52 +355,6 @@ function downloadWADL(extended){
 		}
 
     });
-}
-
-function removeURLField(id){
-	console.debug("length is " + $("#fieldUrlDiv").children().filter("div").length );
-	//console.log("length is " + $("div.fieldUrlDiv").length );
-	if ($("#fieldUrlDiv").children().filter("div").length > 1){
-		$('#singleURLdiv_'+id).remove();
-		reassignIDs();
-	}
-}
-
-function removeAllURLFields(side){
-	var container_div;
-	if (side == "A"){
-		container_div = "fieldUrlDiv";
-	} else if (side == "B"){
-		container_div = "fieldCompareUrlDiv";
-	}
-	console.log("container div is " + container_div);
-	while ($("#" + container_div).children().filter("div").length > 1){
-		console.log("removing index: " + $("#" + container_div).children().filter("div").length - 1);
-		removeURLField($("#" + container_div).children().filter("div").length - 1);
-	}
-	//reassignIDs();
-}
-
-function removeCompareURLField(id){
-	if ($("#fieldCompareUrlDiv").children().filter("div").length > 1){
-		$('#singleCompareUrlDiv_'+id).remove();
-		reassignIDs();
-	}	
-}
-
-function reassignIDs(){
-	var idcount = 0;
-	// loop through all divs
-	$('div.singleUrlDiv').each(function(index) {
-	    // set div id to array value
-
-	    $('#singleUrlDiv_' + index).attr('id', "singleURLdiv_" + index);
-	   	//console.debug(this);
-	    idcount++;
-
-	});
-
-	noURLFields = idcount-1;
 }
 
 function removeNode(mynodeid){
@@ -782,9 +469,11 @@ function find_node(mynode, sid){
 
 var foundNode2 = {};
 // this function is used only once, and has been made in order to be able to also save an 
-// element's position where it was found, if applicable;
+// element's position where it was found (the function has been made specifically for creating 
+// a simple type when converting a type to an enumeration )
 
-// TO DO: fix 'find_node' ( the implementation below does not work properly either)
+// TO DO: fix 'find_node' ( this function might contain a bug - either it does or I forgot to
+// mention that it is fixed - update: seems to work ok after a simple test )
 function find_node_2(mynode, sid){
 	if (mynode.my_id == sid){
 		foundNode2['node'] 		= mynode;
@@ -831,20 +520,6 @@ function highlightRemovingDiv(divid){
 function unhighlightRemovingDiv(divid){
 	//$("#"+divid).css('background-color', '');
 	$("#"+divid).css('text-decoration', '');
-}
-
-function setup_wadl_print_free(){
-	html_wadl_string = '';
-	strapped_html_wadl_string = '';
-	// these two strings will be the download-able wadl files
-	wadl_download_str 			= '';
-	extended_wadl_download_str 	= '';
-
-	spaces = 0;
-	parse_wadl_html(rootNode);
-
-	//parse_wadl_html_two(rootNode);
-	$("#wadlOutput").html(wadl_download_str);
 }
 
 function java_diff(deltas_path, oldDocNode, newDocNode, process_type){
@@ -1076,27 +751,6 @@ function reassignLineNumbers(side){
 	
 }
 
-function addGraySpace(startAtLineIndex, noLines, side){
-	console.log("startat line index is " + startAtLineIndex + ", no lines: " + noLines + ", side: " + side);
-	//startAtLineIndex--;
-	var emptyDivs = "";
-	var n = 0;
-	while(n < noLines){
-		emptyDivs += "<div style='background-color: gray'>.</div>";
-		n++;
-	}
-	if (side == leftSideID){
-		//$("#left_wadl_output")
-	} else if (side == rightSideID){
-
-	}
-	
-	//var abc = startAtLineIndex + "_" + side;
-	console.log("!!!! startAtLineIndex is " +  startAtLineIndex);
-	var elemToInsertAfter = $("*[data-lineNumber=" + startAtLineIndex + "]");
-	$(emptyDivs).insertAfter( elemToInsertAfter );
-	console.log("insert on side: " + side + " after elem with id: " + elemToInsertAfter.attr("id") );
-}
 // pass (method_id, "resources node")
 function highlightResourceRec(resource_id, node, highlightColor){
 	for (var i = 0; i < node.childNodes.length; i++){
@@ -1428,7 +1082,6 @@ function getWADL(wadl_url_path){
 	// nodeName, attributes, childNodes
 
 	setup_wadl_print();
-	//setup_wadl_print_free();
 }
 
 function loadXMLDoc(filename){
@@ -1470,10 +1123,6 @@ function initBootstrapJS_popover(){
 	console.log('init');
 	jQuery('a[data-toggle=popover]').popover();
 }
-
-var margin_left = 0;
-var padding_left = 0;
-var level = 1;
 
 function appendToHTML(side, str, elemClassName){
 	$("#" + sideToWriteTo + "_wadl_output").append(str);
@@ -2022,54 +1671,27 @@ function printAddElementButtons(myNode, extendedWADL){
 	}
 }
 
-
-
-function runSampleAnalysis(testNumber){
-	if (testNumber == 1){
-		removeAllURLFields("A");
-		$('#urlInputA' + '_'+"0").val("https://api.github.com/users");
-		analyzeBtn();
-	} else if (testNumber == 2){
-		removeAllURLFields("A");
-		$('#urlInputA' + '_'+"0").val("https://api.github.com/users/penguinsource");
-		addURLField();
-		$('#urlInputA' + '_'+"1").val("https://api.github.com/users/fokaefs");
-		addURLField();
-		$('#urlInputA' + '_'+"2").val("https://api.github.com/users/lorencs");
-		analyzeBtn();
-	} else if (testNumber == 3){
-		removeAllURLFields("A");
-		$('#urlInputA' + '_'+"0").val("https://graph.facebook.com/oprescu3");
-		addURLField();
-		$('#urlInputA' + '_'+"1").val("https://graph.facebook.com/jack");
-		addURLField();
-		$('#urlInputA' + '_'+"2").val("https://graph.facebook.com/seinfeld");
-		addURLField();
-		$('#urlInputA' + '_'+"3").val("https://graph.facebook.com/arresteddevelopment");
-		analyzeBtn();
-	} else if (testNumber == 4){
-		removeAllURLFields("A");
-		$('#urlInputA' + '_'+"0").val("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=HeyThere");
-		analyzeBtn();
-	} else if (testNumber == 5){
-		removeAllURLFields("A");
-		$('#urlInputA' + '_'+"0").val("http://api.openweathermap.org/data/2.1/find/city?lat=55&lon=37&cnt=10");
-		analyzeBtn();
+// this function is not current used - it is attempting to evenly print the java comparison outputs
+// but it does not work !
+function addGraySpace(startAtLineIndex, noLines, side){
+	console.log("startat line index is " + startAtLineIndex + ", no lines: " + noLines + ", side: " + side);
+	//startAtLineIndex--;
+	var emptyDivs = "";
+	var n = 0;
+	while(n < noLines){
+		emptyDivs += "<div style='background-color: gray'>.</div>";
+		n++;
 	}
-}
+	if (side == leftSideID){
+		//$("#left_wadl_output")
+	} else if (side == rightSideID){
 
-function runSampleTest(process){
-	console.debug("running sample test");
-	if (process === 'analyze'){
-		$('#urlInputA' + '_'+"0").val("https://api.github.com/users");
-		analyzeBtn();
-	} else if (process === 'compare'){
-		$('#urlInputA' + '_'+"0").val("https://api.github.com/users/penguinsource/repos");
-		$('#urlInputB' + '_'+"0").val("https://api.github.com/users/fokaefs/repos");
-		compareBtn();
-	} else if (process === 'crossServiceCompare'){
-		$('#urlInputA' + '_'+"0").val("https://graph.facebook.com/oprescu3");
-		$('#urlInputB' + '_'+"0").val("https://graph.facebook.com/jack");
-		crossServiceCompareBtn();
 	}
+	
+	//var abc = startAtLineIndex + "_" + side;
+	if (DEBUG_PRINT){console.log("function addGraySpace: startAtLineIndex is " +  startAtLineIndex);}
+	
+	var elemToInsertAfter = $("*[data-lineNumber=" + startAtLineIndex + "]");
+	$(emptyDivs).insertAfter( elemToInsertAfter );
+	console.log("insert on side: " + side + " after elem with id: " + elemToInsertAfter.attr("id") );
 }

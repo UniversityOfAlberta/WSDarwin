@@ -23,7 +23,15 @@
 
 <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script> -->
 
+<!-- User-Defined js -->
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/setup.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/utilityFuncs.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/guiFuncs.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/compareFuncs.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/crossServiceComparisonFuncs.js"></script>
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/generalFuncs.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/testFuncs.js"></script>
+
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/ObjTree.js"></script>
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdiff.js"></script>
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdifflib-master/difflib.js"></script>
