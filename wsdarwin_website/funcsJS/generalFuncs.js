@@ -26,25 +26,6 @@ var level = 1;
 // highlight colors
 var crossServiceMappingsHighlightColor = "#cdfeff";
 
-// class declarations
-function wadl_doc(){
-
-	this.xmlDoc = null;
-
-	this.hello = function(){
-		alert('Hello World ' + this.xmlDoc);
-	}
-
-	this.setXmlDoc = function(arg){
-		this.xmlDoc = arg;
-	}
-
-	this.getXmlDoc = function(){
-		return this.xmlDoc;
-	}
-
-}
-
 var crossMappings = new Array();
 
 function crossServiceCompareBtn(){
@@ -73,7 +54,7 @@ function crossServiceCompareBtn(){
 	api_call_url = server_api_url + process_mode;
 	ajaxData = {newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id, compareURLs: compareDataJSON, compareWADLfiles: jsonCompareWadlURLs};
 
-	runAnalysis("crossServiceCompare", api_call_url, ajaxData);
+	getWSDarwinAnalysis("crossServiceCompare", api_call_url, ajaxData);
 }
 
 function compareBtn(){
@@ -102,7 +83,7 @@ function compareBtn(){
 	api_call_url = server_api_url + process_mode;
 	ajaxData = {newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id, compareURLs: compareDataJSON, compareWADLfiles: jsonCompareWadlURLs};
 	
-	runAnalysis("compare", api_call_url, ajaxData);
+	getWSDarwinAnalysis("compare", api_call_url, ajaxData);
 }
 
 function analyzeBtn(){
@@ -125,10 +106,10 @@ function analyzeBtn(){
 	api_call_url = server_api_url + "analyze";
 	ajaxData = { newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id };
 
-	runAnalysis("analyze", api_call_url, ajaxData);
+	getWSDarwinAnalysis("analyze", api_call_url, ajaxData);
 }
 
-function runAnalysis(process_mode, api_call_url, ajaxData){
+function getWSDarwinAnalysis(process_mode, api_call_url, ajaxData){
 	// reset html elements
 	$("#left_wadl_output").hide();
 	$("#right_wadl_output").hide();
@@ -136,7 +117,7 @@ function runAnalysis(process_mode, api_call_url, ajaxData){
 	$("#wadlOutput").html('');
 	
 	if (DEBUG_PRINT){
-		console.log("function runAnalysis:");
+		console.log("function getWSDarwinAnalysis:");
 		console.debug("api call: " 	+ api_call_url);
 		console.debug("ajax data: ");
 		console.debug(ajaxData);
@@ -159,172 +140,190 @@ function runAnalysis(process_mode, api_call_url, ajaxData){
 			var delta_comparison_url = jsonObj[3];
 
 			if (process_mode == "analyze"){
-				if (DEBUG_PRINT){console.log("analyzing wadl's");}
-				add_elements_mode = true;
-				getWADL(analysis_merged_wadl_url_path);
+				processWSDarwinAnalyze(analysis_merged_wadl_url_path);
 			} else if (process_mode == "compare"){
-				if (DEBUG_PRINT){console.log("comparing wadl's");}
-				add_elements_mode = false;
-
-				getWADL(analysis_merged_wadl_url_path);
-				firstWADL = wadl_download_str;
-				getWADL(compare_merged_wadl_url_path);
-				secondWADL = wadl_download_str;
-
-				compareXMLDoc = loadXMLDoc(analysis_merged_wadl_url_path);
-				oldRootDoc = compareXMLDoc.documentElement;
-				compareXMLDoc = loadXMLDoc(compare_merged_wadl_url_path);
-				newRootDoc = compareXMLDoc.documentElement;
-				init_node(oldRootDoc, "_a_");
-				init_node(newRootDoc, "_b_");
-
-				if ( $('.diffTypeText:checked').val() ) {
-					//text_diff_JS(1);								// different type of text comparison diff
-					sideBySideDiff();								// text comparison diff
-				} else if ( $('.diffTypeJava:checked').val() ) {
-					java_diff(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
-				}
-				
-				//saveWADLtoFile();
+				processWSDarwinCompare(
+					analysis_merged_wadl_url_path, 
+					compare_merged_wadl_url_path, 
+					delta_comparison_url, 
+					process_mode);
 			} else if (process_mode == "crossServiceCompare"){
-				if (DEBUG_PRINT){console.log("cross service comparing wadl's");}
-				add_elements_mode = false;
-
-				getWADL(analysis_merged_wadl_url_path);
-				firstWADL = wadl_download_str;
-				getWADL(compare_merged_wadl_url_path);
-				secondWADL = wadl_download_str;
-
-				compareXMLDoc = loadXMLDoc(analysis_merged_wadl_url_path);
-				oldRootDoc = compareXMLDoc.documentElement;
-				compareXMLDoc = loadXMLDoc(compare_merged_wadl_url_path);
-				newRootDoc = compareXMLDoc.documentElement;
-				init_node(oldRootDoc, "_a_");
-				init_node(newRootDoc, "_b_");
-
-				if (DEBUG_PRINT){console.debug("delta comparison url is: " + delta_comparison_url);}
-
-				java_diff(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
-
-				// cross service comparison highlighting mappings
-	        	if (jsonObj[4] != null){
-
-	        		//var listOfMappings = jsonObj[4];
-	        		var n = 0;
-	        		var arrayInd = 0;
-	        		var listMappings = JSON.parse(jsonObj[4]);
-	        		if (DEBUG_PRINT){console.debug("list of mappings: " + listMappings);}
-	        		var mappingRow = listMappings[n];
-	        		var elementsAnalyzed = new Array();
-
-					crossMappings = [];
-					var csind = 0;
-	        		while(mappingRow != null){
-
-	        			var leftElem = mappingRow[0];
-	        			var rightElem = mappingRow[1];
-	        			var score = mappingRow[2];
-
-	        			var leftElemArray = mappingRow[0].split(":=");
-	        			var rightElemArray = mappingRow[1].split(":=");
-
-	        			var leftElemName = leftElemArray[0];
-	        			var leftElemType = leftElemArray[1];
-	        			var rightElemName = rightElemArray[0];
-	        			var rightElemType = rightElemArray[1];
-
-	        			if ( $.inArray(leftElem, elementsAnalyzed) > -1 ){
-	        				// leftElem[0] has already been analyzed
-	        				var ind = $.inArray(leftElem, elementsAnalyzed);
-	              			var mapObject = new Object();
-	        				mapObject.elemName = rightElem;
-	        				mapObject.score = score;
-	        				mapObject.elemId = "csr_" + csind;
-	        				csind++;
-	        				crossMappings[ind][1].push(mapObject);
-	        			} else {
-	        				crossMappings[arrayInd] = new Array(2);
-	        				var leftObject = new Object();
-	        				leftObject.elemName = leftElem;
-	        				leftObject.elemId = "csl_" + csind;
-	        				csind++;
-	        				crossMappings[arrayInd][0] = leftObject;
-	        				crossMappings[arrayInd][1] = new Array();
-	        				var mapObject = new Object();
-	        				mapObject.elemName = rightElem;
-	        				mapObject.score = score;
-	        				mapObject.elemId = "csr_" + csind;
-	        				csind++;
-	        				crossMappings[arrayInd][1].push(mapObject);
-
-	        				elementsAnalyzed[arrayInd] = leftElem;
-	        				arrayInd++;
-	        			}
-	        			n++;
-	        			mappingRow = listMappings[n];
-	        		}
-
-	        		var emptyBtn 		= "<a href='#' class='list-group-item' style='visibility: hidden'>empty</a>";
-	        		var emptyDivPadding = "<div style='width: 100%; height: 10px;'></div>";
-
-	        		$("#leftHalfDiv").html("");
-	        		$("#rightHalfDiv").html("");
-
-	        		console.log('start of crossMappings print');
-	        		console.debug(crossMappings);
-	        		console.log('end of crossMappings print');
-
-	        		for (var i = 0; i < crossMappings.length; i++){
-	        			console.log("left elem: " + crossMappings[i][0] + " and it's connections: ");
-	        			//var leftEname 	= crossMappings[i][0].split(":=")[0];
-	        			var leftEname 	= crossMappings[i][0].elemName.split(":=")[0];
-	        			var leftBtnId 	= crossMappings[i][0].elemId;
-	        			var leftBtn 	= "<a href='javascript:void(0)' id='" + leftBtnId + "' onClick='highlightLeftCrossServiceMappings(" + i + ")' class='list-group-item'>" + leftEname + "</a>";
-	        			$("#leftHalfDiv").append(leftBtn);
-	        			for (var k = 0; k < crossMappings[i][1].length; k++){
-	        				console.log(" ------> " + crossMappings[i][1][k].elemName);
-	        				//var leftEname = crossMappings[i][0].split(":=")[0];
-	        				var rightEname 	 = crossMappings[i][1][k].elemName.split(":=")[0];
-	        				var rightBtnId 	 = crossMappings[i][1][k].elemId;
-	        				var mappingScore = crossMappings[i][1][k].score;
-
-	        				var highlightColor = '';
-							if ( (mappingScore > 0) && (mappingScore <= 24) ){
-								highlightColor = "red";		// red
-							} else if ( (mappingScore > 24) && (mappingScore <= 49) ){
-								highlightColor = "orange";	// orange
-							} else if ( (mappingScore > 49) && (mappingScore <= 74) ){
-								highlightColor = "yellow";	// yellow
-							} else if ( (mappingScore > 74) && (mappingScore <= 100) ){
-								highlightColor = "green";	// green
-							}
-
-	        				//var leftBtn 	= "<a href='#' class='list-group-item' onClick='highlightCrossServiceMappings(\"" + leftEname + "\", \"" + rightEname + "\")'>" + crossMappings[i][0] + "  [" + crossMappings[i][1][k].score + "]   " + crossMappings[i][1][k].elemName + "</a>";
-	        				var rightBtn 	= "<a href='javascript:void(0)' id='" + rightBtnId + "' onClick='highlightRightCrossServiceMappings(" + i + ", " + k + ")' class='list-group-item' style=\"background-color: " + highlightColor + "\" >" + rightEname + "</a>";
-	        				
-	        				if (k != 0){
-	        					$("#leftHalfDiv").append(emptyBtn);
-	        				}
-	        				$("#rightHalfDiv").append(rightBtn);
-	        				//$("#rightHalfDiv").append("<div><button onClick='highlightCrossServiceMappings(\"" + leftEname + "\", \"" + rightEname + "\")'>" + crossMappings[i][0] + "  [" + crossMappings[i][1][k].score + "]   " + crossMappings[i][1][k].elemName + "</button></div>");
-	        			}
-	        			$("#leftHalfDiv").append("</br>");
-	        			$("#rightHalfDiv").append("</br>");
-	        		}
-	        	} else {
-	        		// NULL
-	        	}
-
+				processWSDarwinCrossServiceCompare(
+					analysis_merged_wadl_url_path, 
+					compare_merged_wadl_url_path, 
+					delta_comparison_url, 
+					jsonObj[4], 
+					process_mode);
 			}
-
-
-
         },
         error: function(xhr, status, error) {
 		  alert("Error accessing app. Please try again !");
 		}
 
     });
+}
+
+function processWSDarwinAnalyze(analysis_merged_wadl_url_path){
+	if (DEBUG_PRINT){console.log("analyzing wadl's");}
+	add_elements_mode = true;
+	processWADLFromPath(analysis_merged_wadl_url_path);
+}
+
+function processWSDarwinCompare(analysis_merged_wadl_url_path, compare_merged_wadl_url_path, delta_comparison_url, process_mode){
+	if (DEBUG_PRINT){console.log("[processWSDarwinCompare]");}
+	add_elements_mode = false;	// adding elements not applicable for the 'compare' process type
+
+	//processWADLFromPath(analysis_merged_wadl_url_path);
+	//firstWADL = wadl_download_str;
+	//processWADLFromPath(compare_merged_wadl_url_path);
+	//secondWADL = wadl_download_str;
+
+	compareXMLDoc = loadXMLDoc(analysis_merged_wadl_url_path);
+	oldRootDoc = compareXMLDoc.documentElement;
+	compareXMLDoc = loadXMLDoc(compare_merged_wadl_url_path);
+	newRootDoc = compareXMLDoc.documentElement;
+	init_node(oldRootDoc, "_a_");
+	init_node(newRootDoc, "_b_");
+
+	if ( $('.diffTypeText:checked').val() ) {
+		//text_diff_JS(1);								// different type of text comparison diff
+		sideBySideDiff();								// text comparison diff
+	} else if ( $('.diffTypeJava:checked').val() ) {
+		processJavaComparison(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
+	}
+}
+
+function processWSDarwinCrossServiceCompare(analysis_merged_wadl_url_path, compare_merged_wadl_url_path, delta_comparison_url, crossServiceMappings, process_mode){
+	if (DEBUG_PRINT){console.log("[processWSDarwinCrossServiceCompare]");}
+	add_elements_mode = false;	// adding elements not applicable for the 'compare' process type
+
+	//processWADLFromPath(analysis_merged_wadl_url_path);
+	//firstWADL = wadl_download_str;
+	//processWADLFromPath(compare_merged_wadl_url_path);
+	//secondWADL = wadl_download_str;
+
+	compareXMLDoc = loadXMLDoc(analysis_merged_wadl_url_path);
+	oldRootDoc = compareXMLDoc.documentElement;
+	compareXMLDoc = loadXMLDoc(compare_merged_wadl_url_path);
+	newRootDoc = compareXMLDoc.documentElement;
+	init_node(oldRootDoc, "_a_");
+	init_node(newRootDoc, "_b_");
+
+	if (DEBUG_PRINT){console.debug("delta comparison url is: " + delta_comparison_url);}
+
+	processJavaComparison(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
+
+	printCrossServiceComparisonMappings(crossServiceMappings);
+}
+
+function printCrossServiceComparisonMappings(crossServiceMappings){
+	if (DEBUG_PRINT){console.log("[printCrossServiceComparisonMappings]");}
+	// cross service comparison highlighting mappings
+	if (crossServiceMappings != null){
+		var n = 0;
+		var arrayInd = 0;
+		var listMappings = JSON.parse(crossServiceMappings);
+		if (DEBUG_PRINT){console.debug("list of mappings: " + listMappings);}
+		var mappingRow = listMappings[n];
+		var elementsAnalyzed = new Array();
+
+		crossMappings = [];
+		var csind = 0;
+		while(mappingRow != null){
+
+			var leftElem = mappingRow[0];
+			var rightElem = mappingRow[1];
+			var score = mappingRow[2];
+
+			var leftElemArray = mappingRow[0].split(":=");
+			var rightElemArray = mappingRow[1].split(":=");
+
+			var leftElemName = leftElemArray[0];
+			var leftElemType = leftElemArray[1];
+			var rightElemName = rightElemArray[0];
+			var rightElemType = rightElemArray[1];
+
+			if ( $.inArray(leftElem, elementsAnalyzed) > -1 ){
+				// leftElem[0] has already been analyzed
+				var ind = $.inArray(leftElem, elementsAnalyzed);
+      			var mapObject = new Object();
+				mapObject.elemName = rightElem;
+				mapObject.score = score;
+				mapObject.elemId = "csr_" + csind;
+				csind++;
+				crossMappings[ind][1].push(mapObject);
+			} else {
+				crossMappings[arrayInd] = new Array(2);
+				var leftObject = new Object();
+				leftObject.elemName = leftElem;
+				leftObject.elemId = "csl_" + csind;
+				csind++;
+				crossMappings[arrayInd][0] = leftObject;
+				crossMappings[arrayInd][1] = new Array();
+				var mapObject = new Object();
+				mapObject.elemName = rightElem;
+				mapObject.score = score;
+				mapObject.elemId = "csr_" + csind;
+				csind++;
+				crossMappings[arrayInd][1].push(mapObject);
+
+				elementsAnalyzed[arrayInd] = leftElem;
+				arrayInd++;
+			}
+			n++;
+			mappingRow = listMappings[n];
+		}
+
+		var emptyBtn 		= "<a href='#' class='list-group-item' style='visibility: hidden'>empty</a>";
+		var emptyDivPadding = "<div style='width: 100%; height: 10px;'></div>";
+
+		$("#leftHalfDiv").html("");
+		$("#rightHalfDiv").html("");
+
+		console.log('start of crossMappings print');
+		console.debug(crossMappings);
+		console.log('end of crossMappings print');
+
+		for (var i = 0; i < crossMappings.length; i++){
+			console.log("left elem: " + crossMappings[i][0] + " and it's connections: ");
+			//var leftEname 	= crossMappings[i][0].split(":=")[0];
+			var leftEname 	= crossMappings[i][0].elemName.split(":=")[0];
+			var leftBtnId 	= crossMappings[i][0].elemId;
+			var leftBtn 	= "<a href='javascript:void(0)' id='" + leftBtnId + "' onClick='highlightLeftCrossServiceMappings(" + i + ")' class='list-group-item'>" + leftEname + "</a>";
+			$("#leftHalfDiv").append(leftBtn);
+			for (var k = 0; k < crossMappings[i][1].length; k++){
+				console.log(" ------> " + crossMappings[i][1][k].elemName);
+				//var leftEname = crossMappings[i][0].split(":=")[0];
+				var rightEname 	 = crossMappings[i][1][k].elemName.split(":=")[0];
+				var rightBtnId 	 = crossMappings[i][1][k].elemId;
+				var mappingScore = crossMappings[i][1][k].score;
+
+				var highlightColor = '';
+				if ( (mappingScore > 0) && (mappingScore <= 24) ){
+					highlightColor = "red";		// red
+				} else if ( (mappingScore > 24) && (mappingScore <= 49) ){
+					highlightColor = "orange";	// orange
+				} else if ( (mappingScore > 49) && (mappingScore <= 74) ){
+					highlightColor = "yellow";	// yellow
+				} else if ( (mappingScore > 74) && (mappingScore <= 100) ){
+					highlightColor = "green";	// green
+				}
+
+				//var leftBtn 	= "<a href='#' class='list-group-item' onClick='highlightCrossServiceMappings(\"" + leftEname + "\", \"" + rightEname + "\")'>" + crossMappings[i][0] + "  [" + crossMappings[i][1][k].score + "]   " + crossMappings[i][1][k].elemName + "</a>";
+				var rightBtn 	= "<a href='javascript:void(0)' id='" + rightBtnId + "' onClick='highlightRightCrossServiceMappings(" + i + ", " + k + ")' class='list-group-item' style=\"background-color: " + highlightColor + "\" >" + rightEname + "</a>";
+				
+				if (k != 0){
+					$("#leftHalfDiv").append(emptyBtn);
+				}
+				$("#rightHalfDiv").append(rightBtn);
+				//$("#rightHalfDiv").append("<div><button onClick='highlightCrossServiceMappings(\"" + leftEname + "\", \"" + rightEname + "\")'>" + crossMappings[i][0] + "  [" + crossMappings[i][1][k].score + "]   " + crossMappings[i][1][k].elemName + "</button></div>");
+			}
+			$("#leftHalfDiv").append("</br>");
+			$("#rightHalfDiv").append("</br>");
+		}
+	} else {
+		// NULL
+	}
 }
 
 function sideBySideDiff() {
@@ -335,123 +334,10 @@ function inlineDiff() {
 	text_diff_JS(1);
 }
 
-function downloadWADL(extended){
-	if (DEBUG_PRINT){console.log("downloading wadl file. Extended? " + extended);}
-    
-    var dl_url = "/wsdarwin/funcsPHP/downloadWADLfile.php";
-    var wadl_to_download = (extended) ? extended_wadl_download_str : wadl_download_str;
-    $.ajax({
-    	url: dl_url,
-        type: "POST",
-        data: { wadlString: wadl_to_download },
-        dataType: "html",
-        success: function(response) {
-        	console.log("success?? response: " + response);
-        	onclick="this.target='_blank';"
-        	window.location = dl_url;
-        },
-        error: function(xhr, status, error) {
-		  console.log("Error acccesing downloadWADLfile.");
-		}
+// wadl utility functions 
+// ( they are not in a separate file as it seems everything is loading faster if these stay in the same file)
 
-    });
-}
-
-function removeNode(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	console.log('found node name: ' + foundNode.nodeName + ', parent: ' + foundNode.parentNode.nodeName);
-	foundNode.parentNode.removeChild(foundNode);
-	setup_wadl_print();
-}
-
-function hideNodesChildren(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	foundNode.minimized = true;
-	setup_wadl_print();
-}
-
-function showNodesChildren(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	foundNode.minimized = false;
-	setup_wadl_print();
-}
-
-function addResource(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var newNode=xmlDoc.createElement("resource");
-	newNode.setAttribute("path","");
-	foundNode.appendChild(newNode);
-	//document.getElementById("popupDiv").style.visibility="visible";
-	setup_wadl_print();
-}
-
-function addMethod(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var methodNode=xmlDoc.createElement("method");
-	methodNode.setAttribute("name","");
-
-	foundNode.appendChild(methodNode);
-
-	setup_wadl_print();
-}
-
-function addParam(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var newNode=xmlDoc.createElement("param");
-	newNode.setAttribute("path","");
-	foundNode.appendChild(newNode);
-
-	setup_wadl_print();
-}
-
-function addRequest(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var newNode=xmlDoc.createElement("request");
-	foundNode.appendChild(newNode);
-
-	setup_wadl_print();
-}
-
-function addResponse(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var newNode=xmlDoc.createElement("response");
-	newNode.setAttribute("status","");
-	foundNode.appendChild(newNode);
-
-	setup_wadl_print();
-}
-
-function addRepresentation(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var newNode=xmlDoc.createElement("representation");
-	newNode.setAttribute("element","");
-	newNode.setAttribute("mediaType","");
-	foundNode.appendChild(newNode);
-
-	setup_wadl_print();
-}
-
-function addFault(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var newNode=xmlDoc.createElement("fault");
-	newNode.setAttribute("status","");
-	newNode.setAttribute("mediaType","");
-	foundNode.appendChild(newNode);
-
-	setup_wadl_print();
-}
-
-function updateAttribute(mynodeid, nodeAttrName, newAttrValue){
-	var foundNode = find_node(rootNode, mynodeid);
-	for (var i = 0; i < foundNode.attributes.length; i++){
-		if (foundNode.attributes[i].nodeName == nodeAttrName){
-			foundNode.attributes[i].value = newAttrValue;
-			console.log("updated node with id: " + foundNode.my_id + ", nodeName: " + foundNode.attributes[i].nodeName + ",value of attr:" + foundNode.attributes[i].value);
-		}
-	}
-	setup_wadl_print();
-}
-
+// find and return (if found) the node in the tree with root node 'mynode'
 function find_node(mynode, sid){
 	if (mynode.my_id == sid){
 		window.foundNode = mynode;
@@ -471,7 +357,6 @@ var foundNode2 = {};
 // this function is used only once, and has been made in order to be able to also save an 
 // element's position where it was found (the function has been made specifically for creating 
 // a simple type when converting a type to an enumeration )
-
 // TO DO: fix 'find_node' ( this function might contain a bug - either it does or I forgot to
 // mention that it is fixed - update: seems to work ok after a simple test )
 function find_node_2(mynode, sid){
@@ -491,12 +376,16 @@ function find_node_2(mynode, sid){
 	return foundNode2;
 }
 
-function init_node(myNode, idSubname){
+// given a rootNode of a tree, initiate 2 properties for each node in the tree:
+// a 'minimized' variable (default set to false); to keep track whether a node is minimized or not
+// an increasing 'my_id' variable with a specific suffix (var 'suffix')
+function init_node(rootNode, suffix){
 	node_id = 0;
-	init_element_minimize_property(myNode);
-	init_element_ids(myNode, idSubname);
+	init_element_minimize_property(rootNode);
+	init_element_ids(rootNode, suffix);
 }
 
+// initiate the 'minimized' var for each node in tree with root node 'myNode'
 function init_element_minimize_property(myNode){
 	myNode.minimized = false;
 	for (var i = 0; i < myNode.childNodes.length; i++){
@@ -504,11 +393,12 @@ function init_element_minimize_property(myNode){
 	}
 }
 
-function init_element_ids(myNode, idSubname){
-	myNode.my_id = node_id + idSubname;
+// initiate the 'my_id' var for each node in tree with root node 'myNode'
+function init_element_ids(myNode, suffix){
+	myNode.my_id = node_id + suffix;
 	node_id++;
 	for (var i = 0; i < myNode.childNodes.length; i++){
-		init_element_ids(myNode.childNodes[i], idSubname);
+		init_element_ids(myNode.childNodes[i], suffix);
 	}
 }
 
@@ -522,7 +412,7 @@ function unhighlightRemovingDiv(divid){
 	$("#"+divid).css('text-decoration', '');
 }
 
-function java_diff(deltas_path, oldDocNode, newDocNode, process_type){
+function processJavaComparison(deltas_path, oldDocNode, newDocNode, process_type){
 	console.debug("JAVA DIFF: " + deltas_path);
 	xmlDoc = loadXMLDoc(deltas_path);
 	mainNode=xmlDoc.documentElement;
@@ -539,7 +429,7 @@ function java_diff(deltas_path, oldDocNode, newDocNode, process_type){
 	padding_left = 0;
 	level = 1;
 	lineNumber = 0;
-	parse_wadl_html(oldDocNode);
+	generateWADLDocument(oldDocNode);
 
 	var oldText = strapped_html_wadl_string;
 	strapped_html_wadl_string = '';
@@ -547,7 +437,7 @@ function java_diff(deltas_path, oldDocNode, newDocNode, process_type){
 	padding_left = 0;
 	level = 1;
 	lineNumber = 0;
-	parse_wadl_html(newDocNode);
+	generateWADLDocument(newDocNode);
 
 	var newText = strapped_html_wadl_string;
 	strapped_html_wadl_string = '';
@@ -725,32 +615,6 @@ function highlightChangedResource(splits, xml_doc, type){
 	}
 }
 
-function contains(list, obj) {
-    for (var i = 0; i < list.length; i++) {
-        if (list[i] === obj) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function reassignLineNumbers(side){
-	if (side == leftSideID){
-		lineNumber = 1;
-		$("#left_wadl_output").children().each(function(){
-			$(this).attr("data-lineNumber", lineNumber+"_a");
-			lineNumber++;
-		});
-	} else if (side == rightSideID){
-		lineNumber = 1;
-		$("#right_wadl_output").children().each(function(){
-			$(this).attr("data-lineNumber", lineNumber+"_b");
-			lineNumber++;
-		});
-	}
-	
-}
-
 // pass (method_id, "resources node")
 function highlightResourceRec(resource_id, node, highlightColor){
 	for (var i = 0; i < node.childNodes.length; i++){
@@ -880,6 +744,31 @@ function highlightCTypeRec(ctype_id, node, type){
 				}
 			}
 		}
+	}
+}
+
+function contains(list, obj) {
+    for (var i = 0; i < list.length; i++) {
+        if (list[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function reassignLineNumbers(side){
+	if (side == leftSideID){
+		lineNumber = 1;
+		$("#left_wadl_output").children().each(function(){
+			$(this).attr("data-lineNumber", lineNumber+"_a");
+			lineNumber++;
+		});
+	} else if (side == rightSideID){
+		lineNumber = 1;
+		$("#right_wadl_output").children().each(function(){
+			$(this).attr("data-lineNumber", lineNumber+"_b");
+			lineNumber++;
+		});
 	}
 }
 
@@ -1075,13 +964,13 @@ function highlightXSElementWithName(xselementName, node, highlightColor ){
 	}
 }
 
-function getWADL(wadl_url_path){
+function processWADLFromPath(wadl_url_path){
 	console.log("WADL URL PATH IS " + wadl_url_path);
 	xmlDoc = loadXMLDoc(wadl_url_path);
 	rootNode=xmlDoc.documentElement;
 	// nodeName, attributes, childNodes
 
-	setup_wadl_print();
+	start_wadl_parsing();
 }
 
 function loadXMLDoc(filename){
@@ -1097,31 +986,18 @@ function loadXMLDoc(filename){
 }
 
 // setup and print the wadl document ( in html form)
-function setup_wadl_print(){
+function start_wadl_parsing(){
 	html_wadl_string = '';
 	strapped_html_wadl_string = '';
-
 	wadl_download_str 			= '';
 	extended_wadl_download_str 	= '';
 	spaces = 0;
 	init_element_ids(rootNode, "");
 
-	parse_wadl_html(rootNode);
+	generateWADLDocument(rootNode);
 
 	$("#wadlOutput").html(html_wadl_string);
 	initBootstrapJS_tooltips();
-}
-
-// initializing bootstrap js tooltips
-// For performance reasons, the Tooltip and Popover data-apis are
-// opt-in, meaning you must initialize them yourself.
-function initBootstrapJS_tooltips(){
-	jQuery('[data-toggle=tooltip]').tooltip();
-}
-
-function initBootstrapJS_popover(){
-	console.log('init');
-	jQuery('a[data-toggle=popover]').popover();
 }
 
 function appendToHTML(side, str, elemClassName){
@@ -1306,12 +1182,12 @@ function printChildren(myNode, extendedWADL){
 		// print myNode's children nodes
 		for (var i = 0; i < myNode.childNodes.length; i++){
 			if ((myNode.nodeName === "xs:element") || (extendedWADL)){
-				parse_wadl_html(myNode.childNodes[i], true);
+				generateWADLDocument(myNode.childNodes[i], true);
 			} else {
 				spaces += 4;
 				margin_left += 10;
 				level++;
-				parse_wadl_html(myNode.childNodes[i], false);
+				generateWADLDocument(myNode.childNodes[i], false);
 			}
 		}
 	}
@@ -1390,16 +1266,16 @@ function addSpacesTwo(extendedWADL){
 
 var spanElem = "";
 // parses the wadl/xml document recursively and print it out
-function parse_wadl_html(myNode, extendedWADL){
+function generateWADLDocument(myNode, extendedWADL){
 	if (typeof extendedWADL == "undefined"){
 		extendedWADL = false;
 	}
-	console.log("parse_wadl_html: ", myNode.nodeName, extendedWADL);
+	console.log("generateWADLDocument: ", myNode.nodeName, extendedWADL);
 	addSpaces(extendedWADL);
 
 	// TO DO: optimize these prints, they are everywhere and seem too random;
 	// ALSO: the names are not specific enough, such as html_wadl_string, spanElem.. there needs to be a logic name for each
-	// ALSO: rename functions ( such as parse_wadl_html ); create separate classes that parse/print wadls
+	// ALSO: rename functions ( such as generateWADLDocument ); create separate classes that parse/print wadls
 	// etc..
 	// the cross service comparison highlighting part is a big module itself, so it should be separated
 	// ALSO: separate the normal comparison from the cross service comparison; the latter depends on the first.
@@ -1486,7 +1362,7 @@ var reverseEnumToNormalTypeHandler = function(myNode_id, btn){
 			enumConvertedArray.splice(i, 1);
 		}
 	}
-	setup_wadl_print();
+	start_wadl_parsing();
 }
 
 // other possible name: createSimpleTypeForXSElement
@@ -1557,7 +1433,7 @@ var createEnumSimpleTypeHandler = function(myNode_id, btn){
 	obj.new_simpletype 	= simpleTypeNode;
 	enumConvertedArray.push(obj);
 
-	setup_wadl_print();
+	start_wadl_parsing();
 }
 
 function printAddElementButtons(myNode, extendedWADL){
