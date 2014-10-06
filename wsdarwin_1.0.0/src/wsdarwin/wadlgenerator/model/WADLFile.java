@@ -124,20 +124,20 @@ public class WADLFile implements WADLElement {
 	}
 
 	public void buildWADL(HashSet<XSDFile> xsdFilenames, RequestAnalyzer analyzer, String resourceBase, String methodName, int status) {
-        for(XSDFile xsd : xsdFilenames) {
+        /*for(XSDFile xsd : xsdFilenames) {
         	schema.compareToMerge(xsd);
-        }
+        }*/
         
         // Create all WADL objects
         Resources resources = new Resources(resourceBase);
         resourcesElements.put(resourceBase, resources);
         
-        Resource resource = new Resource(analyzer.getResourcePath()[0]);
-        resources.addResourceElement(analyzer.getResourcePath()[0], resource);
+        Resource resource = new Resource(analyzer.getResourceID(analyzer.getResourcePath()[0]));
+        resources.addResourceElement(analyzer.getResourceID(analyzer.getResourcePath()[0]), resource);
         Resource resourceElement = null;
         for(int i=1; i<analyzer.getResourcePath().length; i++) {
-        	resourceElement = new Resource(analyzer.getResourcePath()[i]);
-        	resource.addResourceElement(analyzer.getResourcePath()[i], resourceElement);
+        	resourceElement = new Resource(analyzer.getResourceID(analyzer.getResourcePath()[i]));
+        	resource.addResourceElement(analyzer.getResourceID(analyzer.getResourcePath()[i]), resourceElement);
         	resource = resourceElement;
         }
         

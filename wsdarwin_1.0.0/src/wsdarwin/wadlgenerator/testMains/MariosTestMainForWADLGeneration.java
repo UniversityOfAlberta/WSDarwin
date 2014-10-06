@@ -33,8 +33,8 @@ public class MariosTestMainForWADLGeneration {
 	 */
 	public static final Boolean DEBUG = true;
 	
-	private static final String VENDOR = "github";
-	private static final String PATH_PREFIX = "files/icsm2014/"+VENDOR;
+	private static final String VENDOR = "tumblr";
+	private static final String PATH_PREFIX = "files/"+VENDOR+"/v2";
 	
 	private static final String FILENAME_DIR = PATH_PREFIX+"/wadl/";
 	private static final String XSD_DIR = PATH_PREFIX+"/xsd/";
@@ -112,9 +112,18 @@ public class MariosTestMainForWADLGeneration {
 		        BufferedReader in = new BufferedReader(
                     new InputStreamReader(yc.getInputStream()));
 		        String inputLine;
-		        BufferedWriter out = new BufferedWriter(new FileWriter(new File(RESPONSE_DIR+FILENAME_XML)));
+		        File responseFile = new File(RESPONSE_DIR+FILENAME_XML);
+				BufferedWriter out = new BufferedWriter(new FileWriter(responseFile));
 
 		        while ((inputLine = in.readLine()) != null) {
+		        	int listIndex = inputLine.indexOf("[");
+					int mapIndex = inputLine.indexOf("{");
+					if(listIndex<mapIndex) {
+						inputLine = inputLine.substring(listIndex);
+					}
+					else {
+						inputLine = inputLine.substring(mapIndex);
+					}
 		            out.write(inputLine);
 		            out.newLine();
 		        }
@@ -122,7 +131,7 @@ public class MariosTestMainForWADLGeneration {
 		        out.close();
 		        Response2XSD xsdBuilder = new Response2XSD();
 	        
-				xsdBuilder.buildXSDFromJSON(RESPONSE_DIR+FILENAME_XML, analyzer.getMethodID());
+				xsdBuilder.buildXSDFromJSON(responseFile, analyzer.getMethodID());
 				XSDFile xsdFile = xsdBuilder.getXSDFile();
 				//XSDFile mergedXSDFile = responses.get(analyzer.getMethodID());
 				

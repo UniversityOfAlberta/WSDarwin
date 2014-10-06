@@ -72,32 +72,34 @@ public class Response2XSD {
 		xsdFile.setResponseElement(element);
 	}
 
-	public void buildXSDFromJSON(String sourceJSONFilename, String methodID) throws IOException {
+	public void buildXSDFromJSON(File source, String methodID) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		File source = new File(sourceJSONFilename);
 		HashMap<String, XSDElement> elements = new HashMap<String, XSDElement>();
 		xsdFile = new XSDFile(elements);
 		BufferedReader in = new BufferedReader(new FileReader(source));
 		String firstLine = in.readLine();
-		if (firstLine.startsWith("[")) {
-			List<Map<String, Object>> jsonList = mapper.readValue(source,
-					new TypeReference<List<Map<String, Object>>>() {
-					});
-			if (!jsonList.isEmpty()) {
-				XSDElement element = getElementFromJSONNode(jsonList.get(0), "",
-						methodID);
-				for (Map<String, Object> map : jsonList) {
-					element.getType().compareToMerge(getElementFromJSONNode(map, "", methodID).getType());
+			if (firstLine.startsWith("[")) {
+				List<Map<String, Object>> jsonList = mapper.readValue(source,
+						new TypeReference<List<Map<String, Object>>>() {
+						});
+				if (!jsonList.isEmpty()) {
+					XSDElement element = getElementFromJSONNode(
+							jsonList.get(0), "", methodID);
+					for (Map<String, Object> map : jsonList) {
+						element.getType().compareToMerge(
+								getElementFromJSONNode(map, "", methodID)
+										.getType());
+					}
+					xsdFile.setResponseElement(element);
 				}
+			} else {
+				Map<String, Object> jsonMap = mapper.readValue(source,
+						new TypeReference<Map<String, Object>>() {
+						});
+				XSDElement element = getElementFromJSONNode(jsonMap, "",
+						methodID);
 				xsdFile.setResponseElement(element);
 			}
-		} else {
-			Map<String, Object> jsonMap = mapper.readValue(source,
-					new TypeReference<Map<String, Object>>() {
-					});
-			XSDElement element = getElementFromJSONNode(jsonMap, "", methodID);
-			xsdFile.setResponseElement(element);
-		}
 		in.close();
 	}
 

@@ -80,14 +80,14 @@ public class WSDarwinService extends Application{
 	// web service directories
 
 	// 1: ( local tomcat path )
-	private static final String PATH_PREFIX_TWO = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
-	private static final String PATH_PREFIX_FILES = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
-	private static final String LOCALHOST_FILES_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
+	//private static final String PATH_PREFIX_TWO = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
+	//private static final String PATH_PREFIX_FILES = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
+	//private static final String LOCALHOST_FILES_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
 	
 	// 2: ( ssrg17.cs.ualberta.ca tomcat path )
-	//private static final String PATH_PREFIX_TWO = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/icsm2014/"+VENDOR;
-	//private static final String PATH_PREFIX_FILES = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/";
-	//private static final String LOCALHOST_FILES_PATH = "http://ssrg17.cs.ualberta.ca:8080/wsdarwin_1.0.0/files/";
+	private static final String PATH_PREFIX_TWO = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
+	private static final String PATH_PREFIX_FILES = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/";
+	private static final String LOCALHOST_FILES_PATH = "http://ssrg17.cs.ualberta.ca:8080/wsdarwin_1.0.0/files/";
 	
 	private static final String FILENAME_DIR_TWO = PATH_PREFIX_TWO+"/wadl/";
 	private static final String RESPONSE_DIR_TWO = PATH_PREFIX_TWO+"/responses/";
@@ -125,14 +125,6 @@ public class WSDarwinService extends Application{
 		
 		returnArray.add(analysis_wadl_merged_path_url);
 		String ret = gson.toJson(returnArray);
-		
-		/*String regex = "\\b(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
-		if (Pattern.matches(regex, "http://google.com")){
-			System.out.println("BLAH ONE !");
-		}
-		if (Pattern.matches(regex, "https://avatars.githubusercontent.com/u/100?v=2")){
-			System.out.println("BLAH TWO !");
-		}*/
 		
 		return ret;
 		
@@ -445,7 +437,8 @@ public class WSDarwinService extends Application{
 		    String inputLine;
 
 		    //BufferedWriter out = new BufferedWriter(new FileWriter(new File(RESPONSE_DIR+FILENAME_XML)));
-		    BufferedWriter out = new BufferedWriter(new FileWriter(new File(RESPONSE_DIR_TWO+FILENAME_XML)));
+		    File responseFile = new File(RESPONSE_DIR_TWO+FILENAME_XML);
+			BufferedWriter out = new BufferedWriter(new FileWriter(responseFile));
 
 		    while ((inputLine = in.readLine()) != null) {
 		        out.write(inputLine);
@@ -457,7 +450,7 @@ public class WSDarwinService extends Application{
 		    Response2XSD xsdBuilder = new Response2XSD();
 		    
 			//xsdBuilder.buildXSDFromJSON(RESPONSE_DIR+FILENAME_XML, analyzer.getMethodID());
-		    xsdBuilder.buildXSDFromJSON(RESPONSE_DIR_TWO+FILENAME_XML, analyzer.getMethodID());
+		    xsdBuilder.buildXSDFromJSON(responseFile, analyzer.getMethodID());
 		    
 		    XSDFile xsdFile = xsdBuilder.getXSDFile();
 			XSDFile mergedXSDFile = responses.get(analyzer.getMethodID());

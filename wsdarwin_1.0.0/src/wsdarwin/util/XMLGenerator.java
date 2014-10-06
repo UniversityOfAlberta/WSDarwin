@@ -109,8 +109,7 @@ public class XMLGenerator {
 								.getValueFrequencies();
 						Map<String, Integer> typeFrequencies = xsdElement
 								.getTypeFrequencies();
-						appendValueAndTypeFrequencies(xmldoc, childElement,
-								valueFrequencies, typeFrequencies);
+						//appendValueAndTypeFrequencies(xmldoc, childElement,valueFrequencies, typeFrequencies);
 					}
 					sequence.appendChild(childElement);
 				}
@@ -255,8 +254,7 @@ public class XMLGenerator {
 		for (Resource rr : resource) {
 			Element resourceElement = xmldoc.createElement("resource");
 			resourceElement.setAttribute("path", rr.getIdentifier());
-			resourceElement.setAttribute("hasVariableID",
-					"" + rr.hasVariableID());
+			//resourceElement.setAttribute("hasVariableID","" + rr.hasVariableID());
 			resourcesElement.appendChild(resourceElement);
 
 			HashSet<Resource> resourceResources = new HashSet<Resource>();
@@ -288,8 +286,7 @@ public class XMLGenerator {
 							.getValueFrequencies();
 					HashMap<String, Integer> typeFrequencies = par
 							.getTypeFrequencies();
-					appendValueAndTypeFrequencies(xmldoc, paramElement,
-							valueFrequencies, typeFrequencies);
+					//appendValueAndTypeFrequencies(xmldoc, paramElement,valueFrequencies, typeFrequencies);
 					requestElement.appendChild(paramElement);
 				}
 

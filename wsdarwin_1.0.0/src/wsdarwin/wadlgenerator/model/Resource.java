@@ -22,6 +22,7 @@ public class Resource implements WADLElement {
 	private boolean variableID;
 	private HashMap<String, Method> methodElements;
 	private HashMap<String, Resource> resourceElements;
+	private HashMap<String, Param> paramElements;
 	private HashMap<Method, Request> changedMethodRequest;
 	private HashMap<Method, HashSet<Response>> changedMethodResponse;
 	private HashMap<Resource, HashSet<WADLElement>> changedResources;
@@ -31,6 +32,7 @@ public class Resource implements WADLElement {
 		this.variableID = false;
 		this.methodElements = new HashMap<String, Method>();
 		this.resourceElements = new HashMap<String, Resource>();
+		this.paramElements = new HashMap<String, Param>();
 		this.changedMethodRequest = new HashMap<Method, Request>();
 		this.changedMethodResponse = new HashMap<Method, HashSet<Response>>();
 		this.changedResources = new HashMap<Resource, HashSet<WADLElement>>();
@@ -74,6 +76,14 @@ public class Resource implements WADLElement {
 		resourceElements.put(id, element);
 	}
 	
+	public HashMap<String, Param> getParamElements() {
+		return paramElements;
+	}
+	
+	public void addParamElement(String id, Param element) {
+		paramElements.put(id, element);
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -106,6 +116,12 @@ public class Resource implements WADLElement {
 	
 	public HashSet<WADLElement> compareToMerge(Resource resource) {
 		HashSet<WADLElement> elementsAdded = new HashSet<WADLElement>();
+		
+		for(String id : resource.getParamElements().keySet()) {
+			if(!this.getParamElements().containsKey(id)) {
+				elementsAdded.add(resource.getMethodElements().get(id));
+			}
+		}
 
 		for(String id : resource.getMethodElements().keySet()) {
 			if(!this.getMethodElements().containsKey(id)) {
@@ -134,6 +150,10 @@ public class Resource implements WADLElement {
 			else if(e instanceof Resource) {
 				Resource resource = (Resource)e;
 				this.resourceElements.put(resource.getIdentifier(), resource);
+			}
+			else if(e instanceof Param) {
+				Param param = (Param)e;
+				this.paramElements.put(param.getIdentifier(), param);
 			}
 		}	
 		// Request

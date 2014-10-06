@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -17,6 +18,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
@@ -38,7 +40,7 @@ import wsdarwin.parsers.WSDLParser;
  */
 
 public class NewClientAdapterWizard extends Wizard implements IWorkbenchWizard{
-	private DiffInputPage page;
+	private WizardPage page;
 	private Delta diff;
 	private Action action;
 	private ISelection selection;
@@ -69,10 +71,13 @@ public class NewClientAdapterWizard extends Wizard implements IWorkbenchWizard{
 	public void addPages() {
 		if (action.getText().equals("diff")) {
 			page = new DiffInputPage();
-			page.setOldWSDLPath(oldWSDL);
-			page.setNewWSDLPath(newWSDL);
-			page.setOldStubFile(oldStub);
-			page.setNewStubFile(newStub);
+			((DiffInputPage)page).setOldWSDLPath(oldWSDL);
+			((DiffInputPage)page).setNewWSDLPath(newWSDL);
+			((DiffInputPage)page).setOldStubFile(oldStub);
+			((DiffInputPage)page).setNewStubFile(newStub);
+		}
+		else if(action.getText().equals("generate")) {
+			page = new WADLGenerationInputPage();
 		}
 		addPage(page);
 		//NewClientAdapterResourcePage resourcePage = new NewClientAdapterResourcePage("Client test cases", selection);
@@ -87,10 +92,15 @@ public class NewClientAdapterWizard extends Wizard implements IWorkbenchWizard{
 	 * using wizard as execution context.
 	 */
 	public boolean performFinish() {
-		oldWSDL = page.getOldWSDL();
-		newWSDL = page.getNewWSDL();
-		oldStub = page.getOldStubFile();
-		newStub = page.getNewStubFile();
+		if (page instanceof DiffInputPage) {
+			oldWSDL = ((DiffInputPage) page).getOldWSDL();
+			newWSDL = ((DiffInputPage) page).getNewWSDL();
+			oldStub = ((DiffInputPage) page).getOldStubFile();
+			newStub = ((DiffInputPage) page).getNewStubFile();
+		}
+		else if(page instanceof WADLGenerationInputPage) {
+			
+		}
 		/*IRunnableWithProgress op = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
@@ -185,7 +195,36 @@ public class NewClientAdapterWizard extends Wizard implements IWorkbenchWizard{
 	public ICompilationUnit getNewStub() {
 		return newStub;
 	}
+
+	public String getDestinationFolderName() {
+		return ((WADLGenerationInputPage)page).getDestinationFolderName();
+	}
 	
+	public void setDestinationFolderName(String foldername) {
+		((WADLGenerationInputPage)page).setDestinationFolderName(foldername);
+	}
 	
+	public IFolder getDestinationFolder() {
+		return ((WADLGenerationInputPage)page).getDestinationFolder();
+	}
 	
+	public void setDestinationFolder(IFolder folder) {
+		((WADLGenerationInputPage)page).setDestinationFolder(folder);
+	}
+
+	public String getWADLFilename() {
+		return ((WADLGenerationInputPage)page).getWadlFilename();
+	}
+	
+	public void setWADLFilename(String filename) {
+		((WADLGenerationInputPage)page).setWadlFilename(filename);
+	}
+
+	public String getRequestFilename() {
+		return ((WADLGenerationInputPage)page).getRequestFilename();
+	}
+	
+	public void setRequestFilename(String filename) {
+		((WADLGenerationInputPage)page).setRequestFilename(filename);
+	}
 }

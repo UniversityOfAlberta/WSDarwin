@@ -1,0 +1,7 @@
+001 GET http://peacecorps.tumblr.com/api/read/json
+002 GET http://pitchersandpoets.tumblr.com/api/read/json
+003 GET http://peacecorps.tumblr.com/api/read/json?type=text
+004 GET http://pitchersandpoets.tumblr.com/api/read/json?type=photo
+005 GET http://peacecorps.tumblr.com/api/read/json?tagged=senegal
+006 GET http://pitchersandpoets.tumblr.com/api/read/json?start=5&num=10
+007 GET http://peacecorps.tumblr.com/api/read/json?id=96705445057&filter=text

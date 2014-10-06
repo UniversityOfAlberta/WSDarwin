@@ -1,16 +1,29 @@
 package wsdarwin.views;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.*;
 import org.eclipse.ui.wizards.IWizardDescriptor;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -38,6 +51,8 @@ import org.eclipse.ui.*;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.SWT;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,8 +70,15 @@ import wsdarwin.model.Operation;
 import wsdarwin.parsers.WADLParser;
 import wsdarwin.parsers.WSDLParser;
 import wsdarwin.util.DeltaUtil;
+import wsdarwin.util.XMLGenerator;
+import wsdarwin.wadlgenerator.RequestAnalyzer;
+import wsdarwin.wadlgenerator.Response2XSD;
+import wsdarwin.wadlgenerator.model.WADLFile;
+import wsdarwin.wadlgenerator.model.xsd.XSDFile;
+import wsdarwin.wizards.DiffInputPage;
 import wsdarwin.wizards.MyRefactoringWizard;
 import wsdarwin.wizards.NewClientAdapterWizard;
+import wsdarwin.wizards.WADLGenerationInputPage;
 
 /**
  * This sample class demonstrates how to plug-in a new workbench view. The view
@@ -81,6 +103,8 @@ public class WADLView extends ViewPart {
 	public static final String ID = "wsdarwin.views.WSDLView";
 
 	private TreeViewer viewer;
+	private Action generateWADL;
+	private Action generateClientProxy;
 	private Action compareInterfaces;
 	private Action adaptClient;
 	private Action runTests;
@@ -90,6 +114,10 @@ public class WADLView extends ViewPart {
 	private String newWSDL;
 	private ICompilationUnit oldStub;
 	private ICompilationUnit newStub;
+	private String wadlFilename;
+	private String requestFilename;
+	private String destinationFolderName;
+	private IFolder destinationFolder;
 
 	/*
 	 * The content provider class is responsible for providing objects to the
@@ -302,6 +330,7 @@ public class WADLView extends ViewPart {
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
+		manager.add(generateWADL);
 		manager.add(compareInterfaces);
 		manager.add(adaptClient);
 		manager.add(runTests);
@@ -311,6 +340,7 @@ public class WADLView extends ViewPart {
 	}
 
 	private void fillLocalToolBar(IToolBarManager manager) {
+		manager.add(generateWADL);
 		manager.add(compareInterfaces);
 		manager.add(adaptClient);
 		manager.add(runTests);
@@ -318,6 +348,182 @@ public class WADLView extends ViewPart {
 	}
 
 	private void makeActions() {
+		generateWADL = new Action() {
+			public void run() {
+				IWizardDescriptor descriptor = PlatformUI.getWorkbench()
+						.getNewWizardRegistry()
+						.findWizard("wsdarwin.wizards.NewClientAdapterWizard");
+				try {
+					IWizard wizard = descriptor.createWizard();
+					NewClientAdapterWizard ncaw = (NewClientAdapterWizard) wizard;
+					ncaw.setAction(this);
+					
+					if (wadlFilename != null) {
+						ncaw.setWADLFilename(wadlFilename.substring(wadlFilename.lastIndexOf('/')+1));
+					}
+					if (requestFilename != null) {
+						ncaw.setRequestFilename(requestFilename);
+					}
+					if (destinationFolderName != null) {
+						ncaw.setDestinationFolderName(destinationFolderName);
+					}
+					if (destinationFolder != null) {
+						ncaw.setDestinationFolder(destinationFolder);
+					}
+					
+					WizardDialog wd = new WizardDialog(PlatformUI
+							.getWorkbench().getActiveWorkbenchWindow()
+							.getShell(), wizard);
+					wd.setTitle(wizard.getWindowTitle());
+					wd.open();
+					
+					wadlFilename = ncaw.getDestinationFolderName()+"/"+ncaw.getWADLFilename();
+					requestFilename = ncaw.getRequestFilename();
+					destinationFolderName = ncaw.getDestinationFolderName();
+					destinationFolder = ncaw.getDestinationFolder();
+					final String wadl = ncaw.getWADLFilename();
+					
+					
+					IRunnableWithProgress op = new IRunnableWithProgress() {
+						public void run(IProgressMonitor monitor) throws InvocationTargetException {
+							try {
+								monitor.beginTask("Generating WADL Interface", 1);
+								try {
+									ArrayList<String> requests = new ArrayList<String>();
+									ArrayList<String> uris = new ArrayList<String>();
+									HashMap<String, XSDFile> responses = new HashMap<String, XSDFile>();
+									
+									BufferedReader testIn = new BufferedReader(new FileReader(new File(requestFilename)));
+									String line = testIn.readLine();
+									
+									while(line != null) {
+										requests.add(line);
+										String[] tokens = line.split(" ");
+										uris.add(tokens[2]);
+										line = testIn.readLine();
+									}
+									
+									RequestAnalyzer analyzer = new RequestAnalyzer();
+									String resourceBase = analyzer.batchRequestAnalysis(uris);
+									for(String methodName : analyzer.getMethodNamesFromBatch(uris)) {
+										responses.put(methodName, new XSDFile());
+									}
+
+									XMLGenerator generator = new XMLGenerator();
+									
+									WADLFile mergedWADL = new WADLFile(wadlFilename, null, new XSDFile());
+									HashSet<XSDFile> grammarSet = new HashSet<XSDFile>();
+									for(String requestLine : requests) {
+										String[] tokens = requestLine.split(" ");
+										String id = "";
+										String methodName = "";
+										String urlLine = "";
+										if (tokens.length>1) {
+											id = tokens[0];
+											methodName = tokens[1];
+											urlLine = tokens[2];
+										}
+										analyzer.resetUriString(urlLine);
+										final String FILENAME_JSON  = id+".json";
+										
+								        
+								        // URLConnection
+										URL yahoo = new URL(urlLine);
+								        URLConnection yc = yahoo.openConnection();
+								        BufferedReader in = new BufferedReader(
+						                    new InputStreamReader(yc.getInputStream()));
+								        String inputLine;
+								        File jsonFile = new File(destinationFolderName+"\\"+FILENAME_JSON);
+										BufferedWriter out = new BufferedWriter(new FileWriter(jsonFile));
+
+								        while ((inputLine = in.readLine()) != null) {
+								        	int listIndex = inputLine.indexOf("[");
+											int mapIndex = inputLine.indexOf("{");
+											if(listIndex<mapIndex) {
+												inputLine = inputLine.substring(listIndex);
+											}
+											else {
+												inputLine = inputLine.substring(mapIndex);
+											}
+								            out.write(inputLine);
+								            out.newLine();
+								        }
+								        in.close();
+								        out.close();
+								        Response2XSD xsdBuilder = new Response2XSD();
+							        
+										xsdBuilder.buildXSDFromJSON(jsonFile, analyzer.getMethodID());
+										XSDFile xsdFile = xsdBuilder.getXSDFile();
+										
+								        WADLFile newWADL = new WADLFile(wadlFilename, urlLine, xsdFile);
+								        
+								        grammarSet.add(xsdFile);
+								        newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
+								        mergedWADL.compareToMerge(newWADL);
+								        
+										requestLine = testIn.readLine();
+										jsonFile.delete();
+										
+									}
+									generator.createWADL(mergedWADL);
+									testIn.close();
+									destinationFolder.refreshLocal(IResource.DEPTH_INFINITE, null);
+									
+									} catch (MalformedURLException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									} catch (ParserConfigurationException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									} catch (CoreException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								monitor.worked(1);
+							} finally {
+								monitor.done();
+							}
+						}
+					};
+					try {
+						PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+								.run(true, false, op);
+						IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+						IFile fileToOpen = destinationFolder.getFile(wadl);
+					    try {
+					        IDE.openEditor(page, fileToOpen);
+					    } catch ( PartInitException e ) {
+					        //Put your exception handler here if you wish to
+					    }
+					} catch (InterruptedException e) {
+						MessageDialog.openError(PlatformUI.getWorkbench()
+								.getActiveWorkbenchWindow().getShell(),
+								"Error", e.getMessage());
+						e.printStackTrace();
+					} catch (InvocationTargetException e) {
+						Throwable realException = e.getTargetException();
+						MessageDialog.openError(PlatformUI.getWorkbench()
+								.getActiveWorkbenchWindow().getShell(),
+								"Error", realException.getMessage());
+						e.printStackTrace();
+					}
+					viewer.refresh();
+					// viewer.setContentProvider(new ViewContentProvider());
+				} catch (CoreException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+		};
+		generateWADL.setText("generate");
+		generateWADL.setToolTipText("Generate WADL interface");
+		generateWADL.setImageDescriptor(PlatformUI.getWorkbench()
+				.getSharedImages()
+				.getImageDescriptor(ISharedImages.IMG_ELCL_SYNCED));
 		compareInterfaces = new Action() {
 			public void run() {
 				IWizardDescriptor descriptor = PlatformUI.getWorkbench()
