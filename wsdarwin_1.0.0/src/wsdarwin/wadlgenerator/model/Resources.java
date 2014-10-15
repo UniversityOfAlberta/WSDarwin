@@ -72,9 +72,9 @@ public class Resources implements WADLElement {
 		
 		for(String path : resources.getResourceElements().keySet()) {
 			if(!this.getResourceElements().containsKey(path)) {
-				if(isNewResource(resources.getResourceElements().get(path))) {
+				//if(isNewResource(resources.getResourceElements().get(path))) {
 					resourceAdded.add(resources.getResourceElements().get(path));
-				}
+				//}
 			} else { // already exists > compare
 				changedResource.put(this.getResourceElements().get(path), this.getResourceElements().get(path).compareToMerge(resources.getResourceElements().get(path)));
 			}

@@ -21,6 +21,9 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.cxf.tools.common.ToolContext;
+import org.apache.cxf.tools.wadlto.WADLToJava;
+import org.apache.cxf.tools.wadlto.WadlToolConstants;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.ide.IDE;
@@ -114,6 +117,7 @@ public class WADLView extends ViewPart {
 	private String newWSDL;
 	private ICompilationUnit oldStub;
 	private ICompilationUnit newStub;
+	private String wadlFilepath;
 	private String wadlFilename;
 	private String requestFilename;
 	private String destinationFolderName;
@@ -331,6 +335,7 @@ public class WADLView extends ViewPart {
 
 	private void fillContextMenu(IMenuManager manager) {
 		manager.add(generateWADL);
+		manager.add(generateClientProxy);
 		manager.add(compareInterfaces);
 		manager.add(adaptClient);
 		manager.add(runTests);
@@ -341,6 +346,7 @@ public class WADLView extends ViewPart {
 
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(generateWADL);
+		manager.add(generateClientProxy);
 		manager.add(compareInterfaces);
 		manager.add(adaptClient);
 		manager.add(runTests);
@@ -359,7 +365,7 @@ public class WADLView extends ViewPart {
 					ncaw.setAction(this);
 					
 					if (wadlFilename != null) {
-						ncaw.setWADLFilename(wadlFilename.substring(wadlFilename.lastIndexOf('/')+1));
+						ncaw.setWADLFilename(wadlFilename);
 					}
 					if (requestFilename != null) {
 						ncaw.setRequestFilename(requestFilename);
@@ -377,7 +383,8 @@ public class WADLView extends ViewPart {
 					wd.setTitle(wizard.getWindowTitle());
 					wd.open();
 					
-					wadlFilename = ncaw.getDestinationFolderName()+"/"+ncaw.getWADLFilename();
+					wadlFilename = ncaw.getWADLFilename();
+					wadlFilepath = ncaw.getDestinationFolderName()+"\\"+ncaw.getWADLFilename();
 					requestFilename = ncaw.getRequestFilename();
 					destinationFolderName = ncaw.getDestinationFolderName();
 					destinationFolder = ncaw.getDestinationFolder();
@@ -411,7 +418,7 @@ public class WADLView extends ViewPart {
 
 									XMLGenerator generator = new XMLGenerator();
 									
-									WADLFile mergedWADL = new WADLFile(wadlFilename, null, new XSDFile());
+									WADLFile mergedWADL = new WADLFile(wadlFilepath, null, new XSDFile());
 									HashSet<XSDFile> grammarSet = new HashSet<XSDFile>();
 									for(String requestLine : requests) {
 										String[] tokens = requestLine.split(" ");
@@ -452,10 +459,17 @@ public class WADLView extends ViewPart {
 								        out.close();
 								        Response2XSD xsdBuilder = new Response2XSD();
 							        
-										xsdBuilder.buildXSDFromJSON(jsonFile, analyzer.getMethodID());
+								        String methodID = "";
+								        if(analyzer.getMethodID().equals("")) {
+								        	methodID = analyzer.getContainingResource();
+								        }
+								        else {
+								        	methodID = analyzer.getMethodID();
+								        }
+										xsdBuilder.buildXSDFromJSON(jsonFile, methodID);
 										XSDFile xsdFile = xsdBuilder.getXSDFile();
 										
-								        WADLFile newWADL = new WADLFile(wadlFilename, urlLine, xsdFile);
+								        WADLFile newWADL = new WADLFile(wadlFilepath, urlLine, xsdFile);
 								        
 								        grammarSet.add(xsdFile);
 								        newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
@@ -465,7 +479,7 @@ public class WADLView extends ViewPart {
 										jsonFile.delete();
 										
 									}
-									generator.createWADL(mergedWADL);
+									generator.createWADL(mergedWADL, resourceBase);
 									testIn.close();
 									destinationFolder.refreshLocal(IResource.DEPTH_INFINITE, null);
 									
@@ -524,6 +538,55 @@ public class WADLView extends ViewPart {
 		generateWADL.setImageDescriptor(PlatformUI.getWorkbench()
 				.getSharedImages()
 				.getImageDescriptor(ISharedImages.IMG_ELCL_SYNCED));
+		generateClientProxy = new Action() {
+			public void run() {
+				IRunnableWithProgress op = new IRunnableWithProgress() {
+					public void run(IProgressMonitor monitor) throws InvocationTargetException {
+						try {
+							monitor.beginTask("Generating client proxy", 1);
+							ToolContext context = new ToolContext();
+							HashMap<String, Object> parameters = new HashMap<String, Object>();
+							//parameters.put(WadlToolConstants.CFG_OUTPUTDIR, destinationFolderName);
+							parameters.put(WadlToolConstants.CFG_WADLURL, wadlFilepath);
+							context.setParameters(parameters);
+							WADLToJava gen = new WADLToJava();
+							gen.run(context);
+							WADLParser parser1 = new WADLParser(new File(oldWSDL));
+							WADLParser parser2 = new WADLParser(new File(newWSDL));
+							Delta delta = parser1.getService().diff(parser2.getService());
+							//DeltaUtil.findMoveDeltas(delta);
+							diffTable = new Delta[] { delta };
+							monitor.worked(1);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} finally {
+							monitor.done();
+						}
+					}
+				};
+				try {
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+							.run(true, false, op);
+				} catch (InterruptedException e) {
+					MessageDialog.openError(PlatformUI.getWorkbench()
+							.getActiveWorkbenchWindow().getShell(),
+							"Error", e.getMessage());
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					Throwable realException = e.getTargetException();
+					MessageDialog.openError(PlatformUI.getWorkbench()
+							.getActiveWorkbenchWindow().getShell(),
+							"Error", realException.getMessage());
+					e.printStackTrace();
+				}
+			}
+		};
+		generateClientProxy.setText("generateProxy");
+		generateClientProxy.setToolTipText("Generate client proxy");
+		generateClientProxy.setImageDescriptor(PlatformUI.getWorkbench()
+				.getSharedImages()
+				.getImageDescriptor(ISharedImages.IMG_ETOOL_PRINT_EDIT));
 		compareInterfaces = new Action() {
 			public void run() {
 				IWizardDescriptor descriptor = PlatformUI.getWorkbench()

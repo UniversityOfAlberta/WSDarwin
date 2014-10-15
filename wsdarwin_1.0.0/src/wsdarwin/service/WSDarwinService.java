@@ -464,7 +464,7 @@ public class WSDarwinService extends Application{
 			WADLFile newWADL = new WADLFile(FILENAME_DIR_TWO +FILENAME_WADL, urlLine, mergedXSDFile);
 			grammarSet.add(xsdFile);		// TODO later change to Identifier + XSDElement
 			newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
-		    generator.createWADL(newWADL);
+		    generator.createWADL(newWADL, resourceBase);
 		    
 		    // Call diff&merge methods from sub-objects 
 		    mergedWADL.compareToMerge(newWADL);
@@ -550,7 +550,7 @@ public class WSDarwinService extends Application{
 			}
 			
 			// write merged WADL file only once
-			generator.createWADL(mergedWADL);
+			generator.createWADL(mergedWADL, resourceBase);
 			
 			// Add the merged wadl's path to the list wadl_paths
 	        //wadl_paths.add(LOCALHOST_FILES_PATH+VENDOR+"Merged.wadl");

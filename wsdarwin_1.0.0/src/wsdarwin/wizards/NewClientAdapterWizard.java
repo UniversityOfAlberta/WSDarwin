@@ -48,6 +48,10 @@ public class NewClientAdapterWizard extends Wizard implements IWorkbenchWizard{
 	private String newWSDL;
 	private ICompilationUnit oldStub;
 	private ICompilationUnit newStub;
+	private IFolder destinationFolder;
+	private String destinationFolderName;
+	private String wadlFilename;
+	private String requestFilename;
 	//private WSDLComparator comp;
 
 	/**
@@ -78,6 +82,10 @@ public class NewClientAdapterWizard extends Wizard implements IWorkbenchWizard{
 		}
 		else if(action.getText().equals("generate")) {
 			page = new WADLGenerationInputPage();
+			((WADLGenerationInputPage)page).setDestinationFolder(destinationFolder);
+			((WADLGenerationInputPage)page).setDestinationFolderName(destinationFolderName);
+			((WADLGenerationInputPage)page).setWadlFilename(wadlFilename);
+			((WADLGenerationInputPage)page).setRequestFilename(requestFilename);
 		}
 		addPage(page);
 		//NewClientAdapterResourcePage resourcePage = new NewClientAdapterResourcePage("Client test cases", selection);
@@ -99,6 +107,10 @@ public class NewClientAdapterWizard extends Wizard implements IWorkbenchWizard{
 			newStub = ((DiffInputPage) page).getNewStubFile();
 		}
 		else if(page instanceof WADLGenerationInputPage) {
+			destinationFolder = ((WADLGenerationInputPage)page).getDestinationFolder();
+			destinationFolderName = ((WADLGenerationInputPage)page).getDestinationFolderName();
+			wadlFilename = ((WADLGenerationInputPage)page).getWadlFilename();
+			requestFilename = ((WADLGenerationInputPage)page).getRequestFilename();
 			
 		}
 		/*IRunnableWithProgress op = new IRunnableWithProgress() {
@@ -197,34 +209,34 @@ public class NewClientAdapterWizard extends Wizard implements IWorkbenchWizard{
 	}
 
 	public String getDestinationFolderName() {
-		return ((WADLGenerationInputPage)page).getDestinationFolderName();
+		return destinationFolderName;
 	}
 	
 	public void setDestinationFolderName(String foldername) {
-		((WADLGenerationInputPage)page).setDestinationFolderName(foldername);
+		destinationFolderName = foldername;
 	}
 	
 	public IFolder getDestinationFolder() {
-		return ((WADLGenerationInputPage)page).getDestinationFolder();
+		return destinationFolder;
 	}
 	
 	public void setDestinationFolder(IFolder folder) {
-		((WADLGenerationInputPage)page).setDestinationFolder(folder);
+		destinationFolder = folder;
 	}
 
 	public String getWADLFilename() {
-		return ((WADLGenerationInputPage)page).getWadlFilename();
+		return wadlFilename;
 	}
 	
 	public void setWADLFilename(String filename) {
-		((WADLGenerationInputPage)page).setWadlFilename(filename);
+		wadlFilename = filename;
 	}
 
 	public String getRequestFilename() {
-		return ((WADLGenerationInputPage)page).getRequestFilename();
+		return requestFilename;
 	}
 	
 	public void setRequestFilename(String filename) {
-		((WADLGenerationInputPage)page).setRequestFilename(filename);
+		requestFilename = filename;
 	}
 }

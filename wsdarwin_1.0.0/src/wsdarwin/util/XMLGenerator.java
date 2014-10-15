@@ -181,7 +181,7 @@ public class XMLGenerator {
 	 * ex.printStackTrace(); return null; } }
 	 */
 
-	public Document createWADL(WADLFile wadlFile) throws IOException,
+	public Document createWADL(WADLFile wadlFile, String base) throws IOException,
 			ParserConfigurationException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
@@ -214,7 +214,7 @@ public class XMLGenerator {
 		Element root = xmldoc.getDocumentElement();
 		// root.setAttribute("tns:schemaLocation",
 		// "http://wadl.dev.java.net/2009/02 "+xsdFile.getFilename());
-		// root.setAttribute("xmlns:tns", "http://www.w3.org/2001/XMLSchema");
+		
 		root.setAttribute("xmlns:xs", "http://www.w3.org/2001/XMLSchema");
 
 		System.out.println("element attt is " + root + ", v: "
@@ -225,6 +225,8 @@ public class XMLGenerator {
 		Element grammarsElement = xmldoc.createElement("grammars");
 		Element schemaElement = xmldoc.createElement(XML_SCHEMA_NAMESPACE
 				+ "schema");
+		schemaElement.setAttribute("targetNamespace", base);
+		schemaElement.setAttribute("xmlns:tns", base);
 		XSDFile xsdFile = wadlFile.getSchema();
 			// System.out.println("-> xsd File: " + xsdFile);
 		createXSD(xsdFile, xmldoc, schemaElement);
@@ -256,6 +258,15 @@ public class XMLGenerator {
 			resourceElement.setAttribute("path", rr.getIdentifier());
 			//resourceElement.setAttribute("hasVariableID","" + rr.hasVariableID());
 			resourcesElement.appendChild(resourceElement);
+			
+			HashSet<Param> params = new HashSet<Param>();
+			params.addAll(rr.getParamElements().values());
+			for(Param p : params) {
+				Element paramElement = xmldoc.createElement("param");
+				paramElement.setAttribute("id", p.getIdentifier());
+				paramElement.setAttribute("style", p.getStyle());
+				resourceElement.appendChild(paramElement);
+			}
 
 			HashSet<Resource> resourceResources = new HashSet<Resource>();
 			resourceResources.addAll(rr.getResourceElements().values());
@@ -265,7 +276,9 @@ public class XMLGenerator {
 			methods.addAll(rr.getMethodElements().values());
 			for (Method m : methods) {
 				Element methodElement = xmldoc.createElement("method");
-				methodElement.setAttribute("id", m.getIdentifier());
+				if (!m.getIdentifier().equals("")) {
+					methodElement.setAttribute("id", m.getIdentifier());
+				}
 				methodElement.setAttribute("name", m.getName());
 				resourceElement.appendChild(methodElement);
 

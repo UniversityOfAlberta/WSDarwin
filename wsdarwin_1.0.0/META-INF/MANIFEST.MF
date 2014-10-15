@@ -17,7 +17,8 @@ Require-Bundle: org.eclipse.ui,
  org.junit;bundle-version="4.11.0",
  javax.servlet,
  org.apache.axis2.eclipse.codegen.plugin;bundle-version="1.6.2",
- Jackson;bundle-version="2.2.3"
+ Jackson;bundle-version="2.2.3",
+ Apache_CXF;bundle-version="2.7.7"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.jdt.core.refactoring,

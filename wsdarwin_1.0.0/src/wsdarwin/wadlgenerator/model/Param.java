@@ -58,6 +58,14 @@ public class Param implements WADLElement {
 		
 		this.options = new HashSet<Option>();
 	}
+	
+	public Param(String name, String style) {
+		super();
+		this.name = name;
+		this.style = style;
+		
+		this.options = new HashSet<Option>();
+	}
 
 	public String getIdentifier() {
 		return name;

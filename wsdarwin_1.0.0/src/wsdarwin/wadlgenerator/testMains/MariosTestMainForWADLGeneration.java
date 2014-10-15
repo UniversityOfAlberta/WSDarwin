@@ -17,6 +17,9 @@ import java.util.HashSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+
 import wsdarwin.comparison.delta.Delta;
 import wsdarwin.comparison.delta.MapDelta;
 import wsdarwin.parsers.WADLParser;
@@ -79,16 +82,11 @@ public class MariosTestMainForWADLGeneration {
 			for(String methodName : analyzer.getMethodNamesFromBatch(uris)) {
 				responses.put(methodName, new XSDFile());
 			}
-			String xsdFilename = null;
 
 			XMLGenerator generator = new XMLGenerator();
-	        System.out.println("[Interface retrieval]");
 			
-			// create empty merged WADL file
-			WADLFile mergedWADL = new WADLFile(FILENAME_DIR+VENDOR+"Merged.wadl", null, new XSDFile());
-			if(DEBUG) System.out.println("** Merged WADLFile: "+mergedWADL.getIdentifier()+" **");
+			WADLFile mergedWADL = new WADLFile(FILENAME_DIR+VENDOR+".wadl", null, new XSDFile());
 			HashSet<XSDFile> grammarSet = new HashSet<XSDFile>();
-			// Looping over test queries
 			for(String requestLine : requests) {
 				String[] tokens = requestLine.split(" ");
 				String id = "";
@@ -100,11 +98,8 @@ public class MariosTestMainForWADLGeneration {
 					urlLine = tokens[2];
 				}
 				analyzer.resetUriString(urlLine);
-				final String FILENAME_XML  = VENDOR+id+".json";
-				final String FILENAME_WADL = "WADLresponse"+id+".wadl";
-				final String FILENAME_XSD  = "response"+id+".xsd";
+				final String FILENAME_JSON  = id+".json";
 				
-		        System.out.println(" Request #"+id+"");
 		        
 		        // URLConnection
 				URL yahoo = new URL(urlLine);
@@ -112,8 +107,8 @@ public class MariosTestMainForWADLGeneration {
 		        BufferedReader in = new BufferedReader(
                     new InputStreamReader(yc.getInputStream()));
 		        String inputLine;
-		        File responseFile = new File(RESPONSE_DIR+FILENAME_XML);
-				BufferedWriter out = new BufferedWriter(new FileWriter(responseFile));
+		        File jsonFile = new File(RESPONSE_DIR+"\\"+FILENAME_JSON);
+				BufferedWriter out = new BufferedWriter(new FileWriter(jsonFile));
 
 		        while ((inputLine = in.readLine()) != null) {
 		        	int listIndex = inputLine.indexOf("[");
@@ -130,37 +125,30 @@ public class MariosTestMainForWADLGeneration {
 		        in.close();
 		        out.close();
 		        Response2XSD xsdBuilder = new Response2XSD();
-	        
-				xsdBuilder.buildXSDFromJSON(responseFile, analyzer.getMethodID());
+		        String methodID = "";
+		        if(analyzer.getMethodID().equals("")) {
+		        	methodID = analyzer.getContainingResource();
+		        }
+		        else {
+		        	methodID = analyzer.getMethodID();
+		        }
+				xsdBuilder.buildXSDFromJSON(jsonFile, methodID);
 				XSDFile xsdFile = xsdBuilder.getXSDFile();
-				//XSDFile mergedXSDFile = responses.get(analyzer.getMethodID());
-				
-				//mergedXSDFile.compareToMerge(xsdFile);
-				
-		        WADLFile newWADL = new WADLFile(FILENAME_DIR+FILENAME_WADL, urlLine, xsdFile);
+				String newWADLFilename = PATH_PREFIX+"/newWADL.wadl";
+		        WADLFile newWADL = new WADLFile(newWADLFilename, urlLine, xsdFile);
 		        
-		        grammarSet.add(xsdFile);		// TODO later change to Identifier + XSDElement
+		        grammarSet.add(xsdFile);
 		        newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
-		        //generator.createWADL(newWADL);
-		        // Call diff&merge methods from sub-objects 
 		        mergedWADL.compareToMerge(newWADL);
 		        
 				requestLine = testIn.readLine();
-				
+				File wadlFile = new File(newWADLFilename);
+				wadlFile.delete();
+				jsonFile.delete();
 				
 			}
-			// write merged WADL file only once
-			generator.createWADL(mergedWADL);
-			mergedWADL.serializeFile();
-			/*for(String methodID : responses.keySet()) {
-				generator.createXSD(responses.get(methodID));
-			}*/
+			generator.createWADL(mergedWADL, resourceBase);
 			testIn.close();
-			
-			/*System.out.println("");
-			System.out.println("[Comparison]");
-			Delta delta = mergedWADL.compare(mergedWADL);
-			delta.printDelta(0);*/			
 			
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block

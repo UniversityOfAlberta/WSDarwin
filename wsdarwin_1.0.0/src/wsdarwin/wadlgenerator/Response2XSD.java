@@ -107,8 +107,15 @@ public class Response2XSD {
 		XSDComplexType type = null;
 		XSDElement element = null;
 		if (typeName.equals("")) {
-			type = new XSDComplexType(methodID+"ResponseType", methodID+"Response");
-			element = new XSDElement(methodID+"Response", type);
+			String name = "";
+			if(methodID.equals("")) {
+				name = "overallResponse";
+			}
+			else {
+				name = methodID+"Response";
+			}
+			type = new XSDComplexType(name+"Type", name);
+			element = new XSDElement(name, type);
 		}
 		else {
 			type = new XSDComplexType(typeName, lowerFirstLetter(typeName.replace("Type", "")));
@@ -125,8 +132,15 @@ public class Response2XSD {
 		XSDComplexType type = null;
 		XSDElement element = null;
 		if (typeName.equals("")) {
-			type = new XSDComplexType(methodID+"ResponseType", methodID+"Response");
-			element = new XSDElement(methodID+"Response", type);
+			String name = "";
+			if(methodID.equals("")) {
+				name = "overallResponse";
+			}
+			else {
+				name = methodID+"Response";
+			}
+			type = new XSDComplexType(name+"Type", name);
+			element = new XSDElement(name, type);
 		}
 		else {
 			type = new XSDComplexType(typeName, lowerFirstLetter(typeName.replace("Type", "")));

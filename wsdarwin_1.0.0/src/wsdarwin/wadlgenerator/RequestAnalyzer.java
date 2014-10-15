@@ -22,6 +22,7 @@ public class RequestAnalyzer extends Uri {
 	private String[] queryParameters;
 	private String[] queryValues;
 	private String resourceBase;
+	private String containingResource;
 	
 	public RequestAnalyzer(String uriString) {
 		super(uriString);
@@ -56,6 +57,7 @@ public class RequestAnalyzer extends Uri {
 		queryMap = new TreeMap<String, Object>();		
 	    queryParameters = getQueryParameters();
 	    queryValues = getQueryValues();
+	    containingResource = "";
 	}
 	
 	public String batchRequestAnalysis(ArrayList<String> requests) {
@@ -335,8 +337,20 @@ public class RequestAnalyzer extends Uri {
 	
 	public String getMethodID() {
         String[] pathTokens = getPathComponentsAfterBase(resourceBase);
-        String[] methodTokens = pathTokens[pathTokens.length-1].split("\\.");
-        return methodTokens[0];
+        String lastToken = pathTokens[pathTokens.length-1];
+        if (lastToken.contains(".")) {
+			String[] methodTokens = pathTokens[pathTokens.length - 1]
+					.split("\\.");
+			return methodTokens[0];
+		}
+        else {
+        	containingResource = pathTokens[pathTokens.length - 1];
+        	return "";
+        }
+	}
+	
+	public String getContainingResource() {
+		return containingResource;
 	}
 	
 	public String getRepresentationMediaType() {

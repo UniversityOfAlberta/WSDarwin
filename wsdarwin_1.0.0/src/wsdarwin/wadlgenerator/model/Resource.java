@@ -36,6 +36,12 @@ public class Resource implements WADLElement {
 		this.changedMethodRequest = new HashMap<Method, Request>();
 		this.changedMethodResponse = new HashMap<Method, HashSet<Response>>();
 		this.changedResources = new HashMap<Resource, HashSet<WADLElement>>();
+		if(path.startsWith("{")) {
+			String paramID = path.replace("{", "");
+			paramID = paramID.replace("}", "");
+			Param param = new Param(paramID, "template");
+			paramElements.put(paramID, param);
+		}
 	}
 	
 	public String getIdentifier() {

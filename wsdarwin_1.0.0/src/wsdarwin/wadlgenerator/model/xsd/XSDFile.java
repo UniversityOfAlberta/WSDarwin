@@ -50,13 +50,13 @@ public class XSDFile implements WADLElement {
 	//}
 	
 	public void addElement(String name, XSDElement element) {
-		XSDElement thisElement = isNewElement(element);
-		if (thisElement == null) {
+		//XSDElement thisElement = isNewElement(element);
+		//if (thisElement == null) {
 			elements.put(name, element);
-		}
-		else {
-			thisElement.getType().compareToMerge(element.getType());
-		}
+		//}
+		//else {
+		//	thisElement.getType().compareToMerge(element.getType());
+		//}
 	}
 
 	/*public void addType(String name, XSDIType type) {
@@ -259,13 +259,13 @@ public class XSDFile implements WADLElement {
 		HashSet<XSDElement> elementsAdded = new HashSet<XSDElement>();
 		for (String element : file.getElements().keySet()) {
 			if (!this.getElements().containsKey(element)) {
-				XSDElement thisElement = isNewElement(file.getElements().get(element));
-				if (thisElement == null) {
+				//XSDElement thisElement = isNewElement(file.getElements().get(element));
+				//if (thisElement == null) {
 					elementsAdded.add(file.getElements().get(element));
-				}
-				else {
-					changedElements.put(thisElement, thisElement.getType().compareToMerge(file.getElements().get(element).getType()));
-				}
+				//}
+				//else {
+				//	changedElements.put(thisElement, thisElement.getType().compareToMerge(file.getElements().get(element).getType()));
+				//}
 			}
 			else {
 				changedElements.put(this.elements.get(element), this.elements.get(element).getType().compareToMerge(file.getElements().get(element).getType()));
