@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -37,6 +38,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
@@ -128,6 +131,106 @@ public class WSDarwinService extends Application{
 		
 		return ret;
 		
+	}
+	
+	public void generateWADL(String requestFilename, String wadlFilepath, String destinationFolderName) {
+		try {
+			ArrayList<String> requests = new ArrayList<String>();
+			ArrayList<String> uris = new ArrayList<String>();
+			HashMap<String, XSDFile> responses = new HashMap<String, XSDFile>();
+			
+			BufferedReader testIn = new BufferedReader(new FileReader(new File(requestFilename)));
+			String line = testIn.readLine();
+			
+			while(line != null) {
+				requests.add(line);
+				String[] tokens = line.split(" ");
+				uris.add(tokens[2]);
+				line = testIn.readLine();
+			}
+			
+			RequestAnalyzer analyzer = new RequestAnalyzer();
+			String resourceBase = analyzer.batchRequestAnalysis(uris);
+			for(String methodName : analyzer.getMethodNamesFromBatch(uris)) {
+				responses.put(methodName, new XSDFile());
+			}
+
+			XMLGenerator generator = new XMLGenerator();
+			
+			WADLFile mergedWADL = new WADLFile(wadlFilepath, null, new XSDFile());
+			HashSet<XSDFile> grammarSet = new HashSet<XSDFile>();
+			for(String requestLine : requests) {
+				String[] tokens = requestLine.split(" ");
+				String id = "";
+				String methodName = "";
+				String urlLine = "";
+				if (tokens.length>1) {
+					id = tokens[0];
+					methodName = tokens[1];
+					urlLine = tokens[2];
+				}
+				analyzer.resetUriString(urlLine);
+				final String FILENAME_JSON  = id+".json";
+				
+		        
+		        // URLConnection
+				URL yahoo = new URL(urlLine);
+		        URLConnection yc = yahoo.openConnection();
+		        BufferedReader in = new BufferedReader(
+                    new InputStreamReader(yc.getInputStream()));
+		        String inputLine;
+		        File jsonFile = new File(destinationFolderName+"\\"+FILENAME_JSON);
+				BufferedWriter out = new BufferedWriter(new FileWriter(jsonFile));
+
+		        while ((inputLine = in.readLine()) != null) {
+		        	int listIndex = inputLine.indexOf("[");
+					int mapIndex = inputLine.indexOf("{");
+					if(listIndex<mapIndex) {
+						inputLine = inputLine.substring(listIndex);
+					}
+					else {
+						inputLine = inputLine.substring(mapIndex);
+					}
+		            out.write(inputLine);
+		            out.newLine();
+		        }
+		        in.close();
+		        out.close();
+		        Response2XSD xsdBuilder = new Response2XSD();
+	        
+		        String methodID = "";
+		        if(analyzer.getMethodID().equals("")) {
+		        	methodID = analyzer.getContainingResource();
+		        }
+		        else {
+		        	methodID = analyzer.getMethodID();
+		        }
+				xsdBuilder.buildXSDFromJSON(jsonFile, methodID);
+				XSDFile xsdFile = xsdBuilder.getXSDFile();
+				
+		        WADLFile newWADL = new WADLFile(wadlFilepath, urlLine, xsdFile);
+		        
+		        grammarSet.add(xsdFile);
+		        newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
+		        mergedWADL.compareToMerge(newWADL);
+		        
+				requestLine = testIn.readLine();
+				jsonFile.delete();
+				
+			}
+			generator.createWADL(mergedWADL, resourceBase);
+			testIn.close();
+			
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ParserConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 	
 	@GET
@@ -449,7 +552,7 @@ public class WSDarwinService extends Application{
 		    Response2XSD xsdBuilder = new Response2XSD();
 		    
 			//xsdBuilder.buildXSDFromJSON(RESPONSE_DIR+FILENAME_XML, analyzer.getMethodID());
-		    xsdBuilder.buildXSDFromJSON(RESPONSE_DIR_TWO+FILENAME_XML, analyzer.getMethodID());
+		    xsdBuilder.buildXSDFromJSON(new File(RESPONSE_DIR_TWO+FILENAME_XML), analyzer.getMethodID());
 		    
 		    XSDFile xsdFile = xsdBuilder.getXSDFile();
 			XSDFile mergedXSDFile = responses.get(analyzer.getMethodID());
@@ -463,7 +566,7 @@ public class WSDarwinService extends Application{
 			WADLFile newWADL = new WADLFile(FILENAME_DIR_TWO +FILENAME_WADL, urlLine, mergedXSDFile);
 			grammarSet.add(xsdFile);		// TODO later change to Identifier + XSDElement
 			newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
-		    generator.createWADL(newWADL);
+		    generator.createWADL(newWADL, resourceBase);
 		    
 		    // Call diff&merge methods from sub-objects 
 		    mergedWADL.compareToMerge(newWADL);
@@ -549,7 +652,7 @@ public class WSDarwinService extends Application{
 			}
 			
 			// write merged WADL file only once
-			generator.createWADL(mergedWADL);
+			generator.createWADL(mergedWADL, resourceBase);
 			
 			// Add the merged wadl's path to the list wadl_paths
 	        //wadl_paths.add(LOCALHOST_FILES_PATH+VENDOR+"Merged.wadl");

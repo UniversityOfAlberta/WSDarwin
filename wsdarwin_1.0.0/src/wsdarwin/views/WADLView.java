@@ -72,6 +72,7 @@ import wsdarwin.comparison.delta.MoveDelta;
 import wsdarwin.model.Operation;
 import wsdarwin.parsers.WADLParser;
 import wsdarwin.parsers.WSDLParser;
+import wsdarwin.service.WSDarwinService;
 import wsdarwin.util.DeltaUtil;
 import wsdarwin.util.XMLGenerator;
 import wsdarwin.wadlgenerator.RequestAnalyzer;
@@ -395,108 +396,13 @@ public class WADLView extends ViewPart {
 						public void run(IProgressMonitor monitor) throws InvocationTargetException {
 							try {
 								monitor.beginTask("Generating WADL Interface", 1);
-								try {
-									ArrayList<String> requests = new ArrayList<String>();
-									ArrayList<String> uris = new ArrayList<String>();
-									HashMap<String, XSDFile> responses = new HashMap<String, XSDFile>();
-									
-									BufferedReader testIn = new BufferedReader(new FileReader(new File(requestFilename)));
-									String line = testIn.readLine();
-									
-									while(line != null) {
-										requests.add(line);
-										String[] tokens = line.split(" ");
-										uris.add(tokens[2]);
-										line = testIn.readLine();
-									}
-									
-									RequestAnalyzer analyzer = new RequestAnalyzer();
-									String resourceBase = analyzer.batchRequestAnalysis(uris);
-									for(String methodName : analyzer.getMethodNamesFromBatch(uris)) {
-										responses.put(methodName, new XSDFile());
-									}
-
-									XMLGenerator generator = new XMLGenerator();
-									
-									WADLFile mergedWADL = new WADLFile(wadlFilepath, null, new XSDFile());
-									HashSet<XSDFile> grammarSet = new HashSet<XSDFile>();
-									for(String requestLine : requests) {
-										String[] tokens = requestLine.split(" ");
-										String id = "";
-										String methodName = "";
-										String urlLine = "";
-										if (tokens.length>1) {
-											id = tokens[0];
-											methodName = tokens[1];
-											urlLine = tokens[2];
-										}
-										analyzer.resetUriString(urlLine);
-										final String FILENAME_JSON  = id+".json";
-										
-								        
-								        // URLConnection
-										URL yahoo = new URL(urlLine);
-								        URLConnection yc = yahoo.openConnection();
-								        BufferedReader in = new BufferedReader(
-						                    new InputStreamReader(yc.getInputStream()));
-								        String inputLine;
-								        File jsonFile = new File(destinationFolderName+"\\"+FILENAME_JSON);
-										BufferedWriter out = new BufferedWriter(new FileWriter(jsonFile));
-
-								        while ((inputLine = in.readLine()) != null) {
-								        	int listIndex = inputLine.indexOf("[");
-											int mapIndex = inputLine.indexOf("{");
-											if(listIndex<mapIndex) {
-												inputLine = inputLine.substring(listIndex);
-											}
-											else {
-												inputLine = inputLine.substring(mapIndex);
-											}
-								            out.write(inputLine);
-								            out.newLine();
-								        }
-								        in.close();
-								        out.close();
-								        Response2XSD xsdBuilder = new Response2XSD();
-							        
-								        String methodID = "";
-								        if(analyzer.getMethodID().equals("")) {
-								        	methodID = analyzer.getContainingResource();
-								        }
-								        else {
-								        	methodID = analyzer.getMethodID();
-								        }
-										xsdBuilder.buildXSDFromJSON(jsonFile, methodID);
-										XSDFile xsdFile = xsdBuilder.getXSDFile();
-										
-								        WADLFile newWADL = new WADLFile(wadlFilepath, urlLine, xsdFile);
-								        
-								        grammarSet.add(xsdFile);
-								        newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
-								        mergedWADL.compareToMerge(newWADL);
-								        
-										requestLine = testIn.readLine();
-										jsonFile.delete();
-										
-									}
-									generator.createWADL(mergedWADL, resourceBase);
-									testIn.close();
-									destinationFolder.refreshLocal(IResource.DEPTH_INFINITE, null);
-									
-									} catch (MalformedURLException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									} catch (IOException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									} catch (ParserConfigurationException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									} catch (CoreException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
+								WSDarwinService service  = new WSDarwinService();
+								service.generateWADL(requestFilename, wadlFilepath, destinationFolderName);
+								destinationFolder.refreshLocal(IResource.DEPTH_INFINITE, null);
 								monitor.worked(1);
+							} catch (CoreException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							} finally {
 								monitor.done();
 							}
