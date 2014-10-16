@@ -23,7 +23,15 @@
 
 <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script> -->
 
+<!-- User-Defined js -->
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/setup.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/utilityFuncs.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/guiFuncs.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/compareFuncs.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/crossServiceComparisonFuncs.js"></script>
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/generalFuncs.js"></script>
+<script src="<?= $GLOBALS['baseURL']; ?>funcsJS/testFuncs.js"></script>
+
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/ObjTree.js"></script>
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdiff.js"></script>
 <script src="<?= $GLOBALS['baseURL']; ?>funcsJS/jsdifflib-master/difflib.js"></script>
@@ -59,7 +67,21 @@
 			<!-- Analyze the input(s) -->
 			<div id='analyzeSubmitBtn' class="submitBtnDiv">
 				<button type="button" id='analyzeBtn' onClick="analyzeBtn()" style="width: 84px;" class="btn btn-success">Analyze</button>
-				<button type="button" onClick="runSampleTest('analyze')" class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button>
+				<!-- <button type="button" onClick="runSampleTest('analyze')" 
+					 class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button> -->
+				<!-- Run Sample Test(s) -->
+				<div class="btn-group">
+				  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+				    Run Sample Test <span class="caret"></span>
+				  </button>
+				  <ul class="dropdown-menu" role="menu">
+				    <li><a href="#" onClick="runSampleAnalysis(1)"> 1 link (Github) </a></li>
+				    <li><a href="#" onClick="runSampleAnalysis(2)"> 3 links (Github)</a></li>
+				    <li><a href="#" onClick="runSampleAnalysis(3)"> 4 links (Facebook)</a></li>
+				    <li><a href="#" onClick="runSampleAnalysis(4)"> 1 links (Google Maps)</a></li>
+				  	<li><a href="#" onClick="runSampleAnalysis(4)"> 1 links (Openweathermap Maps)</a></li>
+				  </ul>
+				</div>
 				<!-- Download WADL button -->
 				<div class="btn-group">
 				  <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">

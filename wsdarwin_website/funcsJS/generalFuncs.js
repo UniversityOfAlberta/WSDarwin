@@ -1,252 +1,129 @@
-// tomcat server path/location
-var tomcat_server_path				= "http://localhost:8080/";
-//var tomcat_server_path			= "http://ssrg17.cs.ualberta.ca:8080/";
 
-$('document').ready(function(){
-	initBootstrapJS_popover();
-});
-
-var server_api_url 					= tomcat_server_path + "wsdarwin_1.0.0/jaxrs/api/";
-
-// for java_diff: ( if true, appends text line by line, otherwise it prints it all in a tree-hierarchy way)
-var parsing_html_mode 			= true;
-var max_wadl_files_uploaded 	= 1;
 var sideToWriteTo 				= "";
-var crossService 				= true;
-
-var noURLFields 				= 0;
-var noCompareURLFields 			= 0;
-var uppedWADLurls 				= [];
-var compareWADLurls 			= [];
-
-//wadl html file
-var wadl_attribute_edit_mode 	= true;	// DEBUG (only applicable to 'analyze', not 'compare')
-var add_elements_mode 			= true;			// DEBUG (only applicable to 'analyze', not 'compare')
 
 var session_id 					= '';	// initially set in the java app
 var html_wadl_string 			= '';
 var strapped_html_wadl_string 	= '';
 var xml_wadl_string 			= '';
 
-var wadl_download_str			= '';
-var extended_wadl_download_str	= '';
-
-// type confidence colors
-var typeConfidence0_24 			= "#c9302c";
-var typeConfidence24_49 		= "#F0854E";
-var typeConfidence50_74 		= "#f0ad4e";
-var typeConfidence75_100 		= "#449d44";
+//var wadl_download_str			= '';
+//var extended_wadl_download_str	= '';
 
 var oldCompare 	= '';
 var newCompare 	= '';
 var rightSideID = "b";
 var leftSideID 	= "a";
 
-var lineNumber 	= 0;
-var spaces 		= 0;
-var node_id 	= 0;
-var rootNode;
-var xmlDoc;
-
-var oldRootDoc;
-var newRootDoc;
-
 var enumConvertedArray = new Array();
 
 var firstWADL = "";
 var secondWADL = "";
 
+var margin_left = 0;
+var padding_left = 0;
+var level = 1;
+
 // highlight colors
 var crossServiceMappingsHighlightColor = "#cdfeff";
-
-// class declarations
-function wadl_doc(){
-
-	this.xmlDoc = null;
-
-	this.hello = function(){
-		alert('Hello World ' + this.xmlDoc);
-	}
-
-	this.setXmlDoc = function(arg){
-		this.xmlDoc = arg;
-	}
-
-	this.getXmlDoc = function(){
-		return this.xmlDoc;
-	}
-
-}
-
-var analyzeObj = new wadl_doc();
-
-// User-action functions ---------------------------- 
-
-function activateView(viewid){
-	$("#" + 'analysisView').removeClass("active");
-	$("#" + 'comparisonView').removeClass("active");
-	$("#" + 'crossServiceComparisonView').removeClass("active");
-	$("#" + 'settingsView').removeClass("active");
-	$("#" + viewid).addClass("active");
-
-	if (viewid == "analysisView"){
-		window.location.hash = "analysisViewName";
-		//$("#compareA").show();
-		$("#compareB").hide();
-		$(".compareOptions").hide();
-		$("#analyzeSubmitBtn").show();
-		$("#compareSubmitBtn").hide();
-		$("#crossServiceCompareSubmitBtn").hide();
-
-		$("#files").text("Upload a WADL file");
-		$("#filesCompare").text("Upload a WADL file");
-
-		$("#uploadAWADLA").css("visibility", "");
-		$("#uploadAWADLB").css("visibility", "");
-	} else if (viewid == "comparisonView"){
-		window.location.hash = "compareViewName";
-		$(".compareOptions").show();
-		$("#compareB").show();
-		$("#analyzeSubmitBtn").hide();
-		$("#crossServiceCompareSubmitBtn").hide();
-		$("#compareSubmitBtn").show();
-
-		$("#files").text("Upload a WADL file");
-		$("#filesCompare").text("Upload a WADL file");
-		$("#uploadAWADLA").css("visibility", "");
-		$("#uploadAWADLB").css("visibility", "");
-
-	} else if (viewid == "crossServiceComparisonView"){
-		window.location.hash = "crossServiceViewName";
-
-		$(".compareOptions").hide();
-
-		$("#compareB").show();
-		$("#analyzeSubmitBtn").hide();	// need to be changed to upload .ser files for now
-		$("#compareSubmitBtn").hide();	// ..
-		$("#files").text("Upload a (.wsmeta) file");
-		$("#filesCompare").text("Upload a (.wsmeta) file");
-
-		$("#uploadAWADLA").css("visibility", "");
-		$("#uploadAWADLB").css("visibility", "");
-
-
-		$("#crossServiceCompareSubmitBtn").show();
-	}
-}
-
-function addURLField(){
-
-	var fullDiv = "	<div class='singleUrlDiv' id='singleURLdiv_" + noURLFields + "'>"+
-				  "	<select class='urlSelectBtn' id='requestType1'>"+
-				  "	<option value='get' selected>GET</option>"+
-						"<option value='post'>POST</option>"+
-						"<option value='put'>PUT</option>"+
-						"<option value='delete'>DELETE</option>"+
-						"<option value='head'>HEAD</option>"+
-					"</select>"+
-					//"<input type='text' name='lname' id='urlInput_" + noURLFields + "' class='urlInput'>"+
-					"<input type=\"text\" name='lname' id='urlInputA_" + noURLFields + "' style='width: 70%; display: inline-block;' class=\"form-control urlInputClassA\" placeholder=\"Text input\">" +
-					//"<button id='analyzeSingleURL1' class='analyzeSingleURL' onClick=\"analyzeSingleURL('" + noURLFields + "')\"> Analyze </button>"+
-					"<button style='margin-left: 10px; vertical-align: top;' onClick=\"removeURLField('" + noURLFields + "')\" type=\"button\" class=\"btn btn-danger\">X</button>" +
-					//"<button class='singleUrlRemoveBtn' onClick=\"removeURLField('" + noURLFields + "')\">Remove</button>"+
-					"</div>";
-	$('#fieldUrlDiv').append(fullDiv);
-	noURLFields++;
-}
-
-function addCompareURLField(){
-	var fullDiv = "	<div class='singleUrlDiv' id='singleCompareUrlDiv_" + noCompareURLFields + "'>"+
-				  "	<select class='urlSelectBtn' id='requestType1'>"+
-				  "	<option value='get' selected>GET</option>"+
-						"<option value='post'>POST</option>"+
-						"<option value='put'>PUT</option>"+
-						"<option value='delete'>DELETE</option>"+
-						"<option value='head'>HEAD</option>"+
-					"</select>"+
-					"<input type=\"text\" name='comparelname' id='urlInputB_" + noCompareURLFields + "' style='width: 70%; display: inline-block;' class=\"form-control urlInputClassB\" placeholder=\"Text input\">" +
-					"<button style='margin-left: 10px; vertical-align: top;' onClick=\"removeCompareURLField('" + noCompareURLFields + "')\" type=\"button\" class=\"btn btn-danger\">X</button>" +
-					"</div>";
-	$('#fieldCompareUrlDiv').append(fullDiv);
-	noCompareURLFields++;
-}
-
-function get_input_urls(inputNo){
-	var urlArray = [];
-	// JSON urls to analyze
-	$('input.urlInputClass' + inputNo).each(function(index) {
-		urlArray.push( $('#urlInput' + inputNo + '_'+index).val() );
-	});
-	return urlArray;
-}
 
 var crossMappings = new Array();
 
 function crossServiceCompareBtn(){
-	runAnalysis("crossServiceCompare");
+	var api_call_url;
+	var ajaxData;
+	var process_mode = "crossServiceCompare";
+	// input urls
+	var analyzeDataJSON = JSON.stringify(get_input_urls('A'));
+	var compareDataJSON = JSON.stringify(get_input_urls('B'));
+
+	// WADL files uploaded..
+	var analyzed_wadls_URLs = [];
+	var compare_wadls_URLs = [];
+
+	for (var i = 0; i < uppedWADLurls.length; i++){
+		analyzed_wadls_URLs.push(uppedWADLurls[i]);
+	}
+	
+	for (var i = 0; i < compareWADLurls.length; i++){
+		compare_wadls_URLs.push(compareWADLurls[i]);
+	}
+	
+	var jsonWadlURLs 		= JSON.stringify(analyzed_wadls_URLs);
+	var jsonCompareWadlURLs = JSON.stringify(compare_wadls_URLs);
+
+	api_call_url = server_api_url + process_mode;
+	ajaxData = {newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id, compareURLs: compareDataJSON, compareWADLfiles: jsonCompareWadlURLs};
+
+	getWSDarwinAnalysis("crossServiceCompare", api_call_url, ajaxData);
 }
 
 function compareBtn(){
-	runAnalysis("compare");
+	var api_call_url;
+	var ajaxData;
+	var process_mode = "compare";
+	// input urls
+	var analyzeDataJSON = JSON.stringify(get_input_urls('A'));
+	var compareDataJSON = JSON.stringify(get_input_urls('B'));
+
+	// WADL files uploaded..
+	var analyzed_wadls_URLs = [];
+	var compare_wadls_URLs = [];
+
+	for (var i = 0; i < uppedWADLurls.length; i++){
+		analyzed_wadls_URLs.push(uppedWADLurls[i]);
+	}
+	
+	for (var i = 0; i < compareWADLurls.length; i++){
+		compare_wadls_URLs.push(compareWADLurls[i]);
+	}
+	
+	var jsonWadlURLs 		= JSON.stringify(analyzed_wadls_URLs);
+	var jsonCompareWadlURLs = JSON.stringify(compare_wadls_URLs);
+
+	api_call_url = server_api_url + process_mode;
+	ajaxData = {newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id, compareURLs: compareDataJSON, compareWADLfiles: jsonCompareWadlURLs};
+	
+	getWSDarwinAnalysis("compare", api_call_url, ajaxData);
 }
 
 function analyzeBtn(){
-	runAnalysis("analyze");
+	var api_call_url;
+	var ajaxData;
+	var process_mode = "analyze";
+
+	// input urls
+	var analyzeDataJSON = JSON.stringify(get_input_urls('A'));
+
+	// WADL files uploaded..
+	var analyzed_wadls_URLs = [];
+
+	for (var i = 0; i < uppedWADLurls.length; i++){
+		analyzed_wadls_URLs.push(uppedWADLurls[i]);
+	}
+
+	var jsonWadlURLs = JSON.stringify(analyzed_wadls_URLs);
+
+	api_call_url = server_api_url + "analyze";
+	ajaxData = { newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id };
+
+	getWSDarwinAnalysis("analyze", api_call_url, ajaxData);
 }
 
-function runAnalysis(process_mode){
+function getWSDarwinAnalysis(process_mode, api_call_url, ajaxData){
 	// reset html elements
 	$("#left_wadl_output").hide();
 	$("#right_wadl_output").hide();
 	$("#wadlOutput").show();
 	$("#wadlOutput").html('');
-
-	var api_call_url;
-	var ajaxData;
-
-	if (process_mode === "analyze"){
-		// input urls
-		var analyzeDataJSON = JSON.stringify(get_input_urls('A'));
-
-		// WADL files uploaded..
-		var analyzed_wadls_URLs = [];
-
-		for (var i = 0; i < uppedWADLurls.length; i++){
-			analyzed_wadls_URLs.push(uppedWADLurls[i]);
-		}
-		var jsonWadlURLs = JSON.stringify(analyzed_wadls_URLs);
-
-		api_call_url = server_api_url + "analyze";
-		ajaxData = { newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id };
-	} else if ( (process_mode === 'compare') || (process_mode === 'crossServiceCompare') ){
-		// input urls
-		var analyzeDataJSON = JSON.stringify(get_input_urls('A'));
-		var compareDataJSON = JSON.stringify(get_input_urls('B'));
-
-		// WADL files uploaded..
-		var analyzed_wadls_URLs = [];
-		var compare_wadls_URLs = [];
-
-		for (var i = 0; i < uppedWADLurls.length; i++){
-			analyzed_wadls_URLs.push(uppedWADLurls[i]);
-		}
-		
-		for (var i = 0; i < compareWADLurls.length; i++){
-			compare_wadls_URLs.push(compareWADLurls[i]);
-		}
-		
-		var jsonWadlURLs 		= JSON.stringify(analyzed_wadls_URLs);
-		var jsonCompareWadlURLs = JSON.stringify(compare_wadls_URLs);
-
-		api_call_url = server_api_url + process_mode;
-		ajaxData = {newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id, compareURLs: compareDataJSON, compareWADLfiles: jsonCompareWadlURLs};
+	
+	if (DEBUG_PRINT){
+		console.log("function getWSDarwinAnalysis:");
+		console.debug("api call: " 	+ api_call_url);
+		console.debug("ajax data: ");
+		console.debug(ajaxData);
+		console.log("---------------- ");
 	}
 	
-	console.log("--------AJAX data:-------- ");
-	console.debug("api call: " 	+ api_call_url);
-	console.debug("ajax data: " + ajaxData);
-	console.log("---------------- ");
-    
     $.ajax({
     	url: api_call_url,
         type: "GET",
@@ -261,183 +138,23 @@ function runAnalysis(process_mode){
         	var analysis_merged_wadl_url_path = jsonObj[1];
 			var compare_merged_wadl_url_path = jsonObj[2];
 			var delta_comparison_url = jsonObj[3];
-			console.log(delta_comparison_url);
 
-			console.log("merged #1_: " + analysis_merged_wadl_url_path);
-			console.log("merged #2_: " + compare_merged_wadl_url_path);
-			console.log("Compare or Analysis? :'" + process_mode + "'");
-
-			console.debug("jsonobj4 is " + jsonObj[4]);
-
-			if (process_mode == "compare"){
-				console.log("diffing the wadl's");
-				add_elements_mode = false;
-
-				getWADL(analysis_merged_wadl_url_path);
-				firstWADL = wadl_download_str;
-				getWADL(compare_merged_wadl_url_path);
-				secondWADL = wadl_download_str;
-
-				compareXMLDoc = loadXMLDoc(analysis_merged_wadl_url_path);
-				oldRootDoc = compareXMLDoc.documentElement;
-				compareXMLDoc = loadXMLDoc(compare_merged_wadl_url_path);
-				newRootDoc = compareXMLDoc.documentElement;
-				init_node(oldRootDoc, "_a_");
-				init_node(newRootDoc, "_b_");
-
-				if ( $('.diffTypeText:checked').val() ) {
-					//text_diff_JS(1);		
-					sideBySideDiff();												// text comparison diff
-				} else if ( $('.diffTypeJava:checked').val() ) {
-					java_diff(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
-				}
-				
-				//saveWADLtoFile();
-			} else if (process_mode == "analyze"){
-				add_elements_mode = true;
-				getWADL(analysis_merged_wadl_url_path);
-
-				xmlDocTest = loadXMLDoc(analysis_merged_wadl_url_path);
-				//smNode=xmlDocTest.documentElement;
-				console.debug('! ! ! !analyze xml doc: ' + xmlDocTest);
-				
-				analyzeObj.setXmlDoc(xmlDocTest);
-
-				//saveWADLtoFile();
+			if (process_mode == "analyze"){
+				processWSDarwinAnalyze(analysis_merged_wadl_url_path);
+			} else if (process_mode == "compare"){
+				processWSDarwinCompare(
+					analysis_merged_wadl_url_path, 
+					compare_merged_wadl_url_path, 
+					delta_comparison_url, 
+					process_mode);
 			} else if (process_mode == "crossServiceCompare"){
-
-				console.log("diffing the wadl's");
-				add_elements_mode = false;
-
-				getWADL(analysis_merged_wadl_url_path);
-				firstWADL = wadl_download_str;
-				getWADL(compare_merged_wadl_url_path);
-				secondWADL = wadl_download_str;
-
-				compareXMLDoc = loadXMLDoc(analysis_merged_wadl_url_path);
-				oldRootDoc = compareXMLDoc.documentElement;
-				compareXMLDoc = loadXMLDoc(compare_merged_wadl_url_path);
-				newRootDoc = compareXMLDoc.documentElement;
-				init_node(oldRootDoc, "_a_");
-				init_node(newRootDoc, "_b_");
-
-				console.debug("delta comparison url is: " + delta_comparison_url);
-				java_diff(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
-				//text_diff_JS(1);														// text comparison diff				
-				//saveWADLtoFile();
-
-	        	if (jsonObj[4] != null){
-
-	        		//var listOfMappings = jsonObj[4];
-	        		var n = 0;
-	        		var arrayInd = 0;
-	        		var listMappings = JSON.parse(jsonObj[4]);
-	        		console.debug("list of mappings: " + listMappings);
-	        		var mappingRow = listMappings[n];
-	        		var elementsAnalyzed = new Array();
-
-					crossMappings = [];
-					var csind = 0;
-	        		while(mappingRow != null){
-
-	        			var leftElem = mappingRow[0];
-	        			var rightElem = mappingRow[1];
-	        			var score = mappingRow[2];
-
-	        			var leftElemArray = mappingRow[0].split(":=");
-	        			var rightElemArray = mappingRow[1].split(":=");
-
-	        			var leftElemName = leftElemArray[0];
-	        			var leftElemType = leftElemArray[1];
-	        			var rightElemName = rightElemArray[0];
-	        			var rightElemType = rightElemArray[1];
-
-	        			if ( $.inArray(leftElem, elementsAnalyzed) > -1 ){
-	        				// leftElem[0] has already been analyzed
-	        				var ind = $.inArray(leftElem, elementsAnalyzed);
-	              			var mapObject = new Object();
-	        				mapObject.elemName = rightElem;
-	        				mapObject.score = score;
-	        				mapObject.elemId = "csr_" + csind;
-	        				csind++;
-	        				crossMappings[ind][1].push(mapObject);
-	        			} else {
-	        				crossMappings[arrayInd] = new Array(2);
-	        				var leftObject = new Object();
-	        				leftObject.elemName = leftElem;
-	        				leftObject.elemId = "csl_" + csind;
-	        				csind++;
-	        				crossMappings[arrayInd][0] = leftObject;
-	        				crossMappings[arrayInd][1] = new Array();
-	        				var mapObject = new Object();
-	        				mapObject.elemName = rightElem;
-	        				mapObject.score = score;
-	        				mapObject.elemId = "csr_" + csind;
-	        				csind++;
-	        				crossMappings[arrayInd][1].push(mapObject);
-
-	        				elementsAnalyzed[arrayInd] = leftElem;
-	        				arrayInd++;
-	        			}
-	        			n++;
-	        			mappingRow = listMappings[n];
-	        		}
-
-	        		var emptyBtn 		= "<a href='#' class='list-group-item' style='visibility: hidden'>empty</a>";
-	        		var emptyDivPadding = "<div style='width: 100%; height: 10px;'></div>";
-
-	        		$("#leftHalfDiv").html("");
-	        		$("#rightHalfDiv").html("");
-
-	        		console.log('start of crossMappings print');
-	        		console.debug(crossMappings);
-	        		console.log('end of crossMappings print');
-
-	        		for (var i = 0; i < crossMappings.length; i++){
-	        			console.log("left elem: " + crossMappings[i][0] + " and it's connections: ");
-	        			//var leftEname 	= crossMappings[i][0].split(":=")[0];
-	        			var leftEname 	= crossMappings[i][0].elemName.split(":=")[0];
-	        			var leftBtnId 	= crossMappings[i][0].elemId;
-	        			var leftBtn 	= "<a href='javascript:void(0)' id='" + leftBtnId + "' onClick='highlightLeftCrossServiceMappings(" + i + ")' class='list-group-item'>" + leftEname + "</a>";
-	        			$("#leftHalfDiv").append(leftBtn);
-	        			for (var k = 0; k < crossMappings[i][1].length; k++){
-	        				console.log(" ------> " + crossMappings[i][1][k].elemName);
-	        				//var leftEname = crossMappings[i][0].split(":=")[0];
-	        				var rightEname 	 = crossMappings[i][1][k].elemName.split(":=")[0];
-	        				var rightBtnId 	 = crossMappings[i][1][k].elemId;
-	        				var mappingScore = crossMappings[i][1][k].score;
-
-	        				var highlightColor = '';
-							if ( (mappingScore > 0) && (mappingScore <= 24) ){
-								highlightColor = "red";		// red
-							} else if ( (mappingScore > 24) && (mappingScore <= 49) ){
-								highlightColor = "orange";	// orange
-							} else if ( (mappingScore > 49) && (mappingScore <= 74) ){
-								highlightColor = "yellow";	// yellow
-							} else if ( (mappingScore > 74) && (mappingScore <= 100) ){
-								highlightColor = "green";	// green
-							}
-
-	        				//var leftBtn 	= "<a href='#' class='list-group-item' onClick='highlightCrossServiceMappings(\"" + leftEname + "\", \"" + rightEname + "\")'>" + crossMappings[i][0] + "  [" + crossMappings[i][1][k].score + "]   " + crossMappings[i][1][k].elemName + "</a>";
-	        				var rightBtn 	= "<a href='javascript:void(0)' id='" + rightBtnId + "' onClick='highlightRightCrossServiceMappings(" + i + ", " + k + ")' class='list-group-item' style=\"background-color: " + highlightColor + "\" >" + rightEname + "</a>";
-	        				
-	        				if (k != 0){
-	        					$("#leftHalfDiv").append(emptyBtn);
-	        				}
-	        				$("#rightHalfDiv").append(rightBtn);
-	        				//$("#rightHalfDiv").append("<div><button onClick='highlightCrossServiceMappings(\"" + leftEname + "\", \"" + rightEname + "\")'>" + crossMappings[i][0] + "  [" + crossMappings[i][1][k].score + "]   " + crossMappings[i][1][k].elemName + "</button></div>");
-	        			}
-	        			$("#leftHalfDiv").append("</br>");
-	        			$("#rightHalfDiv").append("</br>");
-	        		}
-	        	} else {
-	        		// NULL
-	        	}
-
+				processWSDarwinCrossServiceCompare(
+					analysis_merged_wadl_url_path, 
+					compare_merged_wadl_url_path, 
+					delta_comparison_url, 
+					jsonObj[4], 
+					process_mode);
 			}
-
-
-
         },
         error: function(xhr, status, error) {
 		  alert("Error accessing app. Please try again !");
@@ -446,42 +163,167 @@ function runAnalysis(process_mode){
     });
 }
 
-function showCompareOptions(){
-	$("#showCompareBtn").html("- Hide Compare Tool");
-	$("#showCompareBtn").attr('onclick', "hideCompareOptions()");
-	$("#compareDiv").css('height', "inherit");
+function processWSDarwinAnalyze(analysis_merged_wadl_url_path){
+	if (DEBUG_PRINT){console.log("analyzing wadl's");}
+	add_elements_mode = true;
+	processWADLFromPath(analysis_merged_wadl_url_path);
 }
 
-function hideCompareOptions(){
-	$("#showCompareBtn").html("+ Show Compare Tool");
-	$("#showCompareBtn").attr('onclick', "showCompareOptions()");
-	$("#compareDiv").css('height', "23px");
+function processWSDarwinCompare(analysis_merged_wadl_url_path, compare_merged_wadl_url_path, delta_comparison_url, process_mode){
+	if (DEBUG_PRINT){console.log("[processWSDarwinCompare]");}
+	add_elements_mode = false;	// adding elements not applicable for the 'compare' process type
+
+	//processWADLFromPath(analysis_merged_wadl_url_path);
+	//firstWADL = wadl_download_str;
+	//processWADLFromPath(compare_merged_wadl_url_path);
+	//secondWADL = wadl_download_str;
+
+	compareXMLDoc = loadXMLDoc(analysis_merged_wadl_url_path);
+	oldRootDoc = compareXMLDoc.documentElement;
+	compareXMLDoc = loadXMLDoc(compare_merged_wadl_url_path);
+	newRootDoc = compareXMLDoc.documentElement;
+	init_node(oldRootDoc, "_a_");
+	init_node(newRootDoc, "_b_");
+
+	if ( $('.diffTypeText:checked').val() ) {
+		//text_diff_JS(1);								// different type of text comparison diff
+		sideBySideDiff();								// text comparison diff
+	} else if ( $('.diffTypeJava:checked').val() ) {
+		processJavaComparison(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
+	}
 }
 
-function showOptions() {
-	$("#showOptionsBtn").html("- Hide Options");
-	$("#showOptionsBtn").attr('onclick', "hideOptions()");
-	$("#optionsDiv").css('height', "inherit");
+function processWSDarwinCrossServiceCompare(analysis_merged_wadl_url_path, compare_merged_wadl_url_path, delta_comparison_url, crossServiceMappings, process_mode){
+	if (DEBUG_PRINT){console.log("[processWSDarwinCrossServiceCompare]");}
+	add_elements_mode = false;	// adding elements not applicable for the 'compare' process type
+
+	//processWADLFromPath(analysis_merged_wadl_url_path);
+	//firstWADL = wadl_download_str;
+	//processWADLFromPath(compare_merged_wadl_url_path);
+	//secondWADL = wadl_download_str;
+
+	compareXMLDoc = loadXMLDoc(analysis_merged_wadl_url_path);
+	oldRootDoc = compareXMLDoc.documentElement;
+	compareXMLDoc = loadXMLDoc(compare_merged_wadl_url_path);
+	newRootDoc = compareXMLDoc.documentElement;
+	init_node(oldRootDoc, "_a_");
+	init_node(newRootDoc, "_b_");
+
+	if (DEBUG_PRINT){console.debug("delta comparison url is: " + delta_comparison_url);}
+
+	processJavaComparison(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
+
+	printCrossServiceComparisonMappings(crossServiceMappings);
 }
 
-function hideOptions() {
-	$("#showOptionsBtn").html("+ Show Options");
-	$("#showOptionsBtn").attr('onclick', "showOptions()");
-	$("#optionsDiv").css('height', "23px");
-}
+function printCrossServiceComparisonMappings(crossServiceMappings){
+	if (DEBUG_PRINT){console.log("[printCrossServiceComparisonMappings]");}
+	// cross service comparison highlighting mappings
+	if (crossServiceMappings != null){
+		var n = 0;
+		var arrayInd = 0;
+		var listMappings = JSON.parse(crossServiceMappings);
+		if (DEBUG_PRINT){console.debug("list of mappings: " + listMappings);}
+		var mappingRow = listMappings[n];
+		var elementsAnalyzed = new Array();
 
-// Utility functions ---------------------------- 
+		crossMappings = [];
+		var csind = 0;
+		while(mappingRow != null){
 
-function var_dump(obj) {
-    var out = '';
-    for (var i in obj) {
-        out += i + ": " + obj[i] + "\n";
-    }
-    console.log(out);
-}
+			var leftElem = mappingRow[0];
+			var rightElem = mappingRow[1];
+			var score = mappingRow[2];
 
-function htmlentities(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+			var leftElemArray = mappingRow[0].split(":=");
+			var rightElemArray = mappingRow[1].split(":=");
+
+			var leftElemName = leftElemArray[0];
+			var leftElemType = leftElemArray[1];
+			var rightElemName = rightElemArray[0];
+			var rightElemType = rightElemArray[1];
+
+			if ( $.inArray(leftElem, elementsAnalyzed) > -1 ){
+				// leftElem[0] has already been analyzed
+				var ind = $.inArray(leftElem, elementsAnalyzed);
+      			var mapObject = new Object();
+				mapObject.elemName = rightElem;
+				mapObject.score = score;
+				mapObject.elemId = "csr_" + csind;
+				csind++;
+				crossMappings[ind][1].push(mapObject);
+			} else {
+				crossMappings[arrayInd] = new Array(2);
+				var leftObject = new Object();
+				leftObject.elemName = leftElem;
+				leftObject.elemId = "csl_" + csind;
+				csind++;
+				crossMappings[arrayInd][0] = leftObject;
+				crossMappings[arrayInd][1] = new Array();
+				var mapObject = new Object();
+				mapObject.elemName = rightElem;
+				mapObject.score = score;
+				mapObject.elemId = "csr_" + csind;
+				csind++;
+				crossMappings[arrayInd][1].push(mapObject);
+
+				elementsAnalyzed[arrayInd] = leftElem;
+				arrayInd++;
+			}
+			n++;
+			mappingRow = listMappings[n];
+		}
+
+		var emptyBtn 		= "<a href='#' class='list-group-item' style='visibility: hidden'>empty</a>";
+		var emptyDivPadding = "<div style='width: 100%; height: 10px;'></div>";
+
+		$("#leftHalfDiv").html("");
+		$("#rightHalfDiv").html("");
+
+		console.log('start of crossMappings print');
+		console.debug(crossMappings);
+		console.log('end of crossMappings print');
+
+		for (var i = 0; i < crossMappings.length; i++){
+			console.log("left elem: " + crossMappings[i][0] + " and it's connections: ");
+			//var leftEname 	= crossMappings[i][0].split(":=")[0];
+			var leftEname 	= crossMappings[i][0].elemName.split(":=")[0];
+			var leftBtnId 	= crossMappings[i][0].elemId;
+			var leftBtn 	= "<a href='javascript:void(0)' id='" + leftBtnId + "' onClick='highlightLeftCrossServiceMappings(" + i + ")' class='list-group-item'>" + leftEname + "</a>";
+			$("#leftHalfDiv").append(leftBtn);
+			for (var k = 0; k < crossMappings[i][1].length; k++){
+				console.log(" ------> " + crossMappings[i][1][k].elemName);
+				//var leftEname = crossMappings[i][0].split(":=")[0];
+				var rightEname 	 = crossMappings[i][1][k].elemName.split(":=")[0];
+				var rightBtnId 	 = crossMappings[i][1][k].elemId;
+				var mappingScore = crossMappings[i][1][k].score;
+
+				var highlightColor = '';
+				if ( (mappingScore > 0) && (mappingScore <= 24) ){
+					highlightColor = "red";		// red
+				} else if ( (mappingScore > 24) && (mappingScore <= 49) ){
+					highlightColor = "orange";	// orange
+				} else if ( (mappingScore > 49) && (mappingScore <= 74) ){
+					highlightColor = "yellow";	// yellow
+				} else if ( (mappingScore > 74) && (mappingScore <= 100) ){
+					highlightColor = "green";	// green
+				}
+
+				//var leftBtn 	= "<a href='#' class='list-group-item' onClick='highlightCrossServiceMappings(\"" + leftEname + "\", \"" + rightEname + "\")'>" + crossMappings[i][0] + "  [" + crossMappings[i][1][k].score + "]   " + crossMappings[i][1][k].elemName + "</a>";
+				var rightBtn 	= "<a href='javascript:void(0)' id='" + rightBtnId + "' onClick='highlightRightCrossServiceMappings(" + i + ", " + k + ")' class='list-group-item' style=\"background-color: " + highlightColor + "\" >" + rightEname + "</a>";
+				
+				if (k != 0){
+					$("#leftHalfDiv").append(emptyBtn);
+				}
+				$("#rightHalfDiv").append(rightBtn);
+				//$("#rightHalfDiv").append("<div><button onClick='highlightCrossServiceMappings(\"" + leftEname + "\", \"" + rightEname + "\")'>" + crossMappings[i][0] + "  [" + crossMappings[i][1][k].score + "]   " + crossMappings[i][1][k].elemName + "</button></div>");
+			}
+			$("#leftHalfDiv").append("</br>");
+			$("#rightHalfDiv").append("</br>");
+		}
+	} else {
+		// NULL
+	}
 }
 
 function sideBySideDiff() {
@@ -492,192 +334,10 @@ function inlineDiff() {
 	text_diff_JS(1);
 }
 
-function text_diff_JS(viewingType) {
-    // get the baseText and newText values from the two textboxes, and split them into lines
+// wadl utility functions 
+// ( they are not in a separate file as it seems everything is loading faster if these stay in the same file)
 
-    var base = difflib.stringAsLines( firstWADL );
-    var newtxt = difflib.stringAsLines( secondWADL );
-
-    // create a SequenceMatcher instance that diffs the two sets of lines
-    var sm = new difflib.SequenceMatcher(base, newtxt);
-
-    // get the opcodes from the SequenceMatcher instance
-    // opcodes is a list of 3-tuples describing what changes should be made to the base text
-    // in order to yield the new text
-    var opcodes = sm.get_opcodes();
-    var diffoutputdiv = $("wadlOutput");
-    while (diffoutputdiv.firstChild) diffoutputdiv.removeChild(diffoutputdiv.firstChild);
-    //var contextSize = $("contextSize").value;
-    //contextSize = contextSize ? contextSize : null;
-
-    // build the diff view and add it to the current DOM
-    var diffed_string = diffview.buildView({
-	        baseTextLines: base,
-	        newTextLines: newtxt,
-	        opcodes: opcodes,
-	        // set the display titles for each resource
-	        baseTextName: "Base Text",
-	        newTextName: "New Text",
-	        //contextSize: null,
-	        //viewType: $("comparisonDiffType").checked ? 1 : 0
-	        viewType: viewingType
-    	});
-    //);
-	$("#wadlOutput").show();
-	$("#left_wadl_output").hide();
-	$("#right_wadl_output").hide();
-
-    $("#wadlOutput").html( diffed_string );
-
-}
-
-function downloadWADL(extended){
-    console.log("saving wadl file");
-    var dl_url = "/wsdarwin/funcsPHP/downloadWADLfile.php";
-    var wadl_to_download = (extended) ? extended_wadl_download_str : wadl_download_str;
-    $.ajax({
-    	url: dl_url,
-        type: "POST",
-        data: { wadlString: wadl_to_download },
-        dataType: "html",
-        success: function(response) {
-        	console.log("success?? response: " + response);
-        	onclick="this.target='_blank';"
-        	window.location = dl_url;
-        },
-        error: function(xhr, status, error) {
-		  console.log("Error acccesing downloadWADLfile.");
-		}
-
-    });
-}
-
-function removeURLField(id){
-	console.debug("length is " + $("#fieldUrlDiv").children().filter("div").length );
-	//console.log("length is " + $("div.fieldUrlDiv").length );
-	if ($("#fieldUrlDiv").children().filter("div").length > 1){
-		$('#singleURLdiv_'+id).remove();
-		reassignIDs();
-	}
-}
-
-function removeCompareURLField(id){
-	if ($("#fieldCompareUrlDiv").children().filter("div").length > 1){
-		$('#singleCompareUrlDiv_'+id).remove();
-		reassignIDs();
-	}	
-}
-
-function reassignIDs(){
-	var idcount = 0;
-	// loop through all divs
-	$('div.singleUrlDiv').each(function(index) {
-	    // set div id to array value
-
-	    $('#singleUrlDiv_' + index).attr('id', "singleURLdiv_" + index);
-	   	//console.debug(this);
-	    idcount++;
-
-	});
-
-	noURLFields = idcount;
-}
-
-function removeNode(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	console.log('found node name: ' + foundNode.nodeName + ', parent: ' + foundNode.parentNode.nodeName);
-	foundNode.parentNode.removeChild(foundNode);
-	setup_wadl_print();
-}
-
-function hideNodesChildren(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	foundNode.minimized = true;
-	setup_wadl_print();
-}
-
-function showNodesChildren(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	foundNode.minimized = false;
-	setup_wadl_print();
-}
-
-function addResource(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var newNode=xmlDoc.createElement("resource");
-	newNode.setAttribute("path","");
-	foundNode.appendChild(newNode);
-	//document.getElementById("popupDiv").style.visibility="visible";
-	setup_wadl_print();
-}
-
-function addMethod(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var methodNode=xmlDoc.createElement("method");
-	methodNode.setAttribute("name","");
-
-	foundNode.appendChild(methodNode);
-
-	setup_wadl_print();
-}
-
-function addParam(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var newNode=xmlDoc.createElement("param");
-	newNode.setAttribute("path","");
-	foundNode.appendChild(newNode);
-
-	setup_wadl_print();
-}
-
-function addRequest(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var newNode=xmlDoc.createElement("request");
-	foundNode.appendChild(newNode);
-
-	setup_wadl_print();
-}
-
-function addResponse(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var newNode=xmlDoc.createElement("response");
-	newNode.setAttribute("status","");
-	foundNode.appendChild(newNode);
-
-	setup_wadl_print();
-}
-
-function addRepresentation(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var newNode=xmlDoc.createElement("representation");
-	newNode.setAttribute("element","");
-	newNode.setAttribute("mediaType","");
-	foundNode.appendChild(newNode);
-
-	setup_wadl_print();
-}
-
-function addFault(mynodeid){
-	var foundNode = find_node(rootNode, mynodeid);
-	var newNode=xmlDoc.createElement("fault");
-	newNode.setAttribute("status","");
-	newNode.setAttribute("mediaType","");
-	foundNode.appendChild(newNode);
-
-	setup_wadl_print();
-}
-
-function updateAttribute(mynodeid, nodeAttrName, newAttrValue){
-	var foundNode = find_node(rootNode, mynodeid);
-	for (var i = 0; i < foundNode.attributes.length; i++){
-		if (foundNode.attributes[i].nodeName == nodeAttrName){
-			foundNode.attributes[i].value = newAttrValue;
-			console.log("updated node with id: " + foundNode.my_id + ", nodeName: " + foundNode.attributes[i].nodeName + ",value of attr:" + foundNode.attributes[i].value);
-		}
-	}
-	setup_wadl_print();
-}
-
+// find and return (if found) the node in the tree with root node 'mynode'
 function find_node(mynode, sid){
 	if (mynode.my_id == sid){
 		window.foundNode = mynode;
@@ -695,9 +355,10 @@ function find_node(mynode, sid){
 
 var foundNode2 = {};
 // this function is used only once, and has been made in order to be able to also save an 
-// element's position where it was found, if applicable;
-
-// TO DO: fix 'find_node' ( the implementation below does not work properly either)
+// element's position where it was found (the function has been made specifically for creating 
+// a simple type when converting a type to an enumeration )
+// TO DO: fix 'find_node' ( this function might contain a bug - either it does or I forgot to
+// mention that it is fixed - update: seems to work ok after a simple test )
 function find_node_2(mynode, sid){
 	if (mynode.my_id == sid){
 		foundNode2['node'] 		= mynode;
@@ -715,12 +376,16 @@ function find_node_2(mynode, sid){
 	return foundNode2;
 }
 
-function init_node(myNode, idSubname){
+// given a rootNode of a tree, initiate 2 properties for each node in the tree:
+// a 'minimized' variable (default set to false); to keep track whether a node is minimized or not
+// an increasing 'my_id' variable with a specific suffix (var 'suffix')
+function init_node(rootNode, suffix){
 	node_id = 0;
-	init_element_minimize_property(myNode);
-	init_element_ids(myNode, idSubname);
+	init_element_minimize_property(rootNode);
+	init_element_ids(rootNode, suffix);
 }
 
+// initiate the 'minimized' var for each node in tree with root node 'myNode'
 function init_element_minimize_property(myNode){
 	myNode.minimized = false;
 	for (var i = 0; i < myNode.childNodes.length; i++){
@@ -728,11 +393,12 @@ function init_element_minimize_property(myNode){
 	}
 }
 
-function init_element_ids(myNode, idSubname){
-	myNode.my_id = node_id + idSubname;
+// initiate the 'my_id' var for each node in tree with root node 'myNode'
+function init_element_ids(myNode, suffix){
+	myNode.my_id = node_id + suffix;
 	node_id++;
 	for (var i = 0; i < myNode.childNodes.length; i++){
-		init_element_ids(myNode.childNodes[i], idSubname);
+		init_element_ids(myNode.childNodes[i], suffix);
 	}
 }
 
@@ -746,21 +412,7 @@ function unhighlightRemovingDiv(divid){
 	$("#"+divid).css('text-decoration', '');
 }
 
-function setup_wadl_print_free(){
-	html_wadl_string = '';
-	strapped_html_wadl_string = '';
-	// these two strings will be the download-able wadl files
-	wadl_download_str 			= '';
-	extended_wadl_download_str 	= '';
-
-	spaces = 0;
-	parse_wadl_html(rootNode);
-
-	//parse_wadl_html_two(rootNode);
-	$("#wadlOutput").html(wadl_download_str);
-}
-
-function java_diff(deltas_path, oldDocNode, newDocNode, process_type){
+function processJavaComparison(deltas_path, oldDocNode, newDocNode, process_type){
 	console.debug("JAVA DIFF: " + deltas_path);
 	xmlDoc = loadXMLDoc(deltas_path);
 	mainNode=xmlDoc.documentElement;
@@ -777,7 +429,7 @@ function java_diff(deltas_path, oldDocNode, newDocNode, process_type){
 	padding_left = 0;
 	level = 1;
 	lineNumber = 0;
-	parse_wadl_html(oldDocNode);
+	generateWADLDocument(oldDocNode);
 
 	var oldText = strapped_html_wadl_string;
 	strapped_html_wadl_string = '';
@@ -785,7 +437,7 @@ function java_diff(deltas_path, oldDocNode, newDocNode, process_type){
 	padding_left = 0;
 	level = 1;
 	lineNumber = 0;
-	parse_wadl_html(newDocNode);
+	generateWADLDocument(newDocNode);
 
 	var newText = strapped_html_wadl_string;
 	strapped_html_wadl_string = '';
@@ -963,53 +615,6 @@ function highlightChangedResource(splits, xml_doc, type){
 	}
 }
 
-function contains(list, obj) {
-    for (var i = 0; i < list.length; i++) {
-        if (list[i] === obj) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function reassignLineNumbers(side){
-	if (side == leftSideID){
-		lineNumber = 1;
-		$("#left_wadl_output").children().each(function(){
-			$(this).attr("data-lineNumber", lineNumber+"_a");
-			lineNumber++;
-		});
-	} else if (side == rightSideID){
-		lineNumber = 1;
-		$("#right_wadl_output").children().each(function(){
-			$(this).attr("data-lineNumber", lineNumber+"_b");
-			lineNumber++;
-		});
-	}
-	
-}
-
-function addGraySpace(startAtLineIndex, noLines, side){
-	console.log("startat line index is " + startAtLineIndex + ", no lines: " + noLines + ", side: " + side);
-	//startAtLineIndex--;
-	var emptyDivs = "";
-	var n = 0;
-	while(n < noLines){
-		emptyDivs += "<div style='background-color: gray'>.</div>";
-		n++;
-	}
-	if (side == leftSideID){
-		//$("#left_wadl_output")
-	} else if (side == rightSideID){
-
-	}
-	
-	//var abc = startAtLineIndex + "_" + side;
-	console.log("!!!! startAtLineIndex is " +  startAtLineIndex);
-	var elemToInsertAfter = $("*[data-lineNumber=" + startAtLineIndex + "]");
-	$(emptyDivs).insertAfter( elemToInsertAfter );
-	console.log("insert on side: " + side + " after elem with id: " + elemToInsertAfter.attr("id") );
-}
 // pass (method_id, "resources node")
 function highlightResourceRec(resource_id, node, highlightColor){
 	for (var i = 0; i < node.childNodes.length; i++){
@@ -1139,6 +744,31 @@ function highlightCTypeRec(ctype_id, node, type){
 				}
 			}
 		}
+	}
+}
+
+function contains(list, obj) {
+    for (var i = 0; i < list.length; i++) {
+        if (list[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function reassignLineNumbers(side){
+	if (side == leftSideID){
+		lineNumber = 1;
+		$("#left_wadl_output").children().each(function(){
+			$(this).attr("data-lineNumber", lineNumber+"_a");
+			lineNumber++;
+		});
+	} else if (side == rightSideID){
+		lineNumber = 1;
+		$("#right_wadl_output").children().each(function(){
+			$(this).attr("data-lineNumber", lineNumber+"_b");
+			lineNumber++;
+		});
 	}
 }
 
@@ -1334,13 +964,13 @@ function highlightXSElementWithName(xselementName, node, highlightColor ){
 	}
 }
 
-function getWADL(wadl_url_path){
+function processWADLFromPath(wadl_url_path){
+	console.log("WADL URL PATH IS " + wadl_url_path);
 	xmlDoc = loadXMLDoc(wadl_url_path);
 	rootNode=xmlDoc.documentElement;
 	// nodeName, attributes, childNodes
 
-	setup_wadl_print();
-	//setup_wadl_print_free();
+	start_wadl_parsing();
 }
 
 function loadXMLDoc(filename){
@@ -1356,36 +986,19 @@ function loadXMLDoc(filename){
 }
 
 // setup and print the wadl document ( in html form)
-function setup_wadl_print(){
+function start_wadl_parsing(){
 	html_wadl_string = '';
 	strapped_html_wadl_string = '';
-
 	wadl_download_str 			= '';
 	extended_wadl_download_str 	= '';
 	spaces = 0;
 	init_element_ids(rootNode, "");
 
-	parse_wadl_html(rootNode);
+	generateWADLDocument(rootNode);
 
 	$("#wadlOutput").html(html_wadl_string);
 	initBootstrapJS_tooltips();
 }
-
-// initializing bootstrap js tooltips
-// For performance reasons, the Tooltip and Popover data-apis are
-// opt-in, meaning you must initialize them yourself.
-function initBootstrapJS_tooltips(){
-	jQuery('[data-toggle=tooltip]').tooltip();
-}
-
-function initBootstrapJS_popover(){
-	console.log('init');
-	jQuery('a[data-toggle=popover]').popover();
-}
-
-var margin_left = 0;
-var padding_left = 0;
-var level = 1;
 
 function appendToHTML(side, str, elemClassName){
 	$("#" + sideToWriteTo + "_wadl_output").append(str);
@@ -1569,12 +1182,12 @@ function printChildren(myNode, extendedWADL){
 		// print myNode's children nodes
 		for (var i = 0; i < myNode.childNodes.length; i++){
 			if ((myNode.nodeName === "xs:element") || (extendedWADL)){
-				parse_wadl_html(myNode.childNodes[i], true);
+				generateWADLDocument(myNode.childNodes[i], true);
 			} else {
 				spaces += 4;
 				margin_left += 10;
 				level++;
-				parse_wadl_html(myNode.childNodes[i], false);
+				generateWADLDocument(myNode.childNodes[i], false);
 			}
 		}
 	}
@@ -1653,16 +1266,16 @@ function addSpacesTwo(extendedWADL){
 
 var spanElem = "";
 // parses the wadl/xml document recursively and print it out
-function parse_wadl_html(myNode, extendedWADL){
+function generateWADLDocument(myNode, extendedWADL){
 	if (typeof extendedWADL == "undefined"){
 		extendedWADL = false;
 	}
-	console.log("parse_wadl_html: ", myNode.nodeName, extendedWADL);
+	console.log("generateWADLDocument: ", myNode.nodeName, extendedWADL);
 	addSpaces(extendedWADL);
 
 	// TO DO: optimize these prints, they are everywhere and seem too random;
 	// ALSO: the names are not specific enough, such as html_wadl_string, spanElem.. there needs to be a logic name for each
-	// ALSO: rename functions ( such as parse_wadl_html ); create separate classes that parse/print wadls
+	// ALSO: rename functions ( such as generateWADLDocument ); create separate classes that parse/print wadls
 	// etc..
 	// the cross service comparison highlighting part is a big module itself, so it should be separated
 	// ALSO: separate the normal comparison from the cross service comparison; the latter depends on the first.
@@ -1749,7 +1362,7 @@ var reverseEnumToNormalTypeHandler = function(myNode_id, btn){
 			enumConvertedArray.splice(i, 1);
 		}
 	}
-	setup_wadl_print();
+	start_wadl_parsing();
 }
 
 // other possible name: createSimpleTypeForXSElement
@@ -1820,7 +1433,7 @@ var createEnumSimpleTypeHandler = function(myNode_id, btn){
 	obj.new_simpletype 	= simpleTypeNode;
 	enumConvertedArray.push(obj);
 
-	setup_wadl_print();
+	start_wadl_parsing();
 }
 
 function printAddElementButtons(myNode, extendedWADL){
@@ -1934,18 +1547,27 @@ function printAddElementButtons(myNode, extendedWADL){
 	}
 }
 
-function runSampleTest(process){
-	console.debug("running sample test");
-	if (process === 'analyze'){
-		$('#urlInputA' + '_'+"0").val("https://api.github.com/users");
-		analyzeBtn();
-	} else if (process === 'compare'){
-		$('#urlInputA' + '_'+"0").val("https://api.github.com/users/penguinsource/repos");
-		$('#urlInputB' + '_'+"0").val("https://api.github.com/users/fokaefs/repos");
-		compareBtn();
-	} else if (process === 'crossServiceCompare'){
-		$('#urlInputA' + '_'+"0").val("https://graph.facebook.com/oprescu3");
-		$('#urlInputB' + '_'+"0").val("https://graph.facebook.com/jack");
-		crossServiceCompareBtn();
+// this function is not current used - it is attempting to evenly print the java comparison outputs
+// but it does not work !
+function addGraySpace(startAtLineIndex, noLines, side){
+	console.log("startat line index is " + startAtLineIndex + ", no lines: " + noLines + ", side: " + side);
+	//startAtLineIndex--;
+	var emptyDivs = "";
+	var n = 0;
+	while(n < noLines){
+		emptyDivs += "<div style='background-color: gray'>.</div>";
+		n++;
 	}
+	if (side == leftSideID){
+		//$("#left_wadl_output")
+	} else if (side == rightSideID){
+
+	}
+	
+	//var abc = startAtLineIndex + "_" + side;
+	if (DEBUG_PRINT){console.log("function addGraySpace: startAtLineIndex is " +  startAtLineIndex);}
+	
+	var elemToInsertAfter = $("*[data-lineNumber=" + startAtLineIndex + "]");
+	$(emptyDivs).insertAfter( elemToInsertAfter );
+	console.log("insert on side: " + side + " after elem with id: " + elemToInsertAfter.attr("id") );
 }
