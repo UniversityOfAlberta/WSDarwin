@@ -110,7 +110,7 @@ public class WSDarwinService extends Application{
     		@QueryParam("newUppedFiles") String newUppedFiles,
     		@QueryParam("sessionid") String sessionid) throws Exception {
 		
-		if (DEBUG) { System.out.println("Analyze"); }
+		if (DEBUG) { System.out.println("Service: Analyze"); }
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		ArrayList<String> analyze_URLs = gson.fromJson(newURLs, ArrayList.class);
 		ArrayList<String> analyze_WADLurls = gson.fromJson(newUppedFiles, ArrayList.class);
@@ -126,11 +126,10 @@ public class WSDarwinService extends Application{
 		String localpath_wadl_filename_A = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
 		if (DEBUG) {System.out.println("filename A: " + localpath_wadl_filename_A ); }
 		
-		//String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
 		generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH);
 		returnArray.add(serverpath_wadl_filename_A);
 		String ret = gson.toJson(returnArray);
-		
+		//String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
 		return ret;
 		
 	}
@@ -268,7 +267,7 @@ public class WSDarwinService extends Application{
 			
 			WADLFile mergedWADL = new WADLFile(wadlFilepath, null, new XSDFile());
 			HashSet<XSDFile> grammarSet = new HashSet<XSDFile>();
-			// ------------ good till here
+			
 			for(String requestLine : requests) {
 				String[] tokens = requestLine.split(" ");
 				String id = "";
@@ -340,6 +339,7 @@ public class WSDarwinService extends Application{
 			generator.createWADL(mergedWADL, resourceBase);
 			
 			return mergedWADL;
+			
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -363,7 +363,7 @@ public class WSDarwinService extends Application{
     		@QueryParam("compareURLs") String compareURLs, 
     		@QueryParam("compareWADLfiles") String compareWADLfiles) throws Exception {
 		
-		if (DEBUG) { System.out.println("Compare"); }
+		if (DEBUG) { System.out.println("Service: Compare"); }
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		ArrayList<String> analyze_URLs = gson.fromJson(newURLs, ArrayList.class);
 		ArrayList<String> compare_URLs = gson.fromJson(compareURLs, ArrayList.class);
@@ -376,24 +376,39 @@ public class WSDarwinService extends Application{
 		returnArray.add(session_id);
 		
 		// wadlA file paths
-		String filenameA = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
-		String localhostFilenameA = SERVER_FILES_PATH + "wadlA" + session_id + ".wadl";
+//		String serverpath_wadl_filename_A = SERVER_FILES_PATH + "wadlA" + session_id + ".wadl";
+//		String localpath_wadl_filename_A = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
+//		if (DEBUG) {System.out.println("filename A: " + localpath_wadl_filename_A ); }
+//		
+//		generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH);
+//		returnArray.add(serverpath_wadl_filename_A);
+//		String ret = gson.toJson(returnArray);
 		
-		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
-		String compare_wadl_merged_path_url = "";
+		// wadlA file paths
+		String localpath_wadl_filename_A = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
+		String serverpath_wadl_filename_A = SERVER_FILES_PATH + "wadlA" + session_id + ".wadl";
+		
+//		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, localpath_wadl_filename_A, serverpath_wadl_filename_A);
+		WADLFile wadl_A = generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH);
+		String serverpath_wadl_filename_B = "";
 		
 		Delta delta = null;
 		if ( ( (compare_URLs != null) || (compare_WADLurls != null) ) && ( (compare_WADLurls.size() > 0) || (compare_URLs.size() > 0) ) ){
-			String filenameB = LOCAL_FILES_PATH + "wadlB" + session_id + ".wadl";
-			String localhostFilenameB = SERVER_FILES_PATH + "wadlB" + session_id + ".wadl";
-			compare_wadl_merged_path_url = getWadl(compare_URLs, compare_WADLurls, "compareURLS", session_id, filenameB, localhostFilenameB);
+//			String filenameB = LOCAL_FILES_PATH + "wadlB" + session_id + ".wadl";
+//			String localhostFilenameB = SERVER_FILES_PATH + "wadlB" + session_id + ".wadl";
+//			compare_wadl_merged_path_url = getWadl(compare_URLs, compare_WADLurls, "compareURLS", session_id, filenameB, localhostFilenameB);
+			
+			// wadlB file paths
+			String localpath_wadl_filename_B = LOCAL_FILES_PATH + "wadlB" + session_id + ".wadl";
+			serverpath_wadl_filename_B = SERVER_FILES_PATH + "wadlB" + session_id + ".wadl";
+			
 			System.out.println("");
-			System.out.println("analysis path: " + analysis_wadl_merged_path_url);
-			System.out.println("compare path: " + compare_wadl_merged_path_url);
+			System.out.println("analysis path: " + serverpath_wadl_filename_A);
+			System.out.println("compare path: " + serverpath_wadl_filename_B);
 			
 			// parse the 2 wadl's into a wsdarwin.model and diff them
-			WADLParser parser1 = new WADLParser(new File(filenameA));
-			WADLParser parser2 = new WADLParser(new File(filenameB));
+			WADLParser parser1 = new WADLParser(new File(localpath_wadl_filename_A));
+			WADLParser parser2 = new WADLParser(new File(localpath_wadl_filename_B));
 			
 			delta = parser1.getService().diff(parser2.getService());
 						
@@ -402,8 +417,8 @@ public class WSDarwinService extends Application{
 			//System.out.println("Diff finished");
 		}
 		
-		returnArray.add(analysis_wadl_merged_path_url);
-		returnArray.add(compare_wadl_merged_path_url);
+		returnArray.add(serverpath_wadl_filename_A);
+		returnArray.add(serverpath_wadl_filename_B);
 		
 		System.out.println("creating xml comparison file");
 		
@@ -433,7 +448,7 @@ public class WSDarwinService extends Application{
     		@QueryParam("compareURLs") String compareURLs, 
     		@QueryParam("compareWADLfiles") String compareWADLfiles) throws Exception {
 		
-		if (DEBUG) { System.out.println("Cross Service Compare"); }
+		if (DEBUG) { System.out.println("Service: Cross Service Compare"); }
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		ArrayList<String> analyze_URLs = gson.fromJson(newURLs, ArrayList.class);
 		ArrayList<String> compare_URLs = gson.fromJson(compareURLs, ArrayList.class);
