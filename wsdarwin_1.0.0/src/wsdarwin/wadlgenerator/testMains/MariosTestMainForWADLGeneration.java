@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import wsdarwin.comparison.delta.Delta;
 import wsdarwin.comparison.delta.MapDelta;
 import wsdarwin.parsers.WADLParser;
+import wsdarwin.util.DeltaUtil;
 import wsdarwin.util.XMLGenerator;
 import wsdarwin.wadlgenerator.RequestAnalyzer;
 import wsdarwin.wadlgenerator.Response2XSD;
@@ -44,8 +45,8 @@ public class MariosTestMainForWADLGeneration {
 	private static final String RESPONSE_DIR = PATH_PREFIX+"/responses/";
 
 	public static void main(String[] args) {
-		testGeneration();
-		//testComparison();
+		//testGeneration();
+		testComparison();
 		//testMapping();
 
 	}
@@ -163,9 +164,10 @@ public class MariosTestMainForWADLGeneration {
 	}
 
 	private static void testComparison() {
-		WADLParser parser1 = new WADLParser(new File(FILENAME_DIR+"WADLResponse001.wadl"));
-		//WADLParser parser2 = new WADLParser(new File(FILENAME_DIR+"WADLResponse002.wadl"));
-		Delta delta = parser1.getService().diff(parser1.getService());
+		WADLParser parser1 = new WADLParser(new File("files/tumblr/v1/wadl/tumblr.wadl"));
+		WADLParser parser2 = new WADLParser(new File("files/tumblr/v2/wadl/tumblr.wadl"));
+		Delta delta = parser1.getService().diff(parser2.getService());
+		DeltaUtil.findMoveDeltas(delta);
 		delta.printDelta(0);
 	}
 
