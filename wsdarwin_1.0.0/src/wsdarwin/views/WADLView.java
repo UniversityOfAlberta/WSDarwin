@@ -3,6 +3,7 @@ package wsdarwin.views;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -397,10 +398,23 @@ public class WADLView extends ViewPart {
 							try {
 								monitor.beginTask("Generating WADL Interface", 1);
 								WSDarwinService service  = new WSDarwinService();
-								service.generateWADL(requestFilename, wadlFilepath, destinationFolderName);
+								ArrayList<String> urlRequests = new ArrayList<String>();
+								BufferedReader in = new BufferedReader(new FileReader(new File(requestFilename)));
+								String line = in.readLine();
+								while(line != null) {
+									urlRequests.add(line);
+									line = in.readLine();
+								}
+								service.generateWADL(urlRequests, new ArrayList<String>(), wadlFilepath, destinationFolderName);
 								destinationFolder.refreshLocal(IResource.DEPTH_INFINITE, null);
 								monitor.worked(1);
 							} catch (CoreException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (FileNotFoundException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							} finally {

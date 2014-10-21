@@ -225,6 +225,10 @@ public class XMLGenerator {
 		Element grammarsElement = xmldoc.createElement("grammars");
 		Element schemaElement = xmldoc.createElement(XML_SCHEMA_NAMESPACE
 				+ "schema");
+		if(base.startsWith("{")) {
+			base = base.replace("{", "");
+			base = base.replace("}", "");
+		}
 		schemaElement.setAttribute("targetNamespace", base);
 		schemaElement.setAttribute("xmlns:tns", base);
 		XSDFile xsdFile = wadlFile.getSchema();
