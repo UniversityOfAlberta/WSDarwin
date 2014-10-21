@@ -81,7 +81,7 @@ public class WADLParser {
 		for (int j = 0; j < resourceList.getLength(); j++) {
 			Node resourceNode = resourceList.item(j);
 			if (resourceNode.getParentNode()
-					.equals(resourcesNode)) {
+					.equals(resourcesNode) && resourceNode.getNodeName().equals("resource")) {
 				if(!base.endsWith("/")) {
 					base+="/";
 				}
@@ -123,12 +123,18 @@ public class WADLParser {
 		HashMap<String, WSElement> operations = new HashMap<String, WSElement>();
 		NodeList methodList = document.getElementsByTagNameNS("*", "method");
 		for (int i = 0; i < methodList.getLength(); i++) {
+			String methodID = "";
+			if(methodList.item(i).getAttributes().getNamedItem("id") == null) {
+				methodID = resourceNode.getAttributes().getNamedItem("path").getNodeValue();
+			}
+			else {
+				methodID = methodList.item(i).getAttributes().getNamedItem("id").getNodeValue();
+			}
 			if (methodList.item(i).getParentNode().equals(resourceNode)) {
-				Operation operation = new Operation(methodList.item(i)
-						.getAttributes().getNamedItem("id").getNodeValue(),
+				Operation operation = new Operation(methodID,
 						methodList.item(i).getAttributes().getNamedItem("name")
 								.getNodeValue(), "",
-						getInputTypeOfOperation(methodList.item(i)), getInputMediaTypeOfOperation(methodList.item(i)),
+						getInputTypeOfOperation(methodList.item(i), methodID), getInputMediaTypeOfOperation(methodList.item(i)),
 						getOutputTypeOfOperation(methodList.item(i)), getOutputMediaTypeOfOperation(methodList.item(i)));
 				operations.put(operation.getName(), operation);
 			}
@@ -278,15 +284,13 @@ public class WADLParser {
 		}
 	}
 
-	private IType getInputTypeOfOperation(Node method) {
+	private IType getInputTypeOfOperation(Node method, String methodID) {
 		Node request = getMethodChild(method, "request");
 		IType iType = null;
 		if (hasParam(request)) {
 			// TODO if request has parameters, else request has representation
-			iType = new ComplexType(method.getAttributes().getNamedItem("id")
-					.getNodeValue()
-					+ "RequestType", method.getAttributes().getNamedItem("id")
-					.getNodeValue()
+			iType = new ComplexType(methodID
+					+ "RequestType", methodID
 					+ "Request");
 			NodeList requestChildren = request.getChildNodes();
 			for (int i = 0; i < requestChildren.getLength(); i++) {
