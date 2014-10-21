@@ -83,18 +83,20 @@ public class WSDarwinService extends Application{
 	// web service directories
 
 	// 1: ( local tomcat path )
-	//private static final String PATH_PREFIX_TWO = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
-	//private static final String PATH_PREFIX_FILES = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
-	//private static final String LOCALHOST_FILES_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
+	private static final String PATH_PREFIX_TWO = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
+	private static final String LOCAL_FILES_PATH = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
+	private static final String SERVER_FILES_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
+	private static final String LOCAL_WADL_UPLOADS_PATH = "NOT SET UP";
 	
 	// 2: ( ssrg17.cs.ualberta.ca tomcat path )
-	private static final String PATH_PREFIX_TWO = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
-	private static final String PATH_PREFIX_FILES = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/";
-	private static final String LOCALHOST_FILES_PATH = "http://ssrg17.cs.ualberta.ca:8080/wsdarwin_1.0.0/files/";
+//	private static final String PATH_PREFIX_TWO = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
+//	private static final String LOCAL_FILES_PATH = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/";
+//	private static final String SERVER_FILES_PATH = "http://ssrg17.cs.ualberta.ca:8080/wsdarwin_1.0.0/files/";
+//	private static final String LOCAL_WADL_UPLOADS_PATH = "/var/www/html/wsdarwin/uploads/";
 	
 	private static final String FILENAME_DIR_TWO = PATH_PREFIX_TWO+"/wadl/";
 	private static final String RESPONSE_DIR_TWO = PATH_PREFIX_TWO+"/responses/";
-	private static final String UPLOADED_WADLS = PATH_PREFIX_TWO+"/uploadedWADL/";	
+	private static final String UPLOADED_WADLS = LOCAL_WADL_UPLOADS_PATH;	
 	
 	static WADLFile wadl_one;
 	static WADLFile wadl_two;
@@ -120,33 +122,140 @@ public class WSDarwinService extends Application{
 		returnArray.add(session_id);
 		
 		// wadlA file paths
-		String filenameA = PATH_PREFIX_FILES + "wadlA" + session_id + ".wadl";
-		String localhostFilenameA = LOCALHOST_FILES_PATH + "wadlA" + session_id + ".wadl";
-		if (DEBUG) {System.out.println("filename A: " + filenameA ); }
+		String serverpath_wadl_filename_A = SERVER_FILES_PATH + "wadlA" + session_id + ".wadl";
+		String localpath_wadl_filename_A = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
+		if (DEBUG) {System.out.println("filename A: " + localpath_wadl_filename_A ); }
 		
-		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
-		
-		returnArray.add(analysis_wadl_merged_path_url);
+		//String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
+		generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH);
+		returnArray.add(serverpath_wadl_filename_A);
 		String ret = gson.toJson(returnArray);
 		
 		return ret;
 		
 	}
 	
-	public void generateWADL(String requestFilename, String wadlFilepath, String destinationFolderName) {
+	/**
+	 * @param args
+	 */
+	public String getWadl(
+			ArrayList<String> url_list, 
+			ArrayList<String> analyze_WADLurls, 
+			String call_type, String session_id, 
+			String mergedWADLFileName, 
+			String localhostFilePath) {
 		try {
 			ArrayList<String> requests = new ArrayList<String>();
 			ArrayList<String> uris = new ArrayList<String>();
 			HashMap<String, XSDFile> responses = new HashMap<String, XSDFile>();
 			
-			BufferedReader testIn = new BufferedReader(new FileReader(new File(requestFilename)));
-			String line = testIn.readLine();
+			//ArrayList<String> wadl_paths = new ArrayList<String>();
 			
-			while(line != null) {
-				requests.add(line);
-				String[] tokens = line.split(" ");
-				uris.add(tokens[2]);
-				line = testIn.readLine();
+			// gets 'uris' and 'requests', given 'uris'
+			getURIs(url_list, uris, requests);
+			
+			RequestAnalyzer analyzer = new RequestAnalyzer();
+			String resourceBase = analyzeURIs(uris, responses, analyzer);
+
+			XMLGenerator generator = new XMLGenerator();
+	        if (DEBUG) System.out.println("[Interface retrieval]");
+			
+	        // -------------------------------------------
+			// (#1) If you want to use unique session ids:
+			/*
+			WADLFile mergedWADL;
+			File f = new File(mergedWADLFileName);
+			if(f.exists() && !f.isDirectory()) {
+				System.out.println("A WADL FILE WITH filename " + mergedWADLFileName + " already exists. Reading it ! " );
+				mergedWADL = new WADLFile(mergedWADLFileName);
+				try {
+					System.out.println("<<< reading wadl >>>");
+					mergedWADL.readWADL();
+					System.out.println("<<< finished reading wadl >>>");
+				} catch (SAXException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				if (DEBUG) System.out.println("Creating wadl with filename: " + mergedWADLFileName);
+				mergedWADL = new WADLFile(mergedWADLFileName, null, null);
+			}
+			*/
+			// -------------------------------------------
+			
+			// -------------------------------------------
+			// (#2) No unique session ids ( no caching )
+			// Overwrites the same files every time
+	        // Create empty merged WADL file
+			WADLFile mergedWADL = new WADLFile(mergedWADLFileName, null, new XSDFile());
+			if(DEBUG) System.out.println("** Merged WADLFile: "+mergedWADL.getIdentifier()+" **");
+			// -------------------------------------------
+			
+			HashSet<XSDFile> grammarSet = new HashSet<XSDFile>();
+			
+			// ------------ good till here
+			
+			// Looping over test queries
+			processRequests(requests, responses, analyzer, resourceBase,
+					generator, mergedWADL, grammarSet, mergedWADLFileName);
+			
+			// merge uploaded wadl file(s) (if any / can only merge one uploaded wadl file right now)
+			if ( (analyze_WADLurls != null) && (analyze_WADLurls.size() > 0)){
+				WADLFile uppedWADL = getAnalyzeWADLfile(analyze_WADLurls);
+		        // Call diff&merge methods from sub-objects
+		        mergedWADL.compareToMerge(uppedWADL);
+		        System.out.println("FILE MERGED !");
+			}
+			
+			// write merged WADL file only once
+			generator.createWADL(mergedWADL, resourceBase);
+			
+			// Add the merged wadl's path to the list wadl_paths
+	        //wadl_paths.add(SERVER_FILES_PATH+VENDOR+"Merged.wadl");
+	        
+	        //String MERGED_WADL_PATH = SERVER_FILES_PATH+VENDOR+mergedWADLFileName;
+	        if (call_type.equals("analyzeURLS")){
+	        	wadl_one = mergedWADL;
+	        	testA = mergedWADL;
+	        	return localhostFilePath;
+	        } else if (call_type.equals("compareURLS")){
+	        	wadl_two = mergedWADL;
+	        	testB = mergedWADL;
+	        	return localhostFilePath;
+	        }
+	        return "";
+			
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ParserConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		return null;
+	}
+	
+	public WADLFile generateWADL(
+			ArrayList<String> fullRequests,
+			ArrayList<String> analyze_WADLurls,
+			String wadlFilepath, 
+			String destinationFolderName) {
+		try {
+			ArrayList<String> requests = new ArrayList<String>();
+			ArrayList<String> uris = new ArrayList<String>();
+			HashMap<String, XSDFile> responses = new HashMap<String, XSDFile>();
+			
+			for (int i = 0; i < fullRequests.size(); i++){
+				if ( "".equals( fullRequests.get(i) ) ){
+					// its null
+				} else {
+					String proper_url = new String( i + " GET " + fullRequests.get(i) );
+					requests.add(proper_url);
+					uris.add(fullRequests.get(i));
+				}
 			}
 			
 			RequestAnalyzer analyzer = new RequestAnalyzer();
@@ -159,6 +268,7 @@ public class WSDarwinService extends Application{
 			
 			WADLFile mergedWADL = new WADLFile(wadlFilepath, null, new XSDFile());
 			HashSet<XSDFile> grammarSet = new HashSet<XSDFile>();
+			// ------------ good till here
 			for(String requestLine : requests) {
 				String[] tokens = requestLine.split(" ");
 				String id = "";
@@ -171,7 +281,8 @@ public class WSDarwinService extends Application{
 				}
 				analyzer.resetUriString(urlLine);
 				final String FILENAME_JSON  = id+".json";
-				
+				//final String FILENAME_WADL = "NEW_late_WADLresponse"+id+".wadl";
+				//final String FILENAME_XSD  = "NEW_response"+id+".xsd";
 		        
 		        // URLConnection
 				URL yahoo = new URL(urlLine);
@@ -181,7 +292,7 @@ public class WSDarwinService extends Application{
 		        String inputLine;
 		        File jsonFile = new File(destinationFolderName+"\\"+FILENAME_JSON);
 				BufferedWriter out = new BufferedWriter(new FileWriter(jsonFile));
-
+				
 		        while ((inputLine = in.readLine()) != null) {
 		        	int listIndex = inputLine.indexOf("[");
 					int mapIndex = inputLine.indexOf("{");
@@ -214,13 +325,21 @@ public class WSDarwinService extends Application{
 		        newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
 		        mergedWADL.compareToMerge(newWADL);
 		        
-				requestLine = testIn.readLine();
 				jsonFile.delete();
 				
 			}
-			generator.createWADL(mergedWADL, resourceBase);
-			testIn.close();
 			
+			// merge uploaded wadl file(s) (if any / can only merge one uploaded wadl file right now)
+			if ( (analyze_WADLurls != null) && (analyze_WADLurls.size() > 0)){
+				WADLFile uppedWADL = getAnalyzeWADLfile(analyze_WADLurls);
+		        // Call diff&merge methods from sub-objects
+		        mergedWADL.compareToMerge(uppedWADL);
+		        System.out.println("FILE MERGED !");
+			}
+			
+			generator.createWADL(mergedWADL, resourceBase);
+			
+			return mergedWADL;
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -231,6 +350,8 @@ public class WSDarwinService extends Application{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		
+		return null;
 	}
 	
 	@GET
@@ -255,16 +376,16 @@ public class WSDarwinService extends Application{
 		returnArray.add(session_id);
 		
 		// wadlA file paths
-		String filenameA = PATH_PREFIX_FILES + "wadlA" + session_id + ".wadl";
-		String localhostFilenameA = LOCALHOST_FILES_PATH + "wadlA" + session_id + ".wadl";
+		String filenameA = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
+		String localhostFilenameA = SERVER_FILES_PATH + "wadlA" + session_id + ".wadl";
 		
 		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
 		String compare_wadl_merged_path_url = "";
 		
 		Delta delta = null;
 		if ( ( (compare_URLs != null) || (compare_WADLurls != null) ) && ( (compare_WADLurls.size() > 0) || (compare_URLs.size() > 0) ) ){
-			String filenameB = PATH_PREFIX_FILES + "wadlB" + session_id + ".wadl";
-			String localhostFilenameB = LOCALHOST_FILES_PATH + "wadlB" + session_id + ".wadl";
+			String filenameB = LOCAL_FILES_PATH + "wadlB" + session_id + ".wadl";
+			String localhostFilenameB = SERVER_FILES_PATH + "wadlB" + session_id + ".wadl";
 			compare_wadl_merged_path_url = getWadl(compare_URLs, compare_WADLurls, "compareURLS", session_id, filenameB, localhostFilenameB);
 			System.out.println("");
 			System.out.println("analysis path: " + analysis_wadl_merged_path_url);
@@ -294,10 +415,10 @@ public class WSDarwinService extends Application{
 		
 		delta.createXMLElement(xmldoc, xmldoc.getDocumentElement());
 		//String comparison_file_path = 
-		XMLGenerator.writeXML(domImpl, xmldoc, PATH_PREFIX_FILES + "/deltaComparison.xml");
+		XMLGenerator.writeXML(domImpl, xmldoc, LOCAL_FILES_PATH + "/deltaComparison.xml");
 		System.out.println("done creating xml comparison file");
 		//String deltaString = gson.toJson(delta);
-		returnArray.add(LOCALHOST_FILES_PATH + "deltaComparison.xml");
+		returnArray.add(SERVER_FILES_PATH + "deltaComparison.xml");
 		
 		String ret = gson.toJson(returnArray);		
 		return ret;
@@ -324,16 +445,16 @@ public class WSDarwinService extends Application{
 		returnArray.add(session_id);
 		//MergedWADL_A_ + session_id
 		
-		String filenameA = PATH_PREFIX_FILES + "wadlA" + session_id + ".wadl";
-		String localhostFilenameA = LOCALHOST_FILES_PATH + "wadlA" + session_id + ".wadl";
+		String filenameA = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
+		String localhostFilenameA = SERVER_FILES_PATH + "wadlA" + session_id + ".wadl";
 		System.out.println("filename A: " + filenameA );
 		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
 		String compare_wadl_merged_path_url = "";
 		
 		Delta delta = null;
 		if ( ( (compare_URLs != null) || (compare_WADLurls != null) ) && ( (compare_WADLurls.size() > 0) || (compare_URLs.size() > 0) ) ){
-			String filenameB = PATH_PREFIX_FILES + "wadlB" + session_id + ".wadl";
-			String localhostFilenameB = LOCALHOST_FILES_PATH + "wadlB" + session_id + ".wadl";
+			String filenameB = LOCAL_FILES_PATH + "wadlB" + session_id + ".wadl";
+			String localhostFilenameB = SERVER_FILES_PATH + "wadlB" + session_id + ".wadl";
 			compare_wadl_merged_path_url = getWadl(compare_URLs, compare_WADLurls, "compareURLS", session_id, filenameB, localhostFilenameB);
 			System.out.println("");
 			System.out.println("analysis path: " + analysis_wadl_merged_path_url);
@@ -364,10 +485,10 @@ public class WSDarwinService extends Application{
 			
 			delta.createXMLElement(xmldoc, xmldoc.getDocumentElement());
 			//String comparison_file_path = 
-			XMLGenerator.writeXML(domImpl, xmldoc, PATH_PREFIX_FILES + "/deltaComparison.xml");
+			XMLGenerator.writeXML(domImpl, xmldoc, LOCAL_FILES_PATH + "/deltaComparison.xml");
 			System.out.println("done creating xml comparison file");
 			//String deltaString = gson.toJson(delta);
-			returnArray.add(LOCALHOST_FILES_PATH + "deltaComparison.xml");
+			returnArray.add(SERVER_FILES_PATH + "deltaComparison.xml");
 	    //}
 		
 		System.out.println(" = = = = = = ");
@@ -386,7 +507,7 @@ public class WSDarwinService extends Application{
 		System.out.println("Cross Service printDelta:");
 		delta.printDelta(0);
 		System.out.println("------------------------");
-		//returnArray.add(LOCALHOST_FILES_PATH + "deltaComparison.xml");
+		//returnArray.add(SERVER_FILES_PATH + "deltaComparison.xml");
 		System.out.println("SUUUP: " + testA.getElementMappings());
 		System.out.println("ABECEDAR: " + gson.toJson(testA.getElementMappings()));
 		
@@ -580,106 +701,10 @@ public class WSDarwinService extends Application{
 		    System.out.println("============== END of printing all elements of xsdfile ================ ");
 		    
 		    // Add the newly generated wadl's path to the list wadl_paths
-		    //wadl_paths.add(LOCALHOST_FILES_PATH+FILENAME_WADL);
+		    //wadl_paths.add(SERVER_FILES_PATH+FILENAME_WADL);
 			
 		}
 		if (DEBUG)	System.out.println("Value Frequency Table: " + valueFrequencies);
-	}
-	
-	/**
-	 * @param args
-	 */
-	public String getWadl(ArrayList<String> url_list, ArrayList<String> analyze_WADLurls, String call_type, String session_id, String mergedWADLFileName, String localhostFilePath) {
-		try {
-			ArrayList<String> requests = new ArrayList<String>();
-			ArrayList<String> uris = new ArrayList<String>();
-			HashMap<String, XSDFile> responses = new HashMap<String, XSDFile>();
-			
-			//ArrayList<String> wadl_paths = new ArrayList<String>();
-			
-			// gets 'uris' and 'requests', given 'uris'
-			getURIs(url_list, uris, requests);
-			
-			RequestAnalyzer analyzer = new RequestAnalyzer();
-			String resourceBase = analyzeURIs(uris, responses, analyzer);
-
-			XMLGenerator generator = new XMLGenerator();
-	        if (DEBUG) System.out.println("[Interface retrieval]");
-			
-	        // -------------------------------------------
-			// (#1) If you want to use unique session ids:
-			/*
-			WADLFile mergedWADL;
-			File f = new File(mergedWADLFileName);
-			if(f.exists() && !f.isDirectory()) {
-				System.out.println("A WADL FILE WITH filename " + mergedWADLFileName + " already exists. Reading it ! " );
-				mergedWADL = new WADLFile(mergedWADLFileName);
-				try {
-					System.out.println("<<< reading wadl >>>");
-					mergedWADL.readWADL();
-					System.out.println("<<< finished reading wadl >>>");
-				} catch (SAXException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			} else {
-				if (DEBUG) System.out.println("Creating wadl with filename: " + mergedWADLFileName);
-				mergedWADL = new WADLFile(mergedWADLFileName, null, null);
-			}
-			*/
-			// -------------------------------------------
-			
-			// -------------------------------------------
-			// (#2) No unique session ids ( no caching )
-			// Overwrites the same files every time
-	        // Create empty merged WADL file
-			WADLFile mergedWADL = new WADLFile(mergedWADLFileName, null, new XSDFile());
-			if(DEBUG) System.out.println("** Merged WADLFile: "+mergedWADL.getIdentifier()+" **");
-			// -------------------------------------------
-			
-			HashSet<XSDFile> grammarSet = new HashSet<XSDFile>();
-			
-			// Looping over test queries
-			processRequests(requests, responses, analyzer, resourceBase,
-					generator, mergedWADL, grammarSet, mergedWADLFileName);
-			
-			// merge uploaded wadl file(s) (if any / can only merge one uploaded wadl file right now)
-			if ( (analyze_WADLurls != null) && (analyze_WADLurls.size() > 0)){
-				WADLFile uppedWADL = getAnalyzeWADLfile(analyze_WADLurls);
-		        // Call diff&merge methods from sub-objects
-		        mergedWADL.compareToMerge(uppedWADL);
-		        System.out.println("FILE MERGED !");
-			}
-			
-			// write merged WADL file only once
-			generator.createWADL(mergedWADL, resourceBase);
-			
-			// Add the merged wadl's path to the list wadl_paths
-	        //wadl_paths.add(LOCALHOST_FILES_PATH+VENDOR+"Merged.wadl");
-	        
-	        //String MERGED_WADL_PATH = LOCALHOST_FILES_PATH+VENDOR+mergedWADLFileName;
-	        if (call_type.equals("analyzeURLS")){
-	        	wadl_one = mergedWADL;
-	        	testA = mergedWADL;
-	        	return localhostFilePath;
-	        } else if (call_type.equals("compareURLS")){
-	        	wadl_two = mergedWADL;
-	        	testB = mergedWADL;
-	        	return localhostFilePath;
-	        }
-	        return "";
-			
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		return null;
 	}
 
 	// NAME ??????????? getXSDElementsValueFrequencies

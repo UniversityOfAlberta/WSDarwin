@@ -1,0 +1,26 @@
+
+Installation Instructions
+
+WSDarwin Web-App Instructions
+
+	(REQUIRED) There are 2 things that need to be initially set in order for the web app to properly run:
+
+	- The base address/url of the server it is hosted on 
+	  ( check funcsPHP/genFuncs.php, at the top of the page, variable 'server_host' )
+
+	- The tomcat server path where the java application is located 
+	  ( check funcsJS/generalFuncs.js, at the top of the page, variable 'tomcat_server_path' for
+	  the base path, and variable 'server_api_url' for the direct api path)
+
+
+WSDarwin Java-App Instructions
+
+	(REQUIRED) The local and the server host paths of where the wadl files are loaded/saved needs to be
+	specified ( check package wsdarwin.service.WSDarwinService.java, look for '#WEB SERVICE DIRECTORY PATHS')
+
+	To deploy, export the wsdarwin project as a WAR file.
+
+	To deploy to the ssrg17.cs.ualberta.ca, (ftp to it) upload the war file 
+	at path '/var/lib/tomcat7/webapps/'.
+
+

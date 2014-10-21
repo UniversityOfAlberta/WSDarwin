@@ -102,7 +102,10 @@ function analyzeBtn(){
 	}
 
 	var jsonWadlURLs = JSON.stringify(analyzed_wadls_URLs);
-
+	console.debug("uploaded wadls !:!");
+	console.debug(jsonWadlURLs);
+	console.debug("uploaded wadls !:!");
+	
 	api_call_url = server_api_url + "analyze";
 	ajaxData = { newURLs: analyzeDataJSON, newUppedFiles: jsonWadlURLs, sessionid: session_id };
 
@@ -967,6 +970,8 @@ function highlightXSElementWithName(xselementName, node, highlightColor ){
 function processWADLFromPath(wadl_url_path){
 	console.log("WADL URL PATH IS " + wadl_url_path);
 	xmlDoc = loadXMLDoc(wadl_url_path);
+	console.log('xmlDoc print:');
+	console.debug(xmlDoc);
 	rootNode=xmlDoc.documentElement;
 	// nodeName, attributes, childNodes
 
@@ -1547,6 +1552,98 @@ function printAddElementButtons(myNode, extendedWADL){
 	}
 }
 
+function showNodesChildren(mynodeid){
+	var foundNode = find_node(rootNode, mynodeid);
+	foundNode.minimized = false;
+	start_wadl_parsing();
+}
+
+function hideNodesChildren(mynodeid){
+	var foundNode = find_node(rootNode, mynodeid);
+	foundNode.minimized = true;
+	start_wadl_parsing();
+}
+
+function removeNode(mynodeid){
+	var foundNode = find_node(rootNode, mynodeid);
+	console.log('found node name: ' + foundNode.nodeName + ', parent: ' + foundNode.parentNode.nodeName);
+	foundNode.parentNode.removeChild(foundNode);
+	start_wadl_parsing();
+}
+
+function addResource(mynodeid){
+	var foundNode = find_node(rootNode, mynodeid);
+	var newNode=xmlDoc.createElement("resource");
+	newNode.setAttribute("path","");
+	foundNode.appendChild(newNode);
+	//document.getElementById("popupDiv").style.visibility="visible";
+	start_wadl_parsing();
+}
+
+function addMethod(mynodeid){
+	var foundNode = find_node(rootNode, mynodeid);
+	var methodNode=xmlDoc.createElement("method");
+	methodNode.setAttribute("name","");
+
+	foundNode.appendChild(methodNode);
+	start_wadl_parsing();
+}
+
+function addParam(mynodeid){
+	var foundNode = find_node(rootNode, mynodeid);
+	var newNode=xmlDoc.createElement("param");
+	newNode.setAttribute("path","");
+	foundNode.appendChild(newNode);
+	start_wadl_parsing();
+}
+
+function addRequest(mynodeid){
+	var foundNode = find_node(rootNode, mynodeid);
+	var newNode=xmlDoc.createElement("request");
+	foundNode.appendChild(newNode);
+
+	start_wadl_parsing();
+}
+
+function addResponse(mynodeid){
+	var foundNode = find_node(rootNode, mynodeid);
+	var newNode=xmlDoc.createElement("response");
+	newNode.setAttribute("status","");
+	foundNode.appendChild(newNode);
+	start_wadl_parsing();
+}
+
+function addRepresentation(mynodeid){
+	var foundNode = find_node(rootNode, mynodeid);
+	var newNode=xmlDoc.createElement("representation");
+	newNode.setAttribute("element","");
+	newNode.setAttribute("mediaType","");
+	foundNode.appendChild(newNode);
+	start_wadl_parsing();
+}
+
+function addFault(mynodeid){
+	var foundNode = find_node(rootNode, mynodeid);
+	var newNode=xmlDoc.createElement("fault");
+	newNode.setAttribute("status","");
+	newNode.setAttribute("mediaType","");
+	foundNode.appendChild(newNode);
+
+	start_wadl_parsing();
+}
+
+function updateAttribute(mynodeid, nodeAttrName, newAttrValue){
+	var foundNode = find_node(rootNode, mynodeid);
+	for (var i = 0; i < foundNode.attributes.length; i++){
+		if (foundNode.attributes[i].nodeName == nodeAttrName){
+			foundNode.attributes[i].value = newAttrValue;
+			console.log("updated node with id: " + foundNode.my_id + ", nodeName: " + foundNode.attributes[i].nodeName + ",value of attr:" + foundNode.attributes[i].value);
+		}
+	}
+	start_wadl_parsing();
+}
+
+// ================================================================================================
 // this function is not current used - it is attempting to evenly print the java comparison outputs
 // but it does not work !
 function addGraySpace(startAtLineIndex, noLines, side){

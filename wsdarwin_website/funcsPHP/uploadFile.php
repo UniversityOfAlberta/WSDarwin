@@ -1,7 +1,5 @@
 <?php
 
-
-
 if ( isset($_FILES) ) {
     $filename = basename($_FILES['file']['name']);
     //$error = true;
@@ -13,9 +11,9 @@ if ( isset($_FILES) ) {
     $path = "wsdarwin/".$filename;
     //$error = !move_uploaded_file($_FILES['uppedFile']['tmp_name'], $path);
 
-    $destination_path = getcwd().DIRECTORY_SEPARATOR;
-	$destination_path = "/home1/pokemon/public_html/wsdarwin/uploads/";
-	
+    //$destination_path = getcwd().DIRECTORY_SEPARATOR;
+	//$destination_path = "/home1/pokemon/public_html/wsdarwin/uploads/";
+	$destination_path = "/var/www/html/wsdarwin/uploads/";
 	//for (int i = 0; i < $_FILES.length)
 	//var_dump($_POST['uppedFiles']);
     //$fileArray = $_POST['uppedFiles'];
@@ -27,7 +25,8 @@ if ( isset($_FILES) ) {
 	  $file_name = basename( $_FILES["file".$i]["name"] );
 	  $target_path = $destination_path . $file_name;
 	  move_uploaded_file($_FILES['file'.$i]['tmp_name'], $target_path);
-	  $file_link = "http://pokemonpacific.com/wsdarwin/uploads/" . $file_name;
+	  //$file_link = "http://pokemonpacific.com/wsdarwin/uploads/" . $file_name;
+      $file_link = "http://ssrg17.cs.ualberta.ca/wsdarwin/uploads/" . $file_name;
 	  array_push($filepaths, $file_link);
 	}
 
