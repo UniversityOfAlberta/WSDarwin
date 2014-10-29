@@ -2,6 +2,7 @@ package wsdarwin.wadlgenerator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +13,8 @@ import java.util.regex.Pattern;
 
 import wsdarwin.wadlgenerator.model.Param;
 import wsdarwin.wadlgenerator.model.WADLFile;
+import wsdarwin.wadlgenerator.model.xsd.XSDElement;
+import wsdarwin.wadlgenerator.model.xsd.XSDPrimitiveType;
 
 public class RequestAnalyzer extends Uri {
 
@@ -73,8 +76,9 @@ public class RequestAnalyzer extends Uri {
 			bases.add(uri.getAuthority());
 		}
 		if(bases.size()>1) {
-			variableBases.put("{baseID}", bases);
-			resourceBase = "{baseID}";
+			//variableBases.put("{baseID}", bases);
+			//resourceBase = "{baseID}";
+			resourceBase = "";
 		}
 		getVariableResourceIDs(uris);
 		/*String path = "";
@@ -244,15 +248,15 @@ public class RequestAnalyzer extends Uri {
 				valueObject = queryValues[i];
 				type = "string";
 			}
-			else if(Pattern.matches("^[-+]?\\d*$", queryValues[i]) && queryValues[i].length()<=10) {
+			else if(Pattern.matches("^[-+]?\\d*$", queryValues[i]) && Response2XSD.isInteger(queryValues[i])) {
 				valueObject = Integer.parseInt(queryValues[i]);
 				type = "int";
 			}
-			else if(Pattern.matches("^[-+]?\\d*$", queryValues[i]) && queryValues[i].length()<=19) {
+			else if(Pattern.matches("^[-+]?\\d*$", queryValues[i]) && Response2XSD.isLong(queryValues[i])) {
 				valueObject = Long.parseLong(queryValues[i]);
 				type = "long";
 			}
-			else if(Pattern.matches("^[-+]?[0-9]+[.]?[0-9]*([eE][-+]?[0-9]+)?$", queryValues[i])) {
+			else if(Pattern.matches("^[-+]?[0-9]+[.]?[0-9]*([eE][-+]?[0-9]+)?$", queryValues[i]) && Response2XSD.isDouble(queryValues[i])) {
 				valueObject = Double.parseDouble(queryValues[i]);
 				type = "double";
 			}
@@ -260,21 +264,25 @@ public class RequestAnalyzer extends Uri {
 				valueObject = Boolean.parseBoolean(queryValues[i]);
 				type = "boolean";
 			}
-			/*else if(Pattern.matches("^(\\d{4})-(\\d{2})-(\\d{2})[T]?(\\d{2}):(\\d{2}):(\\d{2})[Z]?$", queryValues[i])) {
+			else if (Pattern.matches("^[-+]?\\d*$", queryValues[i]) && Response2XSD.isShort(queryValues[i])) {
+				valueObject = Short.parseShort(queryValues[i]);
+				type = "short";
+			} else if (Pattern.matches("^[-+]?\\d*$", queryValues[i]) && Response2XSD.isByte(queryValues[i])) {
+				valueObject = Byte.parseByte(queryValues[i]);
+				type = "byte";
+			} else if (Pattern.matches("^(\\d{4})-(\\d{2})-(\\d{2})[T]?(\\d{2}):(\\d{2}):(\\d{2})[Z]?$", queryValues[i])) {
 				valueObject = queryValues[i];
 				type = "dateTime";
-			}
-			else if(Pattern.matches("^(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})$", queryValues[i])) {
+			} else if (Response2XSD.matchesURI(queryValues[i])) {
+				valueObject = queryValues[i];
+				type = "anyURI";
+			} else if (Response2XSD.matchesEmail(queryValues[i])) {
+				valueObject = queryValues[i];
+				type = "email";
+			} else if (Pattern.matches("^(\\d{4})-(\\d{2})-(\\d{2})$", queryValues[i])) {
 				valueObject = queryValues[i];
 				type = "date";
-			}*/
-			/*else if(queryValues[i].equals(queryValues[i].toUpperCase()) &&
-					containsLetter(queryValues[i])) {
-				 four conditions: isString && isUpperCase && containsLetter && distribution.exists 
-				 *   1) due to pattern matching 2+3) checked here 4) will be checked after parsing in merging process 
-				valueObject = queryValues[i];
-				type = "enumeration";
-			}*/
+			}
 			else {
 				valueObject = queryValues[i];
 				type = "string";
@@ -362,6 +370,8 @@ public class RequestAnalyzer extends Uri {
 		} else if (pathTokens.contains("xml") || pathTokens.contains("XML")
 				|| pathTokens.contains("Xml")) {
 			mediaType = "xml";
+		} else {
+			mediaType = "json";
 		}
         return mediaType;
 	}

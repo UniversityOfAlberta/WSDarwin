@@ -258,17 +258,19 @@ public class XSDFile implements WADLElement {
 		}*/
 		HashSet<XSDElement> elementsAdded = new HashSet<XSDElement>();
 		for (String element : file.getElements().keySet()) {
+
+			XSDElement fileElement = file.getElements().get(element);
 			if (!this.getElements().containsKey(element)) {
-				//XSDElement thisElement = isNewElement(file.getElements().get(element));
-				//if (thisElement == null) {
-					elementsAdded.add(file.getElements().get(element));
-				//}
-				//else {
-				//	changedElements.put(thisElement, thisElement.getType().compareToMerge(file.getElements().get(element).getType()));
-				//}
+				XSDElement thisElement = isNewElement(fileElement);
+				if (thisElement == null) {
+					elementsAdded.add(fileElement);
+				}
+				else {
+					changedElements.put(thisElement, thisElement.getType().compareToMerge(fileElement.getType()));
+				}
 			}
 			else {
-				changedElements.put(this.elements.get(element), this.elements.get(element).getType().compareToMerge(file.getElements().get(element).getType()));
+				changedElements.put(this.elements.get(element), this.elements.get(element).getType().compareToMerge(fileElement.getType()));
 			}
 		}
 
@@ -287,7 +289,8 @@ public class XSDFile implements WADLElement {
 	private XSDElement isNewElement(XSDElement element) {
 		for(XSDElement thisElement : this.elements.values()) {
 			if(thisElement.equalsAfterRename(element)) {
-				//thisElement.setVariableID(true);
+				element.setName(thisElement.getName());
+				element.setType(thisElement.getType());
 				return thisElement;
 			}
 		}

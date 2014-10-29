@@ -248,9 +248,14 @@ public class WSDarwinService extends Application{
 			HashMap<String, XSDFile> responses = new HashMap<String, XSDFile>();
 			
 			for (int i = 0; i < fullRequests.size(); i++){
-				if ( "".equals( fullRequests.get(i) ) ){
+				if ( "".equals( fullRequests.get(i))){
 					// its null
-				} else {
+				}
+				else if(fullRequests.get(i).contains(" ")) {
+					requests.add(fullRequests.get(i));
+					uris.add(fullRequests.get(i).split(" ")[2]);
+				}
+				else {
 					String proper_url = new String( i + " GET " + fullRequests.get(i) );
 					requests.add(proper_url);
 					uris.add(fullRequests.get(i));
@@ -279,6 +284,7 @@ public class WSDarwinService extends Application{
 					urlLine = tokens[2];
 				}
 				analyzer.resetUriString(urlLine);
+				resourceBase = analyzer.getAuthority();
 				final String FILENAME_JSON  = id+".json";
 				//final String FILENAME_WADL = "NEW_late_WADLresponse"+id+".wadl";
 				//final String FILENAME_XSD  = "NEW_response"+id+".xsd";
@@ -321,7 +327,11 @@ public class WSDarwinService extends Application{
 		        WADLFile newWADL = new WADLFile(wadlFilepath, urlLine, xsdFile);
 		        
 		        grammarSet.add(xsdFile);
+		        /*if(resourceBase.equals("")) {
+		        	resourceBase = analyzer.getAuthority();
+		        }*/
 		        newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
+		        
 		        mergedWADL.compareToMerge(newWADL);
 		        
 				jsonFile.delete();

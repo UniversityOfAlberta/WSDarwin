@@ -4,6 +4,7 @@ package wsdarwin.wadlgenerator.testMains;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import wsdarwin.comparison.delta.Delta;
 import wsdarwin.comparison.delta.MapDelta;
 import wsdarwin.parsers.WADLParser;
+import wsdarwin.service.WSDarwinService;
 import wsdarwin.util.DeltaUtil;
 import wsdarwin.util.XMLGenerator;
 import wsdarwin.wadlgenerator.RequestAnalyzer;
@@ -38,16 +40,18 @@ public class MariosTestMainForWADLGeneration {
 	public static final Boolean DEBUG = true;
 	
 	private static final String VENDOR = "tumblr";
-	private static final String PATH_PREFIX = "files/"+VENDOR+"/v2";
+	private static final String PATH_PREFIX = "files/"+VENDOR+"/v1";
 	
 	private static final String FILENAME_DIR = PATH_PREFIX+"/wadl/";
 	private static final String XSD_DIR = PATH_PREFIX+"/xsd/";
 	private static final String RESPONSE_DIR = PATH_PREFIX+"/responses/";
 
 	public static void main(String[] args) {
-		//testGeneration();
-		testComparison();
+		double time = System.currentTimeMillis();
+		testGeneration();
+		//testComparison();
 		//testMapping();
+		System.out.println(System.currentTimeMillis()-time);
 
 	}
 	
@@ -63,7 +67,24 @@ public class MariosTestMainForWADLGeneration {
 	}
 
 	private static void testGeneration() {
+		
 		try {
+			WSDarwinService service  = new WSDarwinService();
+			ArrayList<String> urlRequests = new ArrayList<String>();
+			BufferedReader in = new BufferedReader(new FileReader(new File(PATH_PREFIX+"/request.txt")));
+			String line = in.readLine();
+			while(line != null) {
+				urlRequests.add(line);
+				line = in.readLine();
+			}
+			in.close();
+			service.generateWADL(urlRequests, new ArrayList<String>(), FILENAME_DIR+VENDOR+".wadl", RESPONSE_DIR);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		/*try {
 			ArrayList<String> requests = new ArrayList<String>();
 			ArrayList<String> uris = new ArrayList<String>();
 			HashMap<String, XSDFile> responses = new HashMap<String, XSDFile>();
@@ -160,7 +181,7 @@ public class MariosTestMainForWADLGeneration {
 			} catch (ParserConfigurationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 	}
 
 	private static void testComparison() {
