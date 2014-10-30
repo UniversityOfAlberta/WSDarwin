@@ -405,7 +405,7 @@ public class WADLView extends ViewPart {
 									urlRequests.add(line);
 									line = in.readLine();
 								}
-								service.generateWADL(urlRequests, new ArrayList<String>(), wadlFilepath, destinationFolderName);
+								service.generateWADL(urlRequests, new ArrayList<String>(), wadlFilepath, destinationFolderName, false);
 								destinationFolder.refreshLocal(IResource.DEPTH_INFINITE, null);
 								monitor.worked(1);
 							} catch (CoreException e) {

@@ -181,7 +181,7 @@ public class XMLGenerator {
 	 * ex.printStackTrace(); return null; } }
 	 */
 
-	public Document createWADL(WADLFile wadlFile, String base) throws IOException,
+	public Document createWADL(WADLFile wadlFile, String base, boolean isXWADL) throws IOException,
 			ParserConfigurationException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
@@ -247,7 +247,7 @@ public class XMLGenerator {
 			HashSet<Resource> resource = new HashSet<Resource>();
 			resource.addAll(r.getResourceElements().values());
 
-			addResourceElements(resource, resourcesElement, xmldoc);
+			addResourceElements(resource, resourcesElement, xmldoc, isXWADL);
 		}
 
 		writeXML(domImpl, xmldoc, wadlFile.getIdentifier());
@@ -256,7 +256,7 @@ public class XMLGenerator {
 	}
 
 	private void addResourceElements(HashSet<Resource> resource,
-			Element resourcesElement, Document xmldoc) {
+			Element resourcesElement, Document xmldoc, boolean isXWADL) {
 		for (Resource rr : resource) {
 			Element resourceElement = xmldoc.createElement("resource");
 			resourceElement.setAttribute("path", rr.getIdentifier());
@@ -274,7 +274,7 @@ public class XMLGenerator {
 
 			HashSet<Resource> resourceResources = new HashSet<Resource>();
 			resourceResources.addAll(rr.getResourceElements().values());
-			addResourceElements(resourceResources, resourceElement, xmldoc);
+			addResourceElements(resourceResources, resourceElement, xmldoc, isXWADL);
 
 			HashSet<Method> methods = new HashSet<Method>();
 			methods.addAll(rr.getMethodElements().values());
@@ -303,7 +303,10 @@ public class XMLGenerator {
 							.getValueFrequencies();
 					HashMap<String, Integer> typeFrequencies = par
 							.getTypeFrequencies();
-					//appendValueAndTypeFrequencies(xmldoc, paramElement,valueFrequencies, typeFrequencies);
+					if (isXWADL) {
+						appendValueAndTypeFrequencies(xmldoc, paramElement,
+								valueFrequencies, typeFrequencies);
+					}
 					requestElement.appendChild(paramElement);
 				}
 

@@ -126,7 +126,7 @@ public class WSDarwinService extends Application{
 		String localpath_wadl_filename_A = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
 		if (DEBUG) {System.out.println("filename A: " + localpath_wadl_filename_A ); }
 		
-		generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH);
+		generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH, true);
 		returnArray.add(serverpath_wadl_filename_A);
 		String ret = gson.toJson(returnArray);
 		//String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
@@ -142,7 +142,7 @@ public class WSDarwinService extends Application{
 			ArrayList<String> analyze_WADLurls, 
 			String call_type, String session_id, 
 			String mergedWADLFileName, 
-			String localhostFilePath) {
+			String localhostFilePath, boolean isXWADL) {
 		try {
 			ArrayList<String> requests = new ArrayList<String>();
 			ArrayList<String> uris = new ArrayList<String>();
@@ -207,7 +207,7 @@ public class WSDarwinService extends Application{
 			}
 			
 			// write merged WADL file only once
-			generator.createWADL(mergedWADL, resourceBase);
+			generator.createWADL(mergedWADL, resourceBase, isXWADL);
 			
 			// Add the merged wadl's path to the list wadl_paths
 	        //wadl_paths.add(SERVER_FILES_PATH+VENDOR+"Merged.wadl");
@@ -241,7 +241,7 @@ public class WSDarwinService extends Application{
 			ArrayList<String> fullRequests,
 			ArrayList<String> analyze_WADLurls,
 			String wadlFilepath, 
-			String destinationFolderName) {
+			String destinationFolderName, boolean isXWADL) {
 		try {
 			ArrayList<String> requests = new ArrayList<String>();
 			ArrayList<String> uris = new ArrayList<String>();
@@ -346,7 +346,7 @@ public class WSDarwinService extends Application{
 		        System.out.println("FILE MERGED !");
 			}
 			
-			generator.createWADL(mergedWADL, resourceBase);
+			generator.createWADL(mergedWADL, resourceBase, isXWADL);
 			
 			return mergedWADL;
 			
@@ -399,7 +399,7 @@ public class WSDarwinService extends Application{
 		String serverpath_wadl_filename_A = SERVER_FILES_PATH + "wadlA" + session_id + ".wadl";
 		
 //		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, localpath_wadl_filename_A, serverpath_wadl_filename_A);
-		WADLFile wadl_A = generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH);
+		WADLFile wadl_A = generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH, false);
 		String serverpath_wadl_filename_B = "";
 		
 		Delta delta = null;
@@ -473,14 +473,14 @@ public class WSDarwinService extends Application{
 		String filenameA = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
 		String localhostFilenameA = SERVER_FILES_PATH + "wadlA" + session_id + ".wadl";
 		System.out.println("filename A: " + filenameA );
-		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
+		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA, true);
 		String compare_wadl_merged_path_url = "";
 		
 		Delta delta = null;
 		if ( ( (compare_URLs != null) || (compare_WADLurls != null) ) && ( (compare_WADLurls.size() > 0) || (compare_URLs.size() > 0) ) ){
 			String filenameB = LOCAL_FILES_PATH + "wadlB" + session_id + ".wadl";
 			String localhostFilenameB = SERVER_FILES_PATH + "wadlB" + session_id + ".wadl";
-			compare_wadl_merged_path_url = getWadl(compare_URLs, compare_WADLurls, "compareURLS", session_id, filenameB, localhostFilenameB);
+			compare_wadl_merged_path_url = getWadl(compare_URLs, compare_WADLurls, "compareURLS", session_id, filenameB, localhostFilenameB, true);
 			System.out.println("");
 			System.out.println("analysis path: " + analysis_wadl_merged_path_url);
 			System.out.println("compare path: " + compare_wadl_merged_path_url);
@@ -712,7 +712,7 @@ public class WSDarwinService extends Application{
 			WADLFile newWADL = new WADLFile(FILENAME_DIR_TWO +FILENAME_WADL, urlLine, mergedXSDFile);
 			grammarSet.add(xsdFile);		// TODO later change to Identifier + XSDElement
 			newWADL.buildWADL(grammarSet, analyzer, resourceBase, methodName, 200);
-		    generator.createWADL(newWADL, resourceBase);
+		    generator.createWADL(newWADL, resourceBase, true);
 		    
 		    // Call diff&merge methods from sub-objects 
 		    mergedWADL.compareToMerge(newWADL);

@@ -78,7 +78,7 @@ public class MariosTestMainForWADLGeneration {
 				line = in.readLine();
 			}
 			in.close();
-			service.generateWADL(urlRequests, new ArrayList<String>(), FILENAME_DIR+VENDOR+".wadl", RESPONSE_DIR);
+			service.generateWADL(urlRequests, new ArrayList<String>(), FILENAME_DIR+VENDOR+".wadl", RESPONSE_DIR, false);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
