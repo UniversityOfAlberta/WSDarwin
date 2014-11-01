@@ -986,6 +986,12 @@ function loadXMLDoc(filename){
 		xhttp=new ActiveXObject("Microsoft.XMLHTTP");
 	}
 	xhttp.open("GET",filename,false);
+	// TRY this if you get Uncaught Network Error
+	// xhttp.onreadystatechange=function() {
+	//   if (xhttp.readyState==4 && xhttp.status==200) {
+	//     xhttp.send();
+	//   }
+	// }
 	xhttp.send();
 	return xhttp.responseXML;
 }
@@ -1141,6 +1147,11 @@ function printOtherTags(myNode, elemClassName, extendedWADL){
 			//var chosenKey;
 			var max_percent		  = 0;
 			var typeConfidenceColor;
+			// type confidence colors
+			var typeConfidence0_24          = "#c9302c";
+			var typeConfidence24_49         = "#F0854E";
+			var typeConfidence50_74         = "#f0ad4e";
+			var typeConfidence75_100        = "#449d44";
 			for (var key in typeConfidenceMap){
 				if (typeConfidenceMap.hasOwnProperty(key)){
 					typeConfStr += key + "  " + typeConfidenceMap[key] + "%";
@@ -1307,6 +1318,8 @@ function calculateTypeConfidence(myNode){
 	var typeConfidenceArray = {};
 	
 	var typeFrequenciesNode = getChildNodeNamed(myNode, 'typeFrequencies');
+	console.debug("typefrequenciesnode:");
+	console.debug(typeFrequenciesNode);
 	if (typeFrequenciesNode){
 		if (typeFrequenciesNode.childNodes.length > 0){
 			// calculating the sum of the frequencies / TO DO: will get this value from the <typeFrequencies> after it's added there
@@ -1644,7 +1657,7 @@ function updateAttribute(mynodeid, nodeAttrName, newAttrValue){
 }
 
 // ================================================================================================
-// this function is not current used - it is attempting to evenly print the java comparison outputs
+// this function is not currently used - it is attempting to evenly print the java comparison outputs
 // but it does not work !
 function addGraySpace(startAtLineIndex, noLines, side){
 	console.log("startat line index is " + startAtLineIndex + ", no lines: " + noLines + ", side: " + side);
