@@ -41,7 +41,7 @@ public class XMLGenerator {
 	public static final String TARGET_SCHEMA_NAMESPACE = "tns:";
 
 	private void createXSD(XSDFile xsdFile, Document xmldoc,
-			Element schemaElement) throws IOException,
+			Element schemaElement, boolean isXWADL) throws IOException,
 			ParserConfigurationException {
 
 		HashMap<String, XSDElement> elements = xsdFile.getElements();
@@ -109,7 +109,10 @@ public class XMLGenerator {
 								.getValueFrequencies();
 						Map<String, Integer> typeFrequencies = xsdElement
 								.getTypeFrequencies();
-						//appendValueAndTypeFrequencies(xmldoc, childElement,valueFrequencies, typeFrequencies);
+						if (isXWADL) {
+							appendValueAndTypeFrequencies(xmldoc, childElement,
+									valueFrequencies, typeFrequencies);
+						}
 					}
 					sequence.appendChild(childElement);
 				}
@@ -233,7 +236,7 @@ public class XMLGenerator {
 		schemaElement.setAttribute("xmlns:tns", base);
 		XSDFile xsdFile = wadlFile.getSchema();
 			// System.out.println("-> xsd File: " + xsdFile);
-		createXSD(xsdFile, xmldoc, schemaElement);
+		createXSD(xsdFile, xmldoc, schemaElement, isXWADL);
 		grammarsElement.appendChild(schemaElement);
 		root.appendChild(grammarsElement);
 
