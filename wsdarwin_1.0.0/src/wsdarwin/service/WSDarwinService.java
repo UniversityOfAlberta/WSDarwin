@@ -412,6 +412,7 @@ public class WSDarwinService extends Application{
 			String localpath_wadl_filename_B = LOCAL_FILES_PATH + "wadlB" + session_id + ".wadl";
 			serverpath_wadl_filename_B = SERVER_FILES_PATH + "wadlB" + session_id + ".wadl";
 			
+			WADLFile wadl_B = generateWADL(compare_URLs, compare_WADLurls, localpath_wadl_filename_B, LOCAL_FILES_PATH, false);
 			System.out.println("");
 			System.out.println("analysis path: " + serverpath_wadl_filename_A);
 			System.out.println("compare path: " + serverpath_wadl_filename_B);

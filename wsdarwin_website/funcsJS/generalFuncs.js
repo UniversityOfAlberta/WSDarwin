@@ -1142,45 +1142,52 @@ function printOtherTags(myNode, elemClassName, extendedWADL){
 										" title='Click to convert to an Enumeration type'>Enum?</button>";
 			}
 			
-			var typeConfidenceMap = calculateTypeConfidence(myNode);
-			var typeConfStr  	  = "";
-			//var chosenKey;
-			var max_percent		  = 0;
-			var typeConfidenceColor;
-			// type confidence colors
-			var typeConfidence0_24          = "#c9302c";
-			var typeConfidence24_49         = "#F0854E";
-			var typeConfidence50_74         = "#f0ad4e";
-			var typeConfidence75_100        = "#449d44";
-			for (var key in typeConfidenceMap){
-				if (typeConfidenceMap.hasOwnProperty(key)){
-					typeConfStr += key + "  " + typeConfidenceMap[key] + "%";
-					if (typeConfidenceMap[key] > max_percent){
-						max_percent = typeConfidenceMap[key];
-						//chosenKey 	= key;
-						if ( (max_percent > 0) && (max_percent <= 24) ){
-							typeConfidenceColor = typeConfidence0_24;
-						} else if ( (max_percent > 24) && (max_percent <= 49) ){
-							typeConfidenceColor = typeConfidence24_49;
-						} else if ( (max_percent > 49) && (max_percent <= 74) ){
-							typeConfidenceColor = typeConfidence50_74;
-						} else if ( (max_percent > 74) && (max_percent <= 100) ){
-							typeConfidenceColor = typeConfidence75_100;
+			console.log("--Attention--");
+			console.debug(myNode)
+			console.log("--Attention--");
+
+			if (isItEnumConvertable(myNode)){
+				var typeConfidenceMap = calculateTypeConfidence(myNode);
+				var typeConfStr  	  = "";
+				//var chosenKey;
+				var max_percent		  = 0;
+				var typeConfidenceColor;
+				// type confidence colors
+				var typeConfidence0_24          = "#c9302c";
+				var typeConfidence24_49         = "#F0854E";
+				var typeConfidence50_74         = "#f0ad4e";
+				var typeConfidence75_100        = "#449d44";
+				for (var key in typeConfidenceMap){
+					if (typeConfidenceMap.hasOwnProperty(key)){
+						typeConfStr += key + "  " + typeConfidenceMap[key] + "%";
+						if (typeConfidenceMap[key] > max_percent){
+							max_percent = typeConfidenceMap[key];
+							//chosenKey 	= key;
+							if ( (max_percent > 0) && (max_percent <= 24) ){
+								typeConfidenceColor = typeConfidence0_24;
+							} else if ( (max_percent > 24) && (max_percent <= 49) ){
+								typeConfidenceColor = typeConfidence24_49;
+							} else if ( (max_percent > 49) && (max_percent <= 74) ){
+								typeConfidenceColor = typeConfidence50_74;
+							} else if ( (max_percent > 74) && (max_percent <= 100) ){
+								typeConfidenceColor = typeConfidence75_100;
+							}
 						}
 					}
 				}
+
+				// have to check if myNode has childNode 'typeFrequency' ( if it doesn't, don't display );
+				// calculate typefrequency from it !
+				var typeConfidenceBtnTooltip = "<button style='margin-left: 5px; width: 15px; height: 15px; " + 
+											"background-color: " + typeConfidenceColor + "; " +
+											"border-radius: 15px;' type='button' class=\"btn btn-xs " + typeConfidenceColor + "\" " +
+											"data-toggle='tooltip' data-placement='right'" +
+											" title='" + typeConfStr + "'></button>";
+
+				html_wadl_string += hintTypeBtnTooltip;
+				html_wadl_string += typeConfidenceBtnTooltip;
+
 			}
-
-			// have to check if myNode has childNode 'typeFrequency' ( if it doesn't, don't display );
-			// calculate typefrequency from it !
-			var typeConfidenceBtnTooltip = "<button style='margin-left: 5px; width: 15px; height: 15px; " + 
-										"background-color: " + typeConfidenceColor + "; " +
-										"border-radius: 15px;' type='button' class=\"btn btn-xs " + typeConfidenceColor + "\" " +
-										"data-toggle='tooltip' data-placement='right'" +
-										" title='" + typeConfStr + "'></button>";
-
-			html_wadl_string += hintTypeBtnTooltip;
-			html_wadl_string += typeConfidenceBtnTooltip;
 		}
 
 		html_wadl_string += "</br>";
@@ -1313,13 +1320,39 @@ function generateWADLDocument(myNode, extendedWADL){
 	printEndTags(myNode, elemClassName, extendedWADL);
 }
 
+function isItEnumConvertable(myNode){
+	console.log("SUP BABYYYYYYYYYYYYYY:");
+	console.debug(myNode);
+	console.log("SUP BABYYYYYYYYYYYYYY:");
+	console.debug(myNode.attributes.getNamedItem("type").value);
+	if ( myNode.hasAttribute("maxOccurs") ){
+		var maxOccurs = myNode.attributes.getNamedItem("maxOccurs").value;
+		if (maxOccurs == "unbounded"){
+			return false;
+		}
+	}
+
+	var valueFrequenciesNode = getChildNodeNamed(myNode, 'valueFrequencies');
+
+	if (valueFrequenciesNode){
+		var vfFreqNodeValue = valueFrequenciesNode.childNodes[0].attributes.getNamedItem('frequency').value;
+		if (vfFreqNodeValue > 1){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+}
+
 function calculateTypeConfidence(myNode){
 	var totalFrequency = 0;
 	var typeConfidenceArray = {};
 	
 	var typeFrequenciesNode = getChildNodeNamed(myNode, 'typeFrequencies');
-	console.debug("typefrequenciesnode:");
-	console.debug(typeFrequenciesNode);
+	var valueFrequenciesNode = getChildNodeNamed(myNode, 'valueFrequencies');
+	console.debug("vatypefrequenciesnode:");
+	console.debug(valueFrequenciesNode);
 	if (typeFrequenciesNode){
 		if (typeFrequenciesNode.childNodes.length > 0){
 			// calculating the sum of the frequencies / TO DO: will get this value from the <typeFrequencies> after it's added there
