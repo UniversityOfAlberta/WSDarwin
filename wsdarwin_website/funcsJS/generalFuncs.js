@@ -348,7 +348,7 @@ function find_node(mynode, sid){
 	for (var i = 0; i < mynode.childNodes.length; i++){
 		if (mynode.childNodes[i].my_id == sid){
 			window.foundNode = mynode.childNodes[i];		// window.foundNode global
-			console.log('[find_node] found node name is ' + window.foundNode.nodeName);
+			// console.log('[find_node] found node name is ' + window.foundNode.nodeName);
 			return window.foundNode;
 		}
 		find_node(mynode.childNodes[i], sid);
@@ -371,7 +371,7 @@ function find_node_2(mynode, sid){
 		if (mynode.childNodes[i].my_id == sid){
 			foundNode2['node'] 		= mynode.childNodes[i];
 			foundNode2['position'] 	= i;
-			console.log('[find_node_2] found node name is ' + window.foundNode2['node'].nodeName);
+			// console.log('[find_node_2] found node name is ' + window.foundNode2['node'].nodeName);
 			return foundNode2;
 		}
 		find_node_2(mynode.childNodes[i], sid);
@@ -515,7 +515,9 @@ function highlightComparedWADLs(mainNode, oldDocNode, newDocNode){
 					}
 				} else if (operationNode.nodeName == "AddDelta"){
 					var targetVal = operationNode.attributes.getNamedItem("target").value;
+					// console.log("Target Value: " + targetVal);
 					highlightMethodNodeDiv(targetVal, newDocNode, 'AddDelta');
+					// highlightResourceNodeDiv();
 				} else if (operationNode.nodeName == "DeleteDelta"){
 					var sourceVal = operationNode.attributes.getNamedItem("source").value;
 					highlightMethodNodeDiv(sourceVal, oldDocNode, 'DeleteDelta');
@@ -681,30 +683,101 @@ function highlightResourceNodeDiv(resource_path, xml_doc, type){
 	}
 }
 
+// ---------------------------------------BELOW: JUST ADDED ON NOV 2
 function highlightMethodRec(method_id, node, highlightColor){
-	for (var i = 0; i < node.childNodes.length; i++){
-		var newNode = node.childNodes[i];
-		if (newNode.nodeName == "resource"){
-			highlightMethodRec(method_id, newNode, highlightColor);
-		} else if (newNode.nodeName == "method"){
-			if (newNode.attributes.getNamedItem("id").value === method_id){
-				if (parsing_html_mode){
-					var elemNode = $("."+newNode.my_id + "line");
-					var endElemClass = newNode.my_id + "line_end";
-					var noLines = 0;
-					while(elemNode.attr("class") != endElemClass ){
-						noLines++;
-						elemNode.css("background-color", highlightColor);
-						elemNode = elemNode.next();
-					}
-					$("." + endElemClass).css("background-color", highlightColor);
-				} else {
-					$("#"+newNode.my_id).css("background-color", highlightColor);
-				}
-			}
-		}
-	}
+ for (var i = 0; i < node.childNodes.length; i++){
+  var newNode = node.childNodes[i];
+  if (newNode.nodeName == "resource"){
+   if(newNode.attributes.getNamedItem("path").value === method_id) {
+                 for (var j = 0; j<newNode.childNodes.length; j++) {
+     var childNode = newNode.childNodes[j];
+     if (childNode.nodeName == "method") {
+      if (parsing_html_mode){
+       var elemNode = $("."+newNode.my_id + "line");
+       var endElemClass = newNode.my_id + "line_end";
+       var noLines = 0;
+       while(elemNode.attr("class") != endElemClass ){
+        noLines++;
+        elemNode.css("background-color", highlightColor);
+        elemNode = elemNode.next();
+       }
+       $("." + endElemClass).css("background-color", highlightColor);
+      } else {
+       $("#"+newNode.my_id).css("background-color", highlightColor);
+      }
+     } else {
+      highlightMethodRec(method_id, newNode, highlightColor);
+     }
+     break;
+    }
+   }
+  } else if (newNode.nodeName == "method"){
+   if (newNode.attributes.getNamedItem("id").value === method_id){
+    if (parsing_html_mode){
+     var elemNode = $("."+newNode.my_id + "line");
+     var endElemClass = newNode.my_id + "line_end";
+     var noLines = 0;
+     while(elemNode.attr("class") != endElemClass ){
+      noLines++;
+      elemNode.css("background-color", highlightColor);
+      elemNode = elemNode.next();
+     }
+     $("." + endElemClass).css("background-color", highlightColor);
+    } else {
+     $("#"+newNode.my_id).css("background-color", highlightColor);
+    }
+   }
+  }
+ }
 }
+// ABOVE: ADDED ON NOV 2
+// function highlightMethodRec(method_id, node, highlightColor){
+// 	for (var i = 0; i < node.childNodes.length; i++){
+// 		var newNode = node.childNodes[i];
+// 		if (newNode.nodeName == "resource"){
+// 			highlightMethodRec(method_id, newNode, highlightColor);
+
+// 			// ADDED below on Nov.1 :
+// 			if (newNode.attributes.getNamedItem('path') == method_id){
+// 				for (var j = 0; j < newNode.childNodes.length; j++){
+// 					var childOfNewNode = newNode.childNodes[j];
+// 					if (childOfNewNode.nodeName == "method"){
+// 						if (parsing_html_mode){
+// 							var elemNode = $("."+childOfNewNode.my_id + "line");
+// 							var endElemClass = childOfNewNode.my_id + "line_end";
+// 							var noLines = 0;
+// 							while(elemNode.attr("class") != endElemClass ){
+// 								noLines++;
+// 								elemNode.css("background-color", highlightColor);
+// 								elemNode = elemNode.next();
+// 							}
+// 							$("." + endElemClass).css("background-color", highlightColor);
+// 						} else {
+// 							$("#"+childOfNewNode.my_id).css("background-color", highlightColor);
+// 						}
+// 					}
+// 				}
+// 			}
+// 			// ADDED above on Nov.1
+// 		} else if (newNode.nodeName == "method"){
+// 			// if (newNode.attributes.getNamedItem("id").value === method_id){
+// 				if (parsing_html_mode){
+// 					var elemNode = $("."+newNode.my_id + "line");
+// 					var endElemClass = newNode.my_id + "line_end";
+// 					var noLines = 0;
+// 					while(elemNode.attr("class") != endElemClass ){
+// 						noLines++;
+// 						elemNode.css("background-color", highlightColor);
+// 						elemNode = elemNode.next();
+// 					}
+// 					$("." + endElemClass).css("background-color", highlightColor);
+// 				} else {
+// 					$("#"+newNode.my_id).css("background-color", highlightColor);
+// 				}
+// 			// }
+// 		}
+// 	}
+// }
 
 function highlightMethodNodeDiv(method_id, xml_doc, type){
 	var highlightColor = '';
@@ -795,8 +868,11 @@ function highlightCTypeGrammarsRec(ctype_id, node, highlightColor){
 				}
 			}
 		} else if (newNode.nodeName == "xs:element"){
+			
+
 			var typeSplits = newNode.attributes.getNamedItem("type").value.split(":");
 			if (typeSplits[1] == ctype_id){
+
 				if (parsing_html_mode){
 					var elemNode = $("."+newNode.my_id + "line");
 					var endElemClass = newNode.my_id + "line_end";
@@ -806,6 +882,8 @@ function highlightCTypeGrammarsRec(ctype_id, node, highlightColor){
 					}
 					$("." + endElemClass).css("background-color", highlightColor);
 				} else {
+					console.log("=============");
+					// console.log(newNode);
 					$("#"+newNode.my_id).css("background-color", highlightColor);
 				}
 			}
@@ -825,7 +903,9 @@ function highlightCTypeNodeDiv(ctype_id, xml_doc, type){
 
 	if ( (xml_doc.childNodes[1].nodeName != null) && (xml_doc.childNodes[1].nodeName == "resources") ){
 		var resourcesNode = xml_doc.childNodes[1];
-		//highlightCTypeRec(ctype_id, resourcesNode, highlightColor);
+		// highlightCTypeRec(ctype_id, resourcesNode, highlightColor);
+
+
 
 		for (var i = 0; i < resourcesNode.childNodes.length; i++){
 			var resource_Node = resourcesNode.childNodes[i];
@@ -846,6 +926,8 @@ function highlightCTypeNodeDiv(ctype_id, xml_doc, type){
 	if ( (xml_doc.childNodes[0].nodeName != null) && (xml_doc.childNodes[0].nodeName == "grammars") ){
 		var grammarsNode = xml_doc.childNodes[0];
 		highlightCTypeGrammarsRec(ctype_id, grammarsNode, highlightColor);
+
+
 	}
 }
 
@@ -968,7 +1050,7 @@ function highlightXSElementWithName(xselementName, node, highlightColor ){
 }
 
 function processWADLFromPath(wadl_url_path){
-	console.log("WADL URL PATH IS " + wadl_url_path);
+	console.log("WADL url path: '" + wadl_url_path + "'");
 	xmlDoc = loadXMLDoc(wadl_url_path);
 	console.log('xmlDoc print:');
 	console.debug(xmlDoc);
@@ -1142,9 +1224,9 @@ function printOtherTags(myNode, elemClassName, extendedWADL){
 										" title='Click to convert to an Enumeration type'>Enum?</button>";
 			}
 			
-			console.log("--Attention--");
-			console.debug(myNode)
-			console.log("--Attention--");
+			// console.log("--Attention--");
+			// console.debug(myNode)
+			// console.log("--Attention--");
 
 			if (isItEnumConvertable(myNode)){
 				var typeConfidenceMap = calculateTypeConfidence(myNode);
@@ -1293,7 +1375,7 @@ function generateWADLDocument(myNode, extendedWADL){
 	if (typeof extendedWADL == "undefined"){
 		extendedWADL = false;
 	}
-	console.log("generateWADLDocument: ", myNode.nodeName, extendedWADL);
+	console.log("-generateWADLDocument: ", myNode.nodeName, extendedWADL);
 	addSpaces(extendedWADL);
 
 	// TO DO: optimize these prints, they are everywhere and seem too random;
@@ -1321,9 +1403,6 @@ function generateWADLDocument(myNode, extendedWADL){
 }
 
 function isItEnumConvertable(myNode){
-	console.log("SUP BABYYYYYYYYYYYYYY:");
-	console.debug(myNode);
-	console.log("SUP BABYYYYYYYYYYYYYY:");
 	console.debug(myNode.attributes.getNamedItem("type").value);
 	if ( myNode.hasAttribute("maxOccurs") ){
 		var maxOccurs = myNode.attributes.getNamedItem("maxOccurs").value;
@@ -1612,7 +1691,7 @@ function hideNodesChildren(mynodeid){
 
 function removeNode(mynodeid){
 	var foundNode = find_node(rootNode, mynodeid);
-	console.log('found node name: ' + foundNode.nodeName + ', parent: ' + foundNode.parentNode.nodeName);
+	// console.log('found node name: ' + foundNode.nodeName + ', parent: ' + foundNode.parentNode.nodeName);
 	foundNode.parentNode.removeChild(foundNode);
 	start_wadl_parsing();
 }
@@ -1683,7 +1762,7 @@ function updateAttribute(mynodeid, nodeAttrName, newAttrValue){
 	for (var i = 0; i < foundNode.attributes.length; i++){
 		if (foundNode.attributes[i].nodeName == nodeAttrName){
 			foundNode.attributes[i].value = newAttrValue;
-			console.log("updated node with id: " + foundNode.my_id + ", nodeName: " + foundNode.attributes[i].nodeName + ",value of attr:" + foundNode.attributes[i].value);
+			// console.log("updated node with id: " + foundNode.my_id + ", nodeName: " + foundNode.attributes[i].nodeName + ",value of attr:" + foundNode.attributes[i].value);
 		}
 	}
 	start_wadl_parsing();
@@ -1693,7 +1772,7 @@ function updateAttribute(mynodeid, nodeAttrName, newAttrValue){
 // this function is not currently used - it is attempting to evenly print the java comparison outputs
 // but it does not work !
 function addGraySpace(startAtLineIndex, noLines, side){
-	console.log("startat line index is " + startAtLineIndex + ", no lines: " + noLines + ", side: " + side);
+	console.log("startat line index is '" + startAtLineIndex + "', no lines: '" + noLines + "', side: '" + side + "'");
 	//startAtLineIndex--;
 	var emptyDivs = "";
 	var n = 0;
@@ -1712,5 +1791,5 @@ function addGraySpace(startAtLineIndex, noLines, side){
 	
 	var elemToInsertAfter = $("*[data-lineNumber=" + startAtLineIndex + "]");
 	$(emptyDivs).insertAfter( elemToInsertAfter );
-	console.log("insert on side: " + side + " after elem with id: " + elemToInsertAfter.attr("id") );
+	console.log("insert on side: '" + side + "' after elem with id: '" + elemToInsertAfter.attr("id") + "'" );
 }

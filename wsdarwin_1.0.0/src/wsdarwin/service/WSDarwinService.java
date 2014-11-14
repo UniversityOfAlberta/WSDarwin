@@ -83,16 +83,16 @@ public class WSDarwinService extends Application{
 	// web service directories
 
 	// 1: ( local tomcat path )
-	private static final String PATH_PREFIX_TWO = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
-	private static final String LOCAL_FILES_PATH = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
-	private static final String SERVER_FILES_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
-	private static final String LOCAL_WADL_UPLOADS_PATH = "NOT SET UP";
+//	private static final String PATH_PREFIX_TWO = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
+//	private static final String LOCAL_FILES_PATH = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
+//	private static final String SERVER_FILES_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
+//	private static final String LOCAL_WADL_UPLOADS_PATH = "NOT SET UP";
 	
 	// 2: ( ssrg17.cs.ualberta.ca tomcat path )
-//	private static final String PATH_PREFIX_TWO = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
-//	private static final String LOCAL_FILES_PATH = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/";
-//	private static final String SERVER_FILES_PATH = "http://ssrg17.cs.ualberta.ca:8080/wsdarwin_1.0.0/files/";
-//	private static final String LOCAL_WADL_UPLOADS_PATH = "/var/www/html/wsdarwin/uploads/";
+	private static final String PATH_PREFIX_TWO = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
+	private static final String LOCAL_FILES_PATH = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/";
+	private static final String SERVER_FILES_PATH = "http://ssrg17.cs.ualberta.ca:8080/wsdarwin_1.0.0/files/";
+	private static final String LOCAL_WADL_UPLOADS_PATH = "/var/www/html/wsdarwin/uploads/";
 	
 	private static final String FILENAME_DIR_TWO = PATH_PREFIX_TWO+"/wadl/";
 	private static final String RESPONSE_DIR_TWO = PATH_PREFIX_TWO+"/responses/";
@@ -471,24 +471,38 @@ public class WSDarwinService extends Application{
 		returnArray.add(session_id);
 		//MergedWADL_A_ + session_id
 		
-		String filenameA = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
-		String localhostFilenameA = SERVER_FILES_PATH + "wadlA" + session_id + ".wadl";
-		System.out.println("filename A: " + filenameA );
-		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA, true);
-		String compare_wadl_merged_path_url = "";
+		// wadlA file paths
+		String localpath_wadl_filename_A = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
+		String serverpath_wadl_filename_A = SERVER_FILES_PATH + "wadlA" + session_id + ".wadl";	
+		
+		WADLFile wadl_A = generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH, false);
+		WADLFile wadl_B = null;
+		String serverpath_wadl_filename_B = "";
+//		String filenameA = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
+//		String localhostFilenameA = SERVER_FILES_PATH + "wadlA" + session_id + ".wadl";
+//		System.out.println("filename A: " + filenameA );
+//		String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA, true);
+//		String compare_wadl_merged_path_url = "";
 		
 		Delta delta = null;
 		if ( ( (compare_URLs != null) || (compare_WADLurls != null) ) && ( (compare_WADLurls.size() > 0) || (compare_URLs.size() > 0) ) ){
-			String filenameB = LOCAL_FILES_PATH + "wadlB" + session_id + ".wadl";
-			String localhostFilenameB = SERVER_FILES_PATH + "wadlB" + session_id + ".wadl";
-			compare_wadl_merged_path_url = getWadl(compare_URLs, compare_WADLurls, "compareURLS", session_id, filenameB, localhostFilenameB, true);
-			System.out.println("");
-			System.out.println("analysis path: " + analysis_wadl_merged_path_url);
-			System.out.println("compare path: " + compare_wadl_merged_path_url);
+
+			// wadlB file paths
+			String localpath_wadl_filename_B = LOCAL_FILES_PATH + "wadlB" + session_id + ".wadl";
+			serverpath_wadl_filename_B = SERVER_FILES_PATH + "wadlB" + session_id + ".wadl";
+			
+			wadl_B = generateWADL(compare_URLs, compare_WADLurls, localpath_wadl_filename_B, LOCAL_FILES_PATH, false);
+			
+//			String filenameB = LOCAL_FILES_PATH + "wadlB" + session_id + ".wadl";
+//			String localhostFilenameB = SERVER_FILES_PATH + "wadlB" + session_id + ".wadl";
+//			compare_wadl_merged_path_url = getWadl(compare_URLs, compare_WADLurls, "compareURLS", session_id, filenameB, localhostFilenameB, true);
+//			System.out.println("");
+//			System.out.println("analysis path: " + analysis_wadl_merged_path_url);
+//			System.out.println("compare path: " + compare_wadl_merged_path_url);
 			
 			// parse the 2 wadl's into a wsdarwin.model and diff them
-			WADLParser parser1 = new WADLParser(new File(filenameA));
-			WADLParser parser2 = new WADLParser(new File(filenameB));
+			WADLParser parser1 = new WADLParser(new File(localpath_wadl_filename_A));
+			WADLParser parser2 = new WADLParser(new File(localpath_wadl_filename_B));
 			
 			delta = parser1.getService().diff(parser2.getService());
 						
@@ -497,8 +511,8 @@ public class WSDarwinService extends Application{
 			//System.out.println("Diff finished");
 		}
 		
-		returnArray.add(analysis_wadl_merged_path_url);
-		returnArray.add(compare_wadl_merged_path_url);
+		returnArray.add(serverpath_wadl_filename_A);
+		returnArray.add(serverpath_wadl_filename_B);
 
 		//if (call_type.equals("compare")){
 			System.out.println("creating xml comparison file");
@@ -518,11 +532,16 @@ public class WSDarwinService extends Application{
 	    //}
 		
 		System.out.println(" = = = = = = ");
-		System.out.println("wadl files A and B exist  ? " + testA.getIdentifier() + " AND " + testB.getIdentifier() );
+//		System.out.println("wadl files A and B exist  ? " + testA.getIdentifier() + " AND " + testB.getIdentifier() );
+		System.out.println("wadl files A and B exist  ? " + wadl_A.getIdentifier() + " AND " + wadl_B.getIdentifier() );
 		
-		testA.mapElement(testB);
-		HashSet<MapDelta> bset = testB.getMapDeltas();
-		HashSet<MapDelta> aset = testA.getMapDeltas();
+		wadl_A.mapElement(wadl_B);
+		HashSet<MapDelta> bset = wadl_B.getMapDeltas();
+		HashSet<MapDelta> aset = wadl_A.getMapDeltas();
+		
+//		testA.mapElement(testB);
+//		HashSet<MapDelta> bset = testB.getMapDeltas();
+//		HashSet<MapDelta> aset = testA.getMapDeltas();
 		//for (int i = 0; i < abc.size(); i++){
 		//	System.out.println("<><><> " + aset );
 		//	System.out.println("<><><> " + bset );
@@ -534,10 +553,10 @@ public class WSDarwinService extends Application{
 		delta.printDelta(0);
 		System.out.println("------------------------");
 		//returnArray.add(SERVER_FILES_PATH + "deltaComparison.xml");
-		System.out.println("SUUUP: " + testA.getElementMappings());
-		System.out.println("ABECEDAR: " + gson.toJson(testA.getElementMappings()));
+		System.out.println("SUUUP: " + wadl_A.getElementMappings());
+		System.out.println("ABECEDAR: " + gson.toJson(wadl_A.getElementMappings()));
 		
-		returnArray.add( gson.toJson( testA.getElementMappings() ) );
+		returnArray.add( gson.toJson( wadl_A.getElementMappings() ) );
 		
 		String ret = gson.toJson(returnArray);		
 		return ret;
