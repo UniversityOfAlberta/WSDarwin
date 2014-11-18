@@ -120,11 +120,11 @@ function getWSDarwinAnalysis(process_mode, api_call_url, ajaxData){
 	$("#wadlOutput").html('');
 	
 	if (DEBUG_PRINT){
-		console.log("function getWSDarwinAnalysis:");
-		console.debug("api call: " 	+ api_call_url);
-		console.debug("ajax data: ");
-		console.debug(ajaxData);
-		console.log("---------------- ");
+		// console.log("function getWSDarwinAnalysis:");
+		// console.debug("api call: " 	+ api_call_url);
+		// console.debug("ajax data: ");
+		// console.debug(ajaxData);
+		// console.log("---------------- ");
 	}
 	
     $.ajax({
@@ -283,19 +283,19 @@ function printCrossServiceComparisonMappings(crossServiceMappings){
 		$("#leftHalfDiv").html("");
 		$("#rightHalfDiv").html("");
 
-		console.log('start of crossMappings print');
-		console.debug(crossMappings);
-		console.log('end of crossMappings print');
+		// console.log('start of crossMappings print');
+		// console.debug(crossMappings);
+		// console.log('end of crossMappings print');
 
 		for (var i = 0; i < crossMappings.length; i++){
-			console.log("left elem: " + crossMappings[i][0] + " and it's connections: ");
+			// console.log("left elem: " + crossMappings[i][0] + " and it's connections: ");
 			//var leftEname 	= crossMappings[i][0].split(":=")[0];
 			var leftEname 	= crossMappings[i][0].elemName.split(":=")[0];
 			var leftBtnId 	= crossMappings[i][0].elemId;
 			var leftBtn 	= "<a href='javascript:void(0)' id='" + leftBtnId + "' onClick='highlightLeftCrossServiceMappings(" + i + ")' class='list-group-item'>" + leftEname + "</a>";
 			$("#leftHalfDiv").append(leftBtn);
 			for (var k = 0; k < crossMappings[i][1].length; k++){
-				console.log(" ------> " + crossMappings[i][1][k].elemName);
+				// console.log(" ------> " + crossMappings[i][1][k].elemName);
 				//var leftEname = crossMappings[i][0].split(":=")[0];
 				var rightEname 	 = crossMappings[i][1][k].elemName.split(":=")[0];
 				var rightBtnId 	 = crossMappings[i][1][k].elemId;
@@ -420,7 +420,7 @@ function processJavaComparison(deltas_path, oldDocNode, newDocNode, process_type
 	xmlDoc = loadXMLDoc(deltas_path);
 	mainNode=xmlDoc.documentElement;
 
-	console.log(" --- JAVA DIFFING --- ");
+	// console.log(" --- JAVA DIFFING --- ");
 	//console.log("name: " + mainNode.nodeName + ", attrs length: " + mainNode.childNodes.length + ", attribute's value: " + mainNode.attributes.getNamedItem("xmlns").value);
 	//console.log(xmlDoc);
 
@@ -478,7 +478,7 @@ function highlightComparedWADLs(mainNode, oldDocNode, newDocNode){
 			if (interfaceNode.nodeName == "MatchDelta"){
 				continue;
 			} else if (interfaceNode.nodeName == "ChangeDelta"){
-				console.log("=============== changed interface ================");
+				// console.log("=============== changed interface ================");
 				if (interfaceNode.attributes.getNamedItem("changedAttribute") != null){
 					if (interfaceNode.attributes.getNamedItem("changedAttribute").value === "address"){
 						var oldSplits = interfaceNode.attributes.getNamedItem("oldValue").value.split("/");
@@ -489,7 +489,7 @@ function highlightComparedWADLs(mainNode, oldDocNode, newDocNode){
 					}
 				}
 			} else if (interfaceNode.nodeName == "AddDelta"){
-				console.log(" AddDelta--> the source is " + interfaceNode.attributes.getNamedItem("target").value);
+				// console.log(" AddDelta--> the source is " + interfaceNode.attributes.getNamedItem("target").value);
 				//var targetSplits = interfaceNode.attributes.getNamedItem("target").value.split("\\");
 				var targetVal = interfaceNode.attributes.getNamedItem("target").value;
 				//highlightResourceNodeDiv(targetSplits[targetSplits.length - 1], newDocNode, 'AddDelta');
@@ -595,7 +595,7 @@ function highlightChangedResource(splits, xml_doc, type){
 
 	if ( (xml_doc.childNodes[1].nodeName != null) && (xml_doc.childNodes[1].nodeName == "resources") ){
 		var resourcesNode = xml_doc.childNodes[1];
-		console.log("resources node base: " + resourcesNode.attributes.getNamedItem('base').value );
+		// console.log("resources node base: " + resourcesNode.attributes.getNamedItem('base').value );
 		// go through each resource and if 
 		for (var i = 0; i < resourcesNode.childNodes.length; i++) {
 			var resNode = resourcesNode.childNodes[i];
@@ -643,12 +643,12 @@ function highlightResourceRec(resource_id, node, highlightColor){
 
 					if (newNode.my_id.split("_")[1] == rightSideID){
 						var newAttrLineNumber = elemNode.attr("data-lineNumber").split("_")[0] + "_" + leftSideID;
-						console.log("adding gray space to: " + newAttrLineNumber);
+						// console.log("adding gray space to: " + newAttrLineNumber);
 						//addGraySpace(newAttrLineNumber, noLines, leftSideID);
 						reassignLineNumbers(rightSideID);
 					} else if (newNode.my_id.split("_")[1] == leftSideID) {
 						var newAttrLineNumber = elemNode.attr("data-lineNumber").split("_")[0] + "_" + rightSideID;
-						console.log("adding gray space to: " + newAttrLineNumber);
+						// console.log("adding gray space to: " + newAttrLineNumber);
 						//addGraySpace(newAttrLineNumber, noLines, rightSideID);
 						reassignLineNumbers(leftSideID);
 					}
@@ -676,7 +676,7 @@ function highlightResourceNodeDiv(resource_path, xml_doc, type){
 	} else if (type == "ChangeDelta"){
 		highlightColor = highlightYellow;
 	}
-	console.log(" [highlightResourceNodeDiv] -- > '" + resource_path + "'");
+	// console.log(" [highlightResourceNodeDiv] -- > '" + resource_path + "'");
 	if ( (xml_doc.childNodes[1].nodeName != null) && (xml_doc.childNodes[1].nodeName == "resources") ){
 		var resourcesNode = xml_doc.childNodes[1];
 		highlightResourceRec(resource_path, resourcesNode, highlightColor);
@@ -862,6 +862,7 @@ function highlightCTypeGrammarsRec(ctype_id, node, highlightColor){
 						elemNode.css("background-color", highlightColor);
 						elemNode = elemNode.next();
 					}
+					console.log("TEST ME: " + newNode.nodeName);
 					$("." + endElemClass).css("background-color", highlightColor);
 				} else {
 					$("#"+newNode.my_id).css("background-color", highlightColor);
@@ -882,7 +883,7 @@ function highlightCTypeGrammarsRec(ctype_id, node, highlightColor){
 					}
 					$("." + endElemClass).css("background-color", highlightColor);
 				} else {
-					console.log("=============");
+					// console.log("=============");
 					// console.log(newNode);
 					$("#"+newNode.my_id).css("background-color", highlightColor);
 				}
@@ -1024,7 +1025,7 @@ function highlightLeftCrossServiceMappings(leftElemIndex){
 }
 
 function highlightCrossServiceMappings(leftElemName, rightElemName, highlightColor){
-	console.log("l: " + leftElemName + " r: " + rightElemName);
+	// console.log("l: " + leftElemName + " r: " + rightElemName);
 	
 	var grammarsOld = oldRootDoc.childNodes[0];
 	var grammarsNew = newRootDoc.childNodes[0];
@@ -1772,7 +1773,7 @@ function updateAttribute(mynodeid, nodeAttrName, newAttrValue){
 // this function is not currently used - it is attempting to evenly print the java comparison outputs
 // but it does not work !
 function addGraySpace(startAtLineIndex, noLines, side){
-	console.log("startat line index is '" + startAtLineIndex + "', no lines: '" + noLines + "', side: '" + side + "'");
+	// console.log("startat line index is '" + startAtLineIndex + "', no lines: '" + noLines + "', side: '" + side + "'");
 	//startAtLineIndex--;
 	var emptyDivs = "";
 	var n = 0;
@@ -1787,9 +1788,9 @@ function addGraySpace(startAtLineIndex, noLines, side){
 	}
 	
 	//var abc = startAtLineIndex + "_" + side;
-	if (DEBUG_PRINT){console.log("function addGraySpace: startAtLineIndex is " +  startAtLineIndex);}
+	// if (DEBUG_PRINT){console.log("function addGraySpace: startAtLineIndex is " +  startAtLineIndex);}
 	
 	var elemToInsertAfter = $("*[data-lineNumber=" + startAtLineIndex + "]");
 	$(emptyDivs).insertAfter( elemToInsertAfter );
-	console.log("insert on side: '" + side + "' after elem with id: '" + elemToInsertAfter.attr("id") + "'" );
+	// console.log("insert on side: '" + side + "' after elem with id: '" + elemToInsertAfter.attr("id") + "'" );
 }
