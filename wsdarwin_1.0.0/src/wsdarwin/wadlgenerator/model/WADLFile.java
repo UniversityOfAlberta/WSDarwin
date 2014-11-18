@@ -607,11 +607,11 @@ public class WADLFile implements WADLElement {
 	}
 
 	public void mapByValue(WADLFile file2) {
-		MapDelta deltaParam = mapByValueParam(file2);
+		//MapDelta deltaParam = mapByValueParam(file2);
 		MapDelta deltaElement = mapByValueResponse(file2);
 		// removeDeuplicateMapDeltas();
 		// System.out.println("Map by Value response " + mapDeltas.toString());
-		iteratemap();
+		//iteratemap();
 	}
 
 	public MapDelta mapByValueParam(WADLFile file2) {
