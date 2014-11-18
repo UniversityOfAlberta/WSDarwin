@@ -116,9 +116,12 @@ function getWSDarwinAnalysis(process_mode, api_call_url, ajaxData){
 	// reset html elements
 	$("#left_wadl_output").hide();
 	$("#right_wadl_output").hide();
-	$("#wadlOutput").show();
-	$("#wadlOutput").html('');
+	// $("#wadlOutput").show();
+	// $("#wadlOutput").html('');
+	$("#analyzeOutput").show();
+	$("#analyzeOutput").html('');
 	
+
 	if (DEBUG_PRINT){
 		// console.log("function getWSDarwinAnalysis:");
 		// console.debug("api call: " 	+ api_call_url);
@@ -225,8 +228,13 @@ function printCrossServiceComparisonMappings(crossServiceMappings){
 	if (crossServiceMappings != null){
 		var n = 0;
 		var arrayInd = 0;
+
 		var listMappings = JSON.parse(crossServiceMappings);
-		if (DEBUG_PRINT){console.debug("list of mappings: " + listMappings);}
+		if (DEBUG_PRINT){
+			console.debug("list of mappings: ");
+			console.debug(listMappings);
+		}
+
 		var mappingRow = listMappings[n];
 		var elementsAnalyzed = new Array();
 
@@ -282,10 +290,6 @@ function printCrossServiceComparisonMappings(crossServiceMappings){
 
 		$("#leftHalfDiv").html("");
 		$("#rightHalfDiv").html("");
-
-		// console.log('start of crossMappings print');
-		// console.debug(crossMappings);
-		// console.log('end of crossMappings print');
 
 		for (var i = 0; i < crossMappings.length; i++){
 			// console.log("left elem: " + crossMappings[i][0] + " and it's connections: ");
@@ -445,7 +449,10 @@ function processJavaComparison(deltas_path, oldDocNode, newDocNode, process_type
 	var newText = strapped_html_wadl_string;
 	strapped_html_wadl_string = '';
 
-	$("#wadlOutput").hide();
+	// $("#wadlOutput").hide();
+	$("#analyzeOutput").hide();
+	
+
 	$("#left_wadl_output").show();
 	$("#right_wadl_output").show();
 
@@ -848,11 +855,12 @@ function reassignLineNumbers(side){
 	}
 }
 
-function highlightCTypeGrammarsRec(ctype_id, node, highlightColor){
+function highlightCTypeGrammarsRec(grammarsNode, ctype_id, node, highlightColor){
+	console.log("ctype_id: " + ctype_id);
 	for (var i = 0; i < node.childNodes.length; i++){
 		var newNode = node.childNodes[i];
 		if (newNode.nodeName == "xs:schema"){
-			highlightCTypeGrammarsRec(ctype_id, newNode, highlightColor);
+			highlightCTypeGrammarsRec(grammarsNode, ctype_id, newNode, highlightColor);
 		} else if (newNode.nodeName == "xs:complexType"){
 			if (newNode.attributes.getNamedItem("name").value == ctype_id){
 				if (parsing_html_mode){
@@ -862,7 +870,20 @@ function highlightCTypeGrammarsRec(ctype_id, node, highlightColor){
 						elemNode.css("background-color", highlightColor);
 						elemNode = elemNode.next();
 					}
-					console.log("TEST ME: " + newNode.nodeName);
+					// if (newNode.attributes.getNamedItem("type"))
+					var sequenceNode = newNode.childNodes[0];
+					for (var j = 0; j < sequenceNode.childNodes.length; j++){
+						var xsElemNode = sequenceNode.childNodes[j];
+						var typeSplit = xsElemNode.attributes.getNamedItem("type").value.split(":");
+						// typeSplit[0] = 'tns'/'xs'
+						// typeSplit[1] = the type's name
+						if (typeSplit[0] == "tns") {
+							highlightCTypeGrammarsRec(grammarsNode, typeSplit[1], grammarsNode, highlightColor);
+						}
+						// console.log("XS ELEM type: " + xsElemNode.attributes.getNamedItem("type").value.split(":")[0] );
+						// if (xsElemNode.attributes.getNamedItem("type").value == "")
+					}
+					// console.log("TEST ME: " + newNode.attributes.getNamedItem("type").value);
 					$("." + endElemClass).css("background-color", highlightColor);
 				} else {
 					$("#"+newNode.my_id).css("background-color", highlightColor);
@@ -926,9 +947,7 @@ function highlightCTypeNodeDiv(ctype_id, xml_doc, type){
 
 	if ( (xml_doc.childNodes[0].nodeName != null) && (xml_doc.childNodes[0].nodeName == "grammars") ){
 		var grammarsNode = xml_doc.childNodes[0];
-		highlightCTypeGrammarsRec(ctype_id, grammarsNode, highlightColor);
-
-
+		highlightCTypeGrammarsRec(grammarsNode, ctype_id, grammarsNode, highlightColor);
 	}
 }
 
@@ -1090,7 +1109,9 @@ function start_wadl_parsing(){
 
 	generateWADLDocument(rootNode);
 
-	$("#wadlOutput").html(html_wadl_string);
+	// $("#wadlOutput").html(html_wadl_string);
+	$("#analyzeOutput").html(html_wadl_string);
+	
 	initBootstrapJS_tooltips();
 }
 

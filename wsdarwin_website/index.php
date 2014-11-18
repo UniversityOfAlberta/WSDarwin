@@ -66,7 +66,7 @@
 
 			<!-- Analyze the input(s) -->
 			<div id='analyzeSubmitBtn' class="submitBtnDiv">
-				<button type="button" id='analyzeBtn' onClick="analyzeBtn()" style="width: 84px;" class="btn btn-success">Analyze</button>
+				<button type="button" id='analyzeBtn' onClick="analyzeBtn()" style="width: 84px;" class="btn btn-success">Generate WADL</button>
 				<!-- <button type="button" onClick="runSampleTest('analyze')" 
 					 class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button> -->
 				<!-- Run Sample Test(s) -->
@@ -117,10 +117,16 @@
 	</div>
 
 	<div class='wadlDiv'>
-		<div id='wadlOutput' class='wadlOutput' placeholder='WADL'>
-		</div>
+		<!-- <div id='wadlOutput' class='wadlOutput' placeholder='WADL'>
+		</div> -->
+		<div id='analyzeOutput' class='wadlOutput' placeHolder='WADL'></div>
+
+
+		
 		<div id='right_wadl_output' class='halfwadlOutput'></div>
 		<div id='left_wadl_output' class='halfwadlOutput'></div>
+
+		<!-- For cross-service comparison -->
 		<div id='leftInfoMenu' class='leftInfoMenu'>
 			<div id="rightHalfDiv" class="halfDiv list-group">
 			  	<!--
