@@ -301,7 +301,7 @@ public class WSDarwinService extends Application{
 		        while ((inputLine = in.readLine()) != null) {
 		        	int listIndex = inputLine.indexOf("[");
 					int mapIndex = inputLine.indexOf("{");
-					if(listIndex<mapIndex && listIndex>0) {
+					if(listIndex<mapIndex) {
 						inputLine = inputLine.substring(listIndex);
 					}
 					else {

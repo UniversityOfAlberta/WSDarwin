@@ -39,8 +39,8 @@ public class MariosTestMainForWADLGeneration {
 	 */
 	public static final Boolean DEBUG = true;
 	
-	private static final String VENDOR = "facebook";
-	private static final String PATH_PREFIX = "files/"+VENDOR+"/v2";
+	private static final String VENDOR = "tumblr";
+	private static final String PATH_PREFIX = "files/"+VENDOR+"/v1";
 	
 	private static final String FILENAME_DIR = PATH_PREFIX+"/wadl/";
 	private static final String XSD_DIR = PATH_PREFIX+"/xsd/";
@@ -48,8 +48,8 @@ public class MariosTestMainForWADLGeneration {
 
 	public static void main(String[] args) {
 		double time = System.currentTimeMillis();
-		//testGeneration();
-		testComparison();
+		testGeneration();
+		//testComparison();
 		//testMapping();
 		System.out.println(System.currentTimeMillis()-time);
 
@@ -185,8 +185,8 @@ public class MariosTestMainForWADLGeneration {
 	}
 
 	private static void testComparison() {
-		WADLParser parser1 = new WADLParser(new File("files/facebook/v1/wadl/facebook.wadl"));
-		WADLParser parser2 = new WADLParser(new File("files/facebook/v2/wadl/facebook.wadl"));
+		WADLParser parser1 = new WADLParser(new File("files/tumblr/v1/wadl/tumblr.wadl"));
+		WADLParser parser2 = new WADLParser(new File("files/tumblr/v2/wadl/tumblr.wadl"));
 		Delta delta = parser1.getService().diff(parser2.getService());
 		DeltaUtil.findMoveDeltas(delta);
 		delta.printDelta(0);

@@ -697,30 +697,6 @@ public class WADLFile implements WADLElement {
 		 }
 		 return delta;
 	 }
-	
-	private HashMap<XSDElement, Object> getResponseElements() {
-		HashMap<XSDElement, Object> map = new HashMap<XSDElement, Object>();
-		for(Resources resources : this.getResourcesElements().values()){
-			 for(Resource resource : resources.getResourceElements().values()){
-				 //getResponse
-			 }
-		}
-		
-		return map;
-	}
-	
-	private void getResponseElementsFromResource(HashMap<XSDElement, Object> map, Resource resource) {
-		for(Resource r : resource.getResourceElements().values()) {
-			getResponseElementsFromResource(map, r); 
-		}
-		for(Method method: resource.getMethodElements().values()){
-			 for(Response response : method.getResponseElements().values()){
-				 for(Representation represent : response.getRepresentationElements().values()){
-					 getXSDElements((XSDComplexType)represent.getElement().getType(), map);
-				 }
-			 }
-		 }
-	}
 
 
 	 public MapDelta mapByValueResponse(WADLFile file2){
