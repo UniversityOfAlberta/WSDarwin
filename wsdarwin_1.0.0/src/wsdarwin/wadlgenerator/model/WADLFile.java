@@ -697,12 +697,47 @@ public class WADLFile implements WADLElement {
 		 }
 		 return delta;
 	 }
-
+	
+	private HashMap<XSDElement, Object> getResponseElements() {
+		
+		HashMap<XSDElement, Object> map = new HashMap<XSDElement, Object>();
+		for(Resources resources : this.getResourcesElements().values()){
+			 for(Resource resource : resources.getResourceElements().values()){
+				 getResponseElementsForResource(map, resource);
+			 }
+		}
+		return map;
+	}
+	
+	private void getResponseElementsForResource(HashMap<XSDElement, Object> map, Resource resource) {
+		for(Resource r : resource.getResourceElements().values()) {
+			getResponseElementsForResource(map, r);
+		}
+		for(Method method: resource.getMethodElements().values()){
+			 for(Response response : method.getResponseElements().values()){
+				 for(Representation represent : response.getRepresentationElements().values()){
+					 getXSDElements((XSDComplexType)represent.getElement().getType(), map);
+				 }
+			 }
+		 }
+	}
 
 	 public MapDelta mapByValueResponse(WADLFile file2){
 		//System.out.println("MAPPING BY RESPONSEEEEEE");
-		 MapDelta delta = null;
-		 for(Resources resources : this.getResourcesElements().values()){
+		 HashMap<XSDElement, Object> map = this.getResponseElements();
+		 HashMap<XSDElement, Object> map2 = file2.getResponseElements();
+		 for (XSDElement xsd : map.keySet()) {
+			if (map.get(xsd) instanceof List) {
+				List<Object> valueList = (List<Object>) map.get(xsd);
+				for (Object value : valueList) {
+					getXSDElementByValue(map2, value, xsd);
+				}
+			} else {
+				getXSDElementByValue(map2, map.get(xsd), xsd);
+			}
+		}
+		MapDelta delta = null;
+		/*for(Resources resources : this.getResourcesElements().values()){
 			 ArrayList<Delta> resourceDeltas = new ArrayList<Delta>();
 			 for(Resource resource : resources.getResourceElements().values()){
 				 ArrayList<Delta> methodDeltas = new ArrayList<Delta>();
@@ -774,7 +809,7 @@ public class WADLFile implements WADLElement {
 		 }
 		 if (delta != null) {
 			 System.out.println("Map by Value response " + mapDeltas.toString());
-		 }
+		 }*/
 
 		 return delta;
 
