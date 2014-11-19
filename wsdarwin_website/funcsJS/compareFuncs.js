@@ -32,10 +32,10 @@ function text_diff_JS(viewingType) {
 	        viewType: viewingType
     	});
     //);
-	$("#wadlOutput").show();
-	$("#left_wadl_output").hide();
-	$("#right_wadl_output").hide();
+	$("#wadlOutput_compare").show();
+	$("#left_wadl_output_compare").hide();
+	$("#right_wadl_output_compare").hide();
 
-    $("#wadlOutput").html( diffed_string );
+    $("#wadlOutput_compare").html( diffed_string );
 
 }

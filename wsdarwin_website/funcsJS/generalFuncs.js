@@ -114,8 +114,8 @@ function analyzeBtn(){
 
 function getWSDarwinAnalysis(process_mode, api_call_url, ajaxData){
 	// reset html elements
-	$("#left_wadl_output").hide();
-	$("#right_wadl_output").hide();
+	$("#left_wadl_output_compare").hide();
+	$("#right_wadl_output_compare").hide();
 	// $("#wadlOutput").show();
 	// $("#wadlOutput").html('');
 	$("#analyzeOutput").show();
@@ -422,14 +422,16 @@ function unhighlightRemovingDiv(divid){
 function processJavaComparison(deltas_path, oldDocNode, newDocNode, process_type){
 	console.debug("JAVA DIFF: " + deltas_path);
 	xmlDoc = loadXMLDoc(deltas_path);
-	mainNode=xmlDoc.documentElement;
+	mainNode = xmlDoc.documentElement;
 
 	// console.log(" --- JAVA DIFFING --- ");
 	//console.log("name: " + mainNode.nodeName + ", attrs length: " + mainNode.childNodes.length + ", attribute's value: " + mainNode.attributes.getNamedItem("xmlns").value);
 	//console.log(xmlDoc);
 
-	$("#left_wadl_output").html("");
-	$("#right_wadl_output").html("");
+	$("#left_wadl_output_compare").html("");
+	$("#right_wadl_output_compare").html("");
+	$("#wadlOutput_compare").html("");
+	
 
 	strapped_html_wadl_string = '';
 	sideToWriteTo = "left";
@@ -452,15 +454,15 @@ function processJavaComparison(deltas_path, oldDocNode, newDocNode, process_type
 	// $("#wadlOutput").hide();
 	$("#analyzeOutput").hide();
 	
-
-	$("#left_wadl_output").show();
-	$("#right_wadl_output").show();
+	$("#wadlOutput_compare").show();
+	$("#left_wadl_output_compare").show();
+	$("#right_wadl_output_compare").show();
 
 	if (parsing_html_mode){
 
 	} else {
-		$("#left_wadl_output").html(oldText);
-		$("#right_wadl_output").html(newText);
+		$("#left_wadl_output_compare").html(oldText);
+		$("#right_wadl_output_compare").html(newText);
 	}
 
 	if (process_type === "crossServiceCompare"){
@@ -842,13 +844,13 @@ function contains(list, obj) {
 function reassignLineNumbers(side){
 	if (side == leftSideID){
 		lineNumber = 1;
-		$("#left_wadl_output").children().each(function(){
+		$("#left_wadl_output_compare").children().each(function(){
 			$(this).attr("data-lineNumber", lineNumber+"_a");
 			lineNumber++;
 		});
 	} else if (side == rightSideID){
 		lineNumber = 1;
-		$("#right_wadl_output").children().each(function(){
+		$("#right_wadl_output_compare").children().each(function(){
 			$(this).attr("data-lineNumber", lineNumber+"_b");
 			lineNumber++;
 		});
@@ -1063,7 +1065,9 @@ function highlightXSElementWithName(xselementName, node, highlightColor ){
 			highlightXSElementWithName(xselementName, newNode, highlightColor);
 		} else if (newNode.nodeName == "xs:element"){
 			if (newNode.attributes.getNamedItem('name').value == xselementName){
-				$("#" + newNode.my_id + "line").css("background-color", highlightColor);
+				if ( newNode.attributes.getNamedItem('type').value.split(":")[0] == "xs" ) {
+					$("#" + newNode.my_id + "line").css("background-color", highlightColor);
+				}
 			}
 		}
 	}
@@ -1116,7 +1120,7 @@ function start_wadl_parsing(){
 }
 
 function appendToHTML(side, str, elemClassName){
-	$("#" + sideToWriteTo + "_wadl_output").append(str);
+	$("#" + sideToWriteTo + "_wadl_output_compare").append(str);
 	lineNumber++;
 	if (side == "left"){
 		$("." + elemClassName).attr("data-lineNumber", lineNumber + "_a");

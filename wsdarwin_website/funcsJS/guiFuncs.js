@@ -20,6 +20,13 @@ function activateView(viewid){
 
 		$("#uploadAWADLA").css("visibility", "");
 		$("#uploadAWADLB").css("visibility", "");
+
+		// show/hide output divs
+		$("#analyzeOutput").css("display", "block");
+		$("#right_wadl_output_compare").css("display", "none");
+		$("#left_wadl_output_compare").css("display", "none");
+		$("#wadlOutput_compare").css("display", "none");
+
 	} else if (viewid == "comparisonView"){
 		window.location.hash = "compareViewName";
 		$(".compareOptions").show();
@@ -32,6 +39,12 @@ function activateView(viewid){
 		$("#filesCompare").text("Upload a WADL file");
 		$("#uploadAWADLA").css("visibility", "");
 		$("#uploadAWADLB").css("visibility", "");
+
+		// show/hide output divs
+		$("#analyzeOutput").css("display", "none");
+		$("#right_wadl_output_compare").css("display", "block");
+		$("#left_wadl_output_compare").css("display", "block");
+		$("#wadlOutput_compare").css("display", "block");
 
 	} else if (viewid == "crossServiceComparisonView"){
 		window.location.hash = "crossServiceViewName";

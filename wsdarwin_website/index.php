@@ -119,12 +119,13 @@
 	<div class='wadlDiv'>
 		<!-- <div id='wadlOutput' class='wadlOutput' placeholder='WADL'>
 		</div> -->
+		<!-- for the analyze service -->
 		<div id='analyzeOutput' class='wadlOutput' placeHolder='WADL'></div>
-
-
 		
-		<div id='right_wadl_output' class='halfwadlOutput'></div>
-		<div id='left_wadl_output' class='halfwadlOutput'></div>
+		<!-- for the compare service -->
+		<div id='wadlOutput_compare' class='wadlOutput' style="display:none;"></div>
+		<div id='right_wadl_output_compare' class='halfwadlOutput'></div>
+		<div id='left_wadl_output_compare' class='halfwadlOutput'></div>
 
 		<!-- For cross-service comparison -->
 		<div id='leftInfoMenu' class='leftInfoMenu'>
@@ -204,11 +205,8 @@
 				    		$("#innerUploadWADLcontent").append("<div style=\"margin-bottom: 5px;\"><a href='" + resp['filepaths'][i] + "'>" + "File " + i + "</a>" + displayWADLbtn + deleteWADLbtn + "</div>");
 			    		} else {
 			    			alert("A maximum number (1) of WADL files has been reached");
-			    		}
-			    		
+			    		}	
 			    	}
-
-
 			    }
 			}
 			$("#uploadWADLcontent").show();
