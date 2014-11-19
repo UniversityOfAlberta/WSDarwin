@@ -972,17 +972,21 @@ public class WADLFile implements WADLElement {
 							double similarity = 0.0;
 							boolean inclusion = false;
 							if (value2.length() > 0) {
-								long value2long = Long.parseLong(value2);
-								// compute distance and similarity
-								double diff = (Math.max(value1long, value2long) - Math
-										.min(value1long, value2long))
-										/ Math.max(value1long, value2long);
-								similarity = (1 - diff) * 100;
-								// inclusion
-								String value1str = Long.toString(value1long);
-								if (value1str.contains(value2)
-										|| value2.contains(value1str)) {
-									inclusion = true;
+								if (Response2XSD.isLong(value2)) {
+									long value2long = Long.parseLong(value2);
+									// compute distance and similarity
+									double diff = (Math.max(value1long,
+											value2long) - Math.min(value1long,
+											value2long))
+											/ Math.max(value1long, value2long);
+									similarity = (1 - diff) * 100;
+									// inclusion
+									String value1str = Long
+											.toString(value1long);
+									if (value1str.contains(value2)
+											|| value2.contains(value1str)) {
+										inclusion = true;
+									}
 								}
 							}
 							xsd.addElementDistanceMap(element, similarity);
@@ -1073,16 +1077,19 @@ public class WADLFile implements WADLElement {
 					double similarity = 0.0;
 					boolean inclusion = false;
 					if (value1.length() > 0) {
-						value1int = Long.parseLong(value1);
-						// compute distance and similarity
-						double diff = (Math.max(value1int, value2int) - Math
-								.min(value1int, value2int))
-								/ Math.max(value1int, value2int);
-						similarity = (1 - diff) * 100;
-						// inclusion
-						String value2 = Integer.toString((int) value);
-						if (value1.contains(value2) || value2.contains(value1)) {
-							inclusion = true;
+						if (Response2XSD.isLong(value1)) {
+							value1int = Long.parseLong(value1);
+							// compute distance and similarity
+							double diff = (Math.max(value1int, value2int) - Math
+									.min(value1int, value2int))
+									/ Math.max(value1int, value2int);
+							similarity = (1 - diff) * 100;
+							// inclusion
+							String value2 = Integer.toString((int) value);
+							if (value1.contains(value2)
+									|| value2.contains(value1)) {
+								inclusion = true;
+							}
 						}
 					}
 					xsd.addElementDistanceMap(element, similarity);
@@ -1138,14 +1145,14 @@ public class WADLFile implements WADLElement {
 		if (maxEl != null) {
 			// String [] elemLst = new String[4];
 			ArrayList<String> elemLst = new ArrayList<String>();
-			elemLst.add(maxEl.getName());
-			// elemLst.add(String.valueOf(maxEl.getValue()));
 			elemLst.add(xsd.getName());
+			// elemLst.add(String.valueOf(maxEl.getValue()));
+			elemLst.add(maxEl.getName());
 			// elemLst.add(String.valueOf(value));
 			elemLst.add(String.valueOf(max));
 			this.elemMappingArray.add(elemLst);
-			System.out.println("this stuff: " + maxEl.getName() + "\t"
-					+ maxEl.getValue() + "\t" + xsd.getName() + "\t" + value
+			System.out.println("this stuff: " + xsd.getName() + "\t"
+					+ xsd.getValue() + "\t" + maxEl.getName() + "\t" + maxEl.getValue()
 					+ "\t" + max);
 		}
 		return maxEl;

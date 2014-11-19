@@ -48,21 +48,26 @@ public class MariosTestMainForWADLGeneration {
 
 	public static void main(String[] args) {
 		double time = System.currentTimeMillis();
-		testGeneration();
+		//testGeneration();
 		//testComparison();
-		//testMapping();
+		testMapping();
 		System.out.println(System.currentTimeMillis()-time);
 
 	}
 	
 	private static void testMapping() {
-		String filename1 = "files/icsm2014/interoperability/movies/imdb/wadl/imdbMerged.ser";
-		String filename2 = "files/icsm2014/interoperability/movies/rottenTomatoes/wadl/rottenTomatoesMerged.ser";		
-		WADLFile file1 = WADLFile.deserializeFile(filename1);
-		WADLFile file2 = WADLFile.deserializeFile(filename2);
+		WSDarwinService service  = new WSDarwinService();
+		ArrayList<String> urlRequests = new ArrayList<String>();
+		urlRequests.add("http://peacecorps.tumblr.com/api/read/json");
+		WADLFile file1 = service.generateWADL(urlRequests, new ArrayList<String>(), FILENAME_DIR+VENDOR+"1.wadl", RESPONSE_DIR, false);
+		
+		urlRequests = new ArrayList<String>();
+		urlRequests.add("http://api.tumblr.com/v2/blog/peacecorps.tumblr.com/posts?api_key=nfCjygcnaZH3nDTf09XsPum2IQkqMO1H3wEjmYpnSy7ltOntGH");
+		WADLFile file2 = service.generateWADL(urlRequests, new ArrayList<String>(), FILENAME_DIR+VENDOR+"2.wadl", RESPONSE_DIR, false);
+		
 		file1.mapByValue(file2);
-		for(MapDelta delta : file1.getMapDeltas()) {
-			delta.printDelta(0);
+		for(ArrayList<String> mappings : file1.getElementMappings()) {
+			System.out.println("Source: \t"+mappings.get(0)+"\t Target: \t"+mappings.get(1)+"\t Distance: \t"+mappings.get(2));
 		}
 	}
 
