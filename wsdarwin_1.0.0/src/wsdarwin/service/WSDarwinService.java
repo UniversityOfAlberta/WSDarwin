@@ -4,6 +4,7 @@ package wsdarwin.service;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -23,6 +24,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -94,6 +97,8 @@ public class WSDarwinService extends Application{
 	private static final String SERVER_FILES_PATH = "http://ssrg17.cs.ualberta.ca:8080/wsdarwin_1.0.0/files/";
 	private static final String LOCAL_WADL_UPLOADS_PATH = "/var/www/html/wsdarwin/uploads/";
 	
+	private static final String LOCAL_WADL2JAVA_FILE = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/bin/wadl2java.bat";
+	
 	private static final String FILENAME_DIR_TWO = PATH_PREFIX_TWO+"/wadl/";
 	private static final String RESPONSE_DIR_TWO = PATH_PREFIX_TWO+"/responses/";
 	private static final String UPLOADED_WADLS = LOCAL_WADL_UPLOADS_PATH;	
@@ -126,12 +131,44 @@ public class WSDarwinService extends Application{
 		String localpath_wadl_filename_A = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
 		if (DEBUG) {System.out.println("filename A: " + localpath_wadl_filename_A ); }
 		
-		generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH, true);
+		WADLFile file = generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH, true);
+		String resourcesBase="";
+		for(String base : file.getResourcesElements().keySet()) {
+			resourcesBase = base;
+		}
+		String[] folders = resourcesBase.split(".");
+		String packageName = "";
+		
+		for(int i=folders.length-1; i>=0; i--) {
+			packageName+=folders[i];
+		}
+		String sourceZipFolder = folders[0];
+		String serverpath_proxy = generateClientProxy(localpath_wadl_filename_A, packageName, sourceZipFolder);
 		returnArray.add(serverpath_wadl_filename_A);
+		returnArray.add(serverpath_proxy);
 		String ret = gson.toJson(returnArray);
 		//String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
 		return ret;
 		
+	}
+	
+	public String generateClientProxy(String localpath_wadl_filename_A, String packageName, String sourceZipFolder) {
+		Runtime rt = Runtime.getRuntime();
+		try {
+			Process pr = rt.exec(LOCAL_WADL2JAVA_FILE+" -o "+LOCAL_FILES_PATH+"/client -p "+packageName+" "+localpath_wadl_filename_A);
+			System.out.println(pr.getInputStream().read());
+			System.out.println(pr.getErrorStream().read());
+			System.out.println(pr.waitFor());
+			System.out.println(pr.exitValue());
+			return zipFolder(sourceZipFolder);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "";
 	}
 	
 	/**
@@ -791,6 +828,89 @@ public class WSDarwinService extends Application{
 		classes.add(WSDarwinService.class);
 		return classes;
 	}
+	
+	public String zipFolder(String sourceZipFolder)
+    {
+		String sourceFolder = LOCAL_FILES_PATH+"client/"+sourceZipFolder;
+		ArrayList<String> filelist = new ArrayList<String>();
+    	generateFileList(new File(sourceFolder), filelist, sourceFolder);
+    	String outputFile = LOCAL_FILES_PATH+"client/proxy.zip";
+    	zipIt(outputFile, filelist, sourceFolder);
+    	String serverOutputFile = SERVER_FILES_PATH+"client/proxy.zip";
+    	return serverOutputFile;
+    }
+ 
+    /**
+     * Zip it
+     * @param zipFile output ZIP file location
+     */
+    public void zipIt(String zipFile, ArrayList<String> filelist, String sourceFolder){
+ 
+     byte[] buffer = new byte[1024];
+ 
+     try{
+ 
+    	FileOutputStream fos = new FileOutputStream(zipFile);
+    	ZipOutputStream zos = new ZipOutputStream(fos);
+ 
+    	System.out.println("Output to Zip : " + zipFile);
+ 
+    	for(String file : filelist){
+ 
+    		System.out.println("File Added : " + file);
+    		ZipEntry ze= new ZipEntry(file);
+        	zos.putNextEntry(ze);
+ 
+        	FileInputStream in = 
+                       new FileInputStream(sourceFolder + File.separator + file);
+ 
+        	int len;
+        	while ((len = in.read(buffer)) > 0) {
+        		zos.write(buffer, 0, len);
+        	}
+ 
+        	in.close();
+    	}
+ 
+    	zos.closeEntry();
+    	//remember close it
+    	zos.close();
+ 
+    	System.out.println("Done");
+    }catch(IOException ex){
+       ex.printStackTrace();   
+    }
+   }
+ 
+    /**
+     * Traverse a directory and get all files,
+     * and add the file into fileList  
+     * @param node file or directory
+     */
+    public void generateFileList(File node, ArrayList<String> filelist, String sourceFolder){
+ 
+    	//add file only
+	if(node.isFile()){
+		filelist.add(generateZipEntry(node.getPath().toString(), sourceFolder));
+	}
+ 
+	if(node.isDirectory()){
+		String[] subNote = node.list();
+		for(String filename : subNote){
+			generateFileList(new File(node, filename), filelist, sourceFolder);
+		}
+	}
+ 
+    }
+ 
+    /**
+     * Format the file path for zip
+     * @param file file path
+     * @return Formatted file path
+     */
+    private String generateZipEntry(String file, String sourceFolder){
+    	return file.substring(sourceFolder.length()+1, file.length());
+    }
 
 }
 

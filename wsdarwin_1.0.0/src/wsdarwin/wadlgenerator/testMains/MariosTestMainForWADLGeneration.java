@@ -4,7 +4,9 @@ package wsdarwin.wadlgenerator.testMains;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -15,6 +17,8 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -40,7 +44,7 @@ public class MariosTestMainForWADLGeneration {
 	public static final Boolean DEBUG = true;
 	
 	private static final String VENDOR = "tumblr";
-	private static final String PATH_PREFIX = "files/"+VENDOR+"/v1";
+	private static final String PATH_PREFIX = "files/"+VENDOR+"/v2";
 	
 	private static final String FILENAME_DIR = PATH_PREFIX+"/wadl/";
 	private static final String XSD_DIR = PATH_PREFIX+"/xsd/";
@@ -50,7 +54,8 @@ public class MariosTestMainForWADLGeneration {
 		double time = System.currentTimeMillis();
 		//testGeneration();
 		//testComparison();
-		testMapping();
+		//testMapping();
+		testGenerateClient();
 		System.out.println(System.currentTimeMillis()-time);
 
 	}
@@ -69,6 +74,25 @@ public class MariosTestMainForWADLGeneration {
 		for(ArrayList<String> mappings : file1.getElementMappings()) {
 			System.out.println("Source: \t"+mappings.get(0)+"\t Target: \t"+mappings.get(1)+"\t Distance: \t"+mappings.get(2));
 		}
+	}
+	
+	private static void testGenerateClient() {
+		Runtime rt = Runtime.getRuntime();
+		try {
+			Process pr = rt.exec("files/wadl2java/bin/wadl2java.bat -o files/tumblr/v2/client -p com.tumplr.api files/tumblr/v2/wadl/tumblr.wadl");
+			System.out.println(pr.getInputStream().read());
+			System.out.println(pr.getErrorStream().read());
+			System.out.println(pr.waitFor());
+			System.out.println(pr.exitValue());
+			zipFolder();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	private static void testGeneration() {
@@ -196,5 +220,85 @@ public class MariosTestMainForWADLGeneration {
 		DeltaUtil.findMoveDeltas(delta);
 		delta.printDelta(0);
 	}
+	
+	public static void zipFolder()
+    {
+		String sourceFolder = "files/tumblr/v2/client/com";
+		ArrayList<String> filelist = new ArrayList<String>();
+    	generateFileList(new File(sourceFolder), filelist, sourceFolder);
+    	zipIt("files/tumblr/v2/client/proxy.zip", filelist, sourceFolder);
+    }
+ 
+    /**
+     * Zip it
+     * @param zipFile output ZIP file location
+     */
+    public static void zipIt(String zipFile, ArrayList<String> filelist, String sourceFolder){
+ 
+     byte[] buffer = new byte[1024];
+ 
+     try{
+ 
+    	FileOutputStream fos = new FileOutputStream(zipFile);
+    	ZipOutputStream zos = new ZipOutputStream(fos);
+ 
+    	System.out.println("Output to Zip : " + zipFile);
+ 
+    	for(String file : filelist){
+ 
+    		System.out.println("File Added : " + file);
+    		ZipEntry ze= new ZipEntry(file);
+        	zos.putNextEntry(ze);
+ 
+        	FileInputStream in = 
+                       new FileInputStream(sourceFolder + File.separator + file);
+ 
+        	int len;
+        	while ((len = in.read(buffer)) > 0) {
+        		zos.write(buffer, 0, len);
+        	}
+ 
+        	in.close();
+    	}
+ 
+    	zos.closeEntry();
+    	//remember close it
+    	zos.close();
+ 
+    	System.out.println("Done");
+    }catch(IOException ex){
+       ex.printStackTrace();   
+    }
+   }
+ 
+    /**
+     * Traverse a directory and get all files,
+     * and add the file into fileList  
+     * @param node file or directory
+     */
+    public static void generateFileList(File node, ArrayList<String> filelist, String sourceFolder){
+ 
+    	//add file only
+	if(node.isFile()){
+		filelist.add(generateZipEntry(node.getPath().toString(), sourceFolder));
+	}
+ 
+	if(node.isDirectory()){
+		String[] subNote = node.list();
+		for(String filename : subNote){
+			generateFileList(new File(node, filename), filelist, sourceFolder);
+		}
+	}
+ 
+    }
+ 
+    /**
+     * Format the file path for zip
+     * @param file file path
+     * @return Formatted file path
+     */
+    private static String generateZipEntry(String file, String sourceFolder){
+    	return file.substring(sourceFolder.length()+1, file.length());
+    }
 
 }
