@@ -1,9 +1,8 @@
 var wadl_download_str			= '';
 var extended_wadl_download_str	= '';
 
-function text_diff_JS(viewingType) {
+function text_diff_JS(viewingType, process_mode) {
     // get the baseText and newText values from the two textboxes, and split them into lines
-
     var base = difflib.stringAsLines( firstWADL );
     var newtxt = difflib.stringAsLines( secondWADL );
 
@@ -32,10 +31,16 @@ function text_diff_JS(viewingType) {
 	        viewType: viewingType
     	});
     //);
-	$("#wadlOutput_compare").show();
-	$("#left_wadl_output_compare").hide();
-	$("#right_wadl_output_compare").hide();
 
-    $("#wadlOutput_compare").html( diffed_string );
+    if (process_mode == "compare"){
+        $("#wadlOutput_compare").show();
+        $("#left_wadl_output_compare").hide();
+        $("#right_wadl_output_compare").hide();
+
+        $("#wadlOutput_compare").html( diffed_string );
+    } else if (process_mode == "crossServiceCompare"){
+
+    }
+
 
 }

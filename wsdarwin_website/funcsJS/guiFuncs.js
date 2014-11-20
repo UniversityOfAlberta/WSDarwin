@@ -21,11 +21,27 @@ function activateView(viewid){
 		$("#uploadAWADLA").css("visibility", "");
 		$("#uploadAWADLB").css("visibility", "");
 
+		$(".halfwadlOutput").css("width", "50%");
+
 		// show/hide output divs
 		$("#analyzeOutput").css("display", "block");
+
 		$("#right_wadl_output_compare").css("display", "none");
 		$("#left_wadl_output_compare").css("display", "none");
 		$("#wadlOutput_compare").css("display", "none");
+
+		$("#leftInfoMenu").css("display", "none");
+		$("#right_wadl_output_crossServiceCompare").css("display", "none");
+		$("#left_wadl_output_crossServiceCompare").css("display", "none");
+		$("#wadlOutput_crossServiceCompare").css("display", "none");
+
+		$("#wadlOutput_crossServiceCompare").html("");
+		$("#left_wadl_output_crossServiceCompare").html("");
+		$("#right_wadl_output_crossServiceCompare").html("");
+
+		$("#wadlOutput_compare").html("");
+		$("#left_wadl_output_compare").html("");
+		$("#right_wadl_output_compare").html("");
 
 	} else if (viewid == "comparisonView"){
 		window.location.hash = "compareViewName";
@@ -40,12 +56,25 @@ function activateView(viewid){
 		$("#uploadAWADLA").css("visibility", "");
 		$("#uploadAWADLB").css("visibility", "");
 
+		$(".halfwadlOutput").css("width", "50%");
+
 		// show/hide output divs
 		$("#analyzeOutput").css("display", "none");
+
+		$("#leftInfoMenu").css("display", "none");
+		$("#right_wadl_output_crossServiceCompare").css("display", "none");
+		$("#left_wadl_output_crossServiceCompare").css("display", "none");
+		$("#wadlOutput_crossServiceCompare").css("display", "none");
+
 		$("#right_wadl_output_compare").css("display", "block");
 		$("#left_wadl_output_compare").css("display", "block");
 		$("#wadlOutput_compare").css("display", "block");
 
+		$("#wadlOutput_crossServiceCompare").html("");
+		$("#left_wadl_output_crossServiceCompare").html("");
+		$("#right_wadl_output_crossServiceCompare").html("");
+
+		$("#analyzeOutput").html("");
 	} else if (viewid == "crossServiceComparisonView"){
 		window.location.hash = "crossServiceViewName";
 
@@ -60,8 +89,27 @@ function activateView(viewid){
 		$("#uploadAWADLA").css("visibility", "");
 		$("#uploadAWADLB").css("visibility", "");
 
+		$(".halfwadlOutput").css("width", "40%");
+
+		// show/hide output divs
+		$("#analyzeOutput").css("display", "none");
+
+		$("#leftInfoMenu").css("display", "block");
+		$("#right_wadl_output_crossServiceCompare").css("display", "block");
+		$("#left_wadl_output_crossServiceCompare").css("display", "block");
+		$("#wadlOutput_crossServiceCompare").css("display", "block");
+
+		$("#right_wadl_output_compare").css("display", "none");
+		$("#left_wadl_output_compare").css("display", "none");
+		$("#wadlOutput_compare").css("display", "none");
 
 		$("#crossServiceCompareSubmitBtn").show();
+
+		$("#wadlOutput_compare").html("");
+		$("#left_wadl_output_compare").html("");
+		$("#right_wadl_output_compare").html("");
+
+		$("#analyzeOutput").html("");
 	}
 }
 
@@ -81,7 +129,15 @@ function addURLField(){
 					"<button style='margin-left: 10px; vertical-align: top;' onClick=\"removeURLField('" + noURLFields + "')\" type=\"button\" class=\"btn btn-danger\">X</button>" +
 					//"<button class='singleUrlRemoveBtn' onClick=\"removeURLField('" + noURLFields + "')\">Remove</button>"+
 					"</div>";
+
+					console.log("TRY " + "#urlInputA_"+noURLFields);
+	
 	$('#fieldUrlDiv').append(fullDiv);
+	// give focus to the last added field
+	$("#urlInputA_" + noURLFields).focus();
+	// scroll to bottom of fieldUrlDiv
+	$('#fieldUrlDiv').scrollTop($('#fieldUrlDiv')[0].scrollHeight);
+
 	noURLFields++;
 }
 

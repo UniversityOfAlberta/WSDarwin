@@ -1,5 +1,6 @@
 
 var sideToWriteTo 				= "";
+var global_process_type			= "";
 
 var session_id 					= '';	// initially set in the java app
 var html_wadl_string 			= '';
@@ -119,7 +120,7 @@ function getWSDarwinAnalysis(process_mode, api_call_url, ajaxData){
 	// $("#wadlOutput").show();
 	// $("#wadlOutput").html('');
 	$("#analyzeOutput").show();
-	$("#analyzeOutput").html('');
+	// $("#analyzeOutput").html('');
 	
 
 	if (DEBUG_PRINT){
@@ -147,6 +148,8 @@ function getWSDarwinAnalysis(process_mode, api_call_url, ajaxData){
 
 			if (process_mode == "analyze"){
 				processWSDarwinAnalyze(analysis_merged_wadl_url_path);
+				console.log("path to generated client code");
+				console.debug(jsonObj[4]);
 			} else if (process_mode == "compare"){
 				processWSDarwinCompare(
 					analysis_merged_wadl_url_path, 
@@ -191,9 +194,10 @@ function processWSDarwinCompare(analysis_merged_wadl_url_path, compare_merged_wa
 	init_node(oldRootDoc, "_a_");
 	init_node(newRootDoc, "_b_");
 
+	console.log("WTF: " + process_mode);
 	if ( $('.diffTypeText:checked').val() ) {
 		//text_diff_JS(1);								// different type of text comparison diff
-		sideBySideDiff();								// text comparison diff
+		sideBySideDiff(process_mode);					// text comparison diff
 	} else if ( $('.diffTypeJava:checked').val() ) {
 		processJavaComparison(delta_comparison_url, oldRootDoc, newRootDoc, process_mode);	// java comparison diff
 	}
@@ -333,12 +337,12 @@ function printCrossServiceComparisonMappings(crossServiceMappings){
 	}
 }
 
-function sideBySideDiff() {
-	text_diff_JS(0);
+function sideBySideDiff(process_mode) {
+	text_diff_JS(0, process_mode);
 }
 
-function inlineDiff() {
-	text_diff_JS(1);
+function inlineDiff(process_mode) {
+	text_diff_JS(1, process_mode);
 }
 
 // wadl utility functions 
@@ -428,11 +432,37 @@ function processJavaComparison(deltas_path, oldDocNode, newDocNode, process_type
 	//console.log("name: " + mainNode.nodeName + ", attrs length: " + mainNode.childNodes.length + ", attribute's value: " + mainNode.attributes.getNamedItem("xmlns").value);
 	//console.log(xmlDoc);
 
-	$("#left_wadl_output_compare").html("");
-	$("#right_wadl_output_compare").html("");
-	$("#wadlOutput_compare").html("");
 	
+	// $("#wadlOutput").hide();
+	$("#analyzeOutput").hide();
 
+	if (process_type == 'compare'){
+		$("#wadlOutput_crossServiceCompare").hide();
+		$("#left_wadl_output_crossServiceCompare").hide();
+		$("#right_wadl_output_crossServiceCompare").hide();
+
+		$("#wadlOutput_compare").html("");
+		$("#left_wadl_output_compare").html("");
+		$("#right_wadl_output_compare").html("");
+
+		$("#wadlOutput_compare").show();
+		$("#left_wadl_output_compare").show();
+		$("#right_wadl_output_compare").show();
+	} else if (process_type == 'crossServiceCompare'){
+		$("#wadlOutput_compare").hide();
+		$("#left_wadl_output_compare").hide();
+		$("#right_wadl_output_compare").hide();
+
+		$("#wadlOutput_crossServiceCompare").html("");
+		$("#left_wadl_output_crossServiceCompare").html("");
+		$("#right_wadl_output_crossServiceCompare").html("");
+
+		$("#wadlOutput_crossServiceCompare").show();
+		$("#left_wadl_output_crossServiceCompare").show();
+		$("#right_wadl_output_crossServiceCompare").show();
+	}
+
+	global_process_type = process_type;
 	strapped_html_wadl_string = '';
 	sideToWriteTo = "left";
 	padding_left = 0;
@@ -450,24 +480,23 @@ function processJavaComparison(deltas_path, oldDocNode, newDocNode, process_type
 
 	var newText = strapped_html_wadl_string;
 	strapped_html_wadl_string = '';
-
-	// $("#wadlOutput").hide();
-	$("#analyzeOutput").hide();
-	
-	$("#wadlOutput_compare").show();
-	$("#left_wadl_output_compare").show();
-	$("#right_wadl_output_compare").show();
-
+	console.log("process: " + process_type);
 	if (parsing_html_mode){
 
 	} else {
-		$("#left_wadl_output_compare").html(oldText);
-		$("#right_wadl_output_compare").html(newText);
+		if (process_type == 'compare'){
+			$("#left_wadl_output_compare").html(oldText);
+			$("#right_wadl_output_compare").html(newText);
+		} else if (process_type == 'crossServiceCompare'){
+			$("#left_wadl_output_crossServiceCompare").html(oldText);
+			$("#right_wadl_output_crossServiceCompare").html(newText);
+		}
+
 	}
 
 	if (process_type === "crossServiceCompare"){
 		console.log("cross servicing here..");
-		$(".halfwadlOutput").css("width", "40%");
+		// $(".halfwadlOutput").css("width", "40%");
 
 	} else if (process_type === "compare") {
 		highlightComparedWADLs(mainNode, oldDocNode, newDocNode);
@@ -1120,7 +1149,9 @@ function start_wadl_parsing(){
 }
 
 function appendToHTML(side, str, elemClassName){
-	$("#" + sideToWriteTo + "_wadl_output_compare").append(str);
+	console.log("GLOBAL PROCESS");
+	console.log(global_process_type);
+	$("#" + sideToWriteTo + "_wadl_output_"+global_process_type).append(str);
 	lineNumber++;
 	if (side == "left"){
 		$("." + elemClassName).attr("data-lineNumber", lineNumber + "_a");
@@ -1154,7 +1185,6 @@ function printMinimizeMaximizeBtn(myNode, extendedWADL){
 	} else {
 		//console.log("printMinimizeMaximizeBtn: ", extendedWADL);
 	}
-
 }
 
 function printStartTags(myNode, elemClassName, extendedWADL){
