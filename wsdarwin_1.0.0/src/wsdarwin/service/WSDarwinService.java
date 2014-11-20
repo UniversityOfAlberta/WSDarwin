@@ -136,13 +136,14 @@ public class WSDarwinService extends Application{
 		for(String base : file.getResourcesElements().keySet()) {
 			resourcesBase = base;
 		}
-		String[] folders = resourcesBase.split(".");
-		String packageName = "";
+		resourcesBase = resourcesBase.replace("/", "");
 		
-		for(int i=folders.length-1; i>=0; i--) {
-			packageName+=folders[i];
+		String[] folders = resourcesBase.split("\\.");
+		String packageName = "";
+		String sourceZipFolder = packageName = folders[folders.length-1];
+		for(int i=folders.length-2; i>=0; i--) {
+			packageName+="."+folders[i];
 		}
-		String sourceZipFolder = folders[0];
 		String serverpath_proxy = generateClientProxy(localpath_wadl_filename_A, packageName, sourceZipFolder);
 		returnArray.add(serverpath_wadl_filename_A);
 		returnArray.add(serverpath_proxy);

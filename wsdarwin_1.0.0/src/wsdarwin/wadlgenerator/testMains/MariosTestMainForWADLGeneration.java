@@ -52,10 +52,10 @@ public class MariosTestMainForWADLGeneration {
 
 	public static void main(String[] args) {
 		double time = System.currentTimeMillis();
-		//testGeneration();
+		testGeneration();
 		//testComparison();
 		//testMapping();
-		testGenerateClient();
+		//testGenerateClient();
 		System.out.println(System.currentTimeMillis()-time);
 
 	}
@@ -107,7 +107,21 @@ public class MariosTestMainForWADLGeneration {
 				line = in.readLine();
 			}
 			in.close();
-			service.generateWADL(urlRequests, new ArrayList<String>(), FILENAME_DIR+VENDOR+".wadl", RESPONSE_DIR, false);
+			WADLFile file = service.generateWADL(urlRequests, new ArrayList<String>(), FILENAME_DIR+VENDOR+".wadl", RESPONSE_DIR, false);
+			String resourcesBase="";
+			for(String base : file.getResourcesElements().keySet()) {
+				resourcesBase = base;
+			}
+			resourcesBase = resourcesBase.replace("/", "");
+			
+			String[] folders = resourcesBase.split("\\.");
+			String packageName = "";
+			String sourceZipFolder = packageName = folders[folders.length-1];
+			for(int i=folders.length-2; i>=0; i--) {
+				packageName+="."+folders[i];
+			}
+			System.out.println(packageName);
+			System.out.println(sourceZipFolder);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
