@@ -148,8 +148,9 @@ function getWSDarwinAnalysis(process_mode, api_call_url, ajaxData){
 
 			if (process_mode == "analyze"){
 				processWSDarwinAnalyze(analysis_merged_wadl_url_path);
+				console.debug(jsonObj[1]);
 				console.log("path to generated client code");
-				console.debug(jsonObj[4]);
+				console.debug(jsonObj);
 			} else if (process_mode == "compare"){
 				processWSDarwinCompare(
 					analysis_merged_wadl_url_path, 
