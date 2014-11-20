@@ -139,12 +139,11 @@ public class WSDarwinService extends Application{
 		resourcesBase = resourcesBase.replace("/", "");
 		
 		String[] folders = resourcesBase.split("\\.");
-		String packageName = "";
-		String sourceZipFolder = packageName = folders[folders.length-1];
+		String packageName = folders[folders.length-1];
 		for(int i=folders.length-2; i>=0; i--) {
 			packageName+="."+folders[i];
 		}
-		String serverpath_proxy = generateClientProxy(localpath_wadl_filename_A, packageName, sourceZipFolder);
+		String serverpath_proxy = generateClientProxy(localpath_wadl_filename_A, packageName, LOCAL_WADL2JAVA_FILE, LOCAL_FILES_PATH, SERVER_FILES_PATH);
 		returnArray.add(serverpath_wadl_filename_A);
 		returnArray.add(serverpath_proxy);
 		String ret = gson.toJson(returnArray);
@@ -153,15 +152,15 @@ public class WSDarwinService extends Application{
 		
 	}
 	
-	public String generateClientProxy(String localpath_wadl_filename_A, String packageName, String sourceZipFolder) {
+	public String generateClientProxy(String localpath_wadl_filename_A, String packageName, String wadl2javaFile, String localPath, String serverPath) {
 		Runtime rt = Runtime.getRuntime();
 		try {
-			Process pr = rt.exec(LOCAL_WADL2JAVA_FILE+" -o "+LOCAL_FILES_PATH+"/client -p "+packageName+" "+localpath_wadl_filename_A);
+			Process pr = rt.exec(wadl2javaFile+" -o "+localPath+"/client -p "+packageName+" "+localpath_wadl_filename_A);
 			System.out.println(pr.getInputStream().read());
 			System.out.println(pr.getErrorStream().read());
 			System.out.println(pr.waitFor());
 			System.out.println(pr.exitValue());
-			return zipFolder(sourceZipFolder);
+			return zipFolder(localPath, serverPath);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -830,14 +829,14 @@ public class WSDarwinService extends Application{
 		return classes;
 	}
 	
-	public String zipFolder(String sourceZipFolder)
+	public String zipFolder(String localPath, String serverPath)
     {
-		String sourceFolder = LOCAL_FILES_PATH+"client/"+sourceZipFolder;
+		String sourceFolder = localPath+"client";
 		ArrayList<String> filelist = new ArrayList<String>();
     	generateFileList(new File(sourceFolder), filelist, sourceFolder);
-    	String outputFile = LOCAL_FILES_PATH+"client/proxy.zip";
+    	String outputFile = localPath+"client/proxy.zip";
     	zipIt(outputFile, filelist, sourceFolder);
-    	String serverOutputFile = SERVER_FILES_PATH+"client/proxy.zip";
+    	String serverOutputFile = serverPath+"client/proxy.zip";
     	return serverOutputFile;
     }
  
