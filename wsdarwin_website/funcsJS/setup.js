@@ -7,8 +7,8 @@ $('document').ready(function(){
 });
 
 // tomcat server path/location
-var tomcat_server_path              = "http://localhost:8080/";
-// var tomcat_server_path            = "http://ssrg17.cs.ualberta.ca:8080/";
+// var tomcat_server_path              = "http://localhost:8080/";
+var tomcat_server_path            = "http://ssrg17.cs.ualberta.ca:8080/";
 
 var server_api_url                  = tomcat_server_path + "wsdarwin_1.0.0/jaxrs/api/";
 
