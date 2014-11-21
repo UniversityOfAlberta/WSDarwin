@@ -131,6 +131,11 @@ public class WSDarwinService extends Application{
 		String localpath_wadl_filename_A = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
 		if (DEBUG) {System.out.println("filename A: " + localpath_wadl_filename_A ); }
 		
+		generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH, true);
+		
+		String serverpath_wadl_filename_for_proxy = SERVER_FILES_PATH + "wadlForProxy" + session_id + ".wadl";
+		String localpath_wadl_filename_for_proxy = LOCAL_FILES_PATH + "wadlForProxy" + session_id + ".wadl";
+		
 		WADLFile file = generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH, false);
 		String resourcesBase="";
 		for(String base : file.getResourcesElements().keySet()) {
@@ -143,8 +148,9 @@ public class WSDarwinService extends Application{
 		for(int i=folders.length-2; i>=0; i--) {
 			packageName+="."+folders[i];
 		}
-		String serverpath_proxy = generateClientProxy(localpath_wadl_filename_A, packageName, LOCAL_WADL2JAVA_FILE, LOCAL_FILES_PATH, SERVER_FILES_PATH);
+		String serverpath_proxy = generateClientProxy(localpath_wadl_filename_for_proxy, packageName, LOCAL_WADL2JAVA_FILE, LOCAL_FILES_PATH, SERVER_FILES_PATH);
 		returnArray.add(serverpath_wadl_filename_A);
+		returnArray.add(serverpath_wadl_filename_for_proxy);
 		returnArray.add(serverpath_proxy);
 		String ret = gson.toJson(returnArray);
 		//String analysis_wadl_merged_path_url = getWadl(analyze_URLs, analyze_WADLurls, "analyzeURLS", session_id, filenameA, localhostFilenameA);
