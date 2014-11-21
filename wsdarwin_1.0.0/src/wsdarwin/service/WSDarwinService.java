@@ -86,16 +86,16 @@ public class WSDarwinService extends Application{
 	// web service directories
 
 	// 1: ( local tomcat path )
-//	private static final String PATH_PREFIX_TWO = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
-//	private static final String LOCAL_FILES_PATH = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
-//	private static final String SERVER_FILES_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
-//	private static final String LOCAL_WADL_UPLOADS_PATH = "NOT SET UP";
+	private static final String PATH_PREFIX_TWO = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
+	private static final String LOCAL_FILES_PATH = "C:/Users/mihai/tomcat_server/webapps/wsdarwin_1.0.0/files/";
+	private static final String SERVER_FILES_PATH = "http://localhost:8080/wsdarwin_1.0.0/files/";
+	private static final String LOCAL_WADL_UPLOADS_PATH = "NOT SET UP";
 	
 	// 2: ( ssrg17.cs.ualberta.ca tomcat path )
-	private static final String PATH_PREFIX_TWO = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
-	private static final String LOCAL_FILES_PATH = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/";
-	private static final String SERVER_FILES_PATH = "http://ssrg17.cs.ualberta.ca:8080/wsdarwin_1.0.0/files/";
-	private static final String LOCAL_WADL_UPLOADS_PATH = "/var/www/html/wsdarwin/uploads/";
+//	private static final String PATH_PREFIX_TWO = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/icsm2014/twitter";
+//	private static final String LOCAL_FILES_PATH = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/";
+//	private static final String SERVER_FILES_PATH = "http://ssrg17.cs.ualberta.ca:8080/wsdarwin_1.0.0/files/";
+//	private static final String LOCAL_WADL_UPLOADS_PATH = "/var/www/html/wsdarwin/uploads/";
 	
 	private static final String LOCAL_WADL2JAVA_FILE = LOCAL_FILES_PATH+"wadl2java/bin/wadl2java.bat";
 	
@@ -131,7 +131,7 @@ public class WSDarwinService extends Application{
 		String localpath_wadl_filename_A = LOCAL_FILES_PATH + "wadlA" + session_id + ".wadl";
 		if (DEBUG) {System.out.println("filename A: " + localpath_wadl_filename_A ); }
 		
-		WADLFile file = generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH, true);
+		WADLFile file = generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH, false);
 		String resourcesBase="";
 		for(String base : file.getResourcesElements().keySet()) {
 			resourcesBase = base;
@@ -155,7 +155,11 @@ public class WSDarwinService extends Application{
 	public String generateClientProxy(String localpath_wadl_filename_A, String packageName, String wadl2javaFile, String localPath, String serverPath) {
 		Runtime rt = Runtime.getRuntime();
 		try {
-			Process pr = rt.exec(wadl2javaFile+" -o "+localPath+"/client -p "+packageName+" "+localpath_wadl_filename_A);
+			System.out.println("wadl2javaFile: " + wadl2javaFile);
+			System.out.println("localPath: " + localPath);
+			System.out.println("packageName: " + packageName);
+			System.out.println("localpath_wadl_filename_A: " + localpath_wadl_filename_A);
+			Process pr = rt.exec(wadl2javaFile+" -o "+localPath+"client -p "+packageName+" "+localpath_wadl_filename_A);
 			System.out.println(pr.getInputStream().read());
 			System.out.println(pr.getErrorStream().read());
 			System.out.println(pr.waitFor());
