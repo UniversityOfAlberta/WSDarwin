@@ -97,7 +97,7 @@ public class WSDarwinService extends Application{
 	private static final String SERVER_FILES_PATH = "http://ssrg17.cs.ualberta.ca:8080/wsdarwin_1.0.0/files/";
 	private static final String LOCAL_WADL_UPLOADS_PATH = "/var/www/html/wsdarwin/uploads/";
 	
-	private static final String LOCAL_WADL2JAVA_FILE = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/bin/wadl2java.bat";
+	private static final String LOCAL_WADL2JAVA_FILE = "/var/lib/tomcat7/webapps/wsdarwin_1.0.0/files/wadl2java/bin/wadl2java.bat";
 	
 	private static final String FILENAME_DIR_TWO = PATH_PREFIX_TWO+"/wadl/";
 	private static final String RESPONSE_DIR_TWO = PATH_PREFIX_TWO+"/responses/";
