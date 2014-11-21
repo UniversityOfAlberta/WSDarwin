@@ -136,7 +136,7 @@ public class WSDarwinService extends Application{
 		String serverpath_wadl_filename_for_proxy = SERVER_FILES_PATH + "wadlForProxy" + session_id + ".wadl";
 		String localpath_wadl_filename_for_proxy = LOCAL_FILES_PATH + "wadlForProxy" + session_id + ".wadl";
 		
-		WADLFile file = generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_A, LOCAL_FILES_PATH, false);
+		WADLFile file = generateWADL(analyze_URLs, analyze_WADLurls, localpath_wadl_filename_for_proxy, LOCAL_FILES_PATH, false);
 		String resourcesBase="";
 		for(String base : file.getResourcesElements().keySet()) {
 			resourcesBase = base;
