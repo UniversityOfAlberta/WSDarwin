@@ -23,6 +23,12 @@ function downloadWADL(extended){
     });
 }
 
+function downloadGeneratedProxy(dl_url){
+    onclick="this.target='_blank';"
+    window.location = dl_url;
+}
+
+
 function var_dump(obj) {
     var out = '';
     for (var i in obj) {

@@ -1,6 +1,9 @@
 
 $('document').ready(function(){
     initBootstrapJS_popover();
+    var dl_url = tomcat_server_path + "wsdarwin_1.0.0/files/client/proxy.zip";
+    console.log("dl:  " + dl_url);
+    $("#downloaGenProxy").attr('onclick', "downloadGeneratedProxy(\"" + dl_url + "\")");
 });
 
 // tomcat server path/location

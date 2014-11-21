@@ -1,4 +1,6 @@
 
+// var extendedWADL = false;
+
 var sideToWriteTo 				= "";
 var global_process_type			= "";
 
@@ -147,6 +149,7 @@ function getWSDarwinAnalysis(process_mode, api_call_url, ajaxData){
 			var delta_comparison_url = jsonObj[3];
 
 			if (process_mode == "analyze"){
+				var basicWadl = jsonObj[2];
 				processWSDarwinAnalyze(analysis_merged_wadl_url_path);
 				console.debug(jsonObj[1]);
 				console.log("path to generated client code");
@@ -174,7 +177,7 @@ function getWSDarwinAnalysis(process_mode, api_call_url, ajaxData){
 }
 
 function processWSDarwinAnalyze(analysis_merged_wadl_url_path){
-	if (DEBUG_PRINT){console.log("analyzing wadl's");}
+	// if (DEBUG_PRINT){console.log("analyzing wadl's");}
 	add_elements_mode = true;
 	processWADLFromPath(analysis_merged_wadl_url_path);
 }
@@ -195,7 +198,6 @@ function processWSDarwinCompare(analysis_merged_wadl_url_path, compare_merged_wa
 	init_node(oldRootDoc, "_a_");
 	init_node(newRootDoc, "_b_");
 
-	console.log("WTF: " + process_mode);
 	if ( $('.diffTypeText:checked').val() ) {
 		//text_diff_JS(1);								// different type of text comparison diff
 		sideBySideDiff(process_mode);					// text comparison diff
@@ -481,7 +483,6 @@ function processJavaComparison(deltas_path, oldDocNode, newDocNode, process_type
 
 	var newText = strapped_html_wadl_string;
 	strapped_html_wadl_string = '';
-	console.log("process: " + process_type);
 	if (parsing_html_mode){
 
 	} else {
@@ -496,7 +497,6 @@ function processJavaComparison(deltas_path, oldDocNode, newDocNode, process_type
 	}
 
 	if (process_type === "crossServiceCompare"){
-		console.log("cross servicing here..");
 		// $(".halfwadlOutput").css("width", "40%");
 
 	} else if (process_type === "compare") {
@@ -888,7 +888,6 @@ function reassignLineNumbers(side){
 }
 
 function highlightCTypeGrammarsRec(grammarsNode, ctype_id, node, highlightColor){
-	console.log("ctype_id: " + ctype_id);
 	for (var i = 0; i < node.childNodes.length; i++){
 		var newNode = node.childNodes[i];
 		if (newNode.nodeName == "xs:schema"){
@@ -1104,9 +1103,7 @@ function highlightXSElementWithName(xselementName, node, highlightColor ){
 }
 
 function processWADLFromPath(wadl_url_path){
-	console.log("WADL url path: '" + wadl_url_path + "'");
 	xmlDoc = loadXMLDoc(wadl_url_path);
-	console.log('xmlDoc print:');
 	console.debug(xmlDoc);
 	rootNode=xmlDoc.documentElement;
 	// nodeName, attributes, childNodes
@@ -1150,8 +1147,6 @@ function start_wadl_parsing(){
 }
 
 function appendToHTML(side, str, elemClassName){
-	console.log("GLOBAL PROCESS");
-	console.log(global_process_type);
 	$("#" + sideToWriteTo + "_wadl_output_"+global_process_type).append(str);
 	lineNumber++;
 	if (side == "left"){
@@ -1271,7 +1266,12 @@ function printOtherTags(myNode, elemClassName, extendedWADL){
 
 		if (myNode.nodeName === "xs:element"){
 			var hintTypeBtnTooltip;
+			var backCheck = false;
+			console.log("TEST: ");
+			console.debug(myNode);
 			if (myNode.convertedToEnumType){
+				console.log("YEEEEEEEEEEEEEEEEEEEEEEY ");
+				backCheck = true;
 				hintTypeBtnTooltip = 	"<button type='button' class=\"convertToEnum btn btn-default btn-xs\" data-toggle='tooltip' " + 
 										"onClick='reverseEnumToNormalTypeHandler(" + myNode.my_id + ", this)' data-placement='right'" +
 										" title='Reset to its original type'>Reset Type</button>";
@@ -1285,7 +1285,7 @@ function printOtherTags(myNode, elemClassName, extendedWADL){
 			// console.debug(myNode)
 			// console.log("--Attention--");
 
-			if (isItEnumConvertable(myNode)){
+			// if (isItEnumConvertable(myNode) || backCheck){
 				var typeConfidenceMap = calculateTypeConfidence(myNode);
 				var typeConfStr  	  = "";
 				//var chosenKey;
@@ -1323,10 +1323,15 @@ function printOtherTags(myNode, elemClassName, extendedWADL){
 											"data-toggle='tooltip' data-placement='right'" +
 											" title='" + typeConfStr + "'></button>";
 
-				html_wadl_string += hintTypeBtnTooltip;
-				html_wadl_string += typeConfidenceBtnTooltip;
+				// html_wadl_string += hintTypeBtnTooltip;
+				// html_wadl_string += typeConfidenceBtnTooltip;
 
+			// }
+
+			if (isItEnumConvertable(myNode) || backCheck){
+				html_wadl_string += hintTypeBtnTooltip;
 			}
+			html_wadl_string += typeConfidenceBtnTooltip;
 		}
 
 		html_wadl_string += "</br>";
@@ -1337,13 +1342,15 @@ function printOtherTags(myNode, elemClassName, extendedWADL){
 }
 
 function printChildren(myNode, extendedWADL){
+	//extendedWADL = false;
 	// only print myNode's children nodes if myNode is not minimized
 	// SPECIAL CASE: don't print any child of xs:element
 	if ( (!myNode.minimized) ){
 	//if ( (!myNode.minimized) && ( (myNode.nodeName !== "xs:element") || (extendedWADL) ) ){
 		// print myNode's children nodes
 		for (var i = 0; i < myNode.childNodes.length; i++){
-			if ((myNode.nodeName === "xs:element") || (extendedWADL)){
+			if ((myNode.nodeName === "xs:element") || (myNode.nodeName === "param") || (extendedWADL)){
+				console.log("node name is " + myNode.nodeName + " AND " + extendedWADL);
 				generateWADLDocument(myNode.childNodes[i], true);
 			} else {
 				spaces += 4;
@@ -1432,7 +1439,8 @@ function generateWADLDocument(myNode, extendedWADL){
 	if (typeof extendedWADL == "undefined"){
 		extendedWADL = false;
 	}
-	console.log("-generateWADLDocument: ", myNode.nodeName, extendedWADL);
+
+	// console.log("-generateWADLDocument: ", myNode.nodeName, extendedWADL);
 	addSpaces(extendedWADL);
 
 	// TO DO: optimize these prints, they are everywhere and seem too random;
@@ -1460,6 +1468,7 @@ function generateWADLDocument(myNode, extendedWADL){
 }
 
 function isItEnumConvertable(myNode){
+	console.log("BLAH:");
 	console.debug(myNode.attributes.getNamedItem("type").value);
 	if ( myNode.hasAttribute("maxOccurs") ){
 		var maxOccurs = myNode.attributes.getNamedItem("maxOccurs").value;
@@ -1487,8 +1496,6 @@ function calculateTypeConfidence(myNode){
 	
 	var typeFrequenciesNode = getChildNodeNamed(myNode, 'typeFrequencies');
 	var valueFrequenciesNode = getChildNodeNamed(myNode, 'valueFrequencies');
-	console.debug("vatypefrequenciesnode:");
-	console.debug(valueFrequenciesNode);
 	if (typeFrequenciesNode){
 		if (typeFrequenciesNode.childNodes.length > 0){
 			// calculating the sum of the frequencies / TO DO: will get this value from the <typeFrequencies> after it's added there
@@ -1562,13 +1569,15 @@ var createEnumSimpleTypeHandler = function(myNode_id, btn){
 				   foundNode2['node'].attributes.getNamedItem('name').value );
 	var attribute_name_val = foundNode2['node'].attributes.getNamedItem('name').value;
 	var attribute_type_val = foundNode2['node'].attributes.getNamedItem('type').value;
+
 	var oldNode = foundNode2['node'].cloneNode(true);
 
 	// changes the attribute 'type' of the node
 	foundNode2['node'].attributes.getNamedItem("type").value = "tns:" + attribute_name_val + "Type";
 	// useful for determining the type of onclick eventlistener is defined for node 'foundNode2['node']'
 	foundNode2['node'].convertedToEnumType = true;
-
+	console.log("ha: " );
+	console.debug(foundNode2['node']);
 	// creating the xs:simpleType element
 	var simpleTypeNode = xmlDoc.createElement("xs:simpleType");
 	var nameAttr = xmlDoc.createAttribute("name");

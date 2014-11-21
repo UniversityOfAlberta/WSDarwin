@@ -46,9 +46,9 @@
 	<div class="menuTabs">
 		<!-- Nav tabs -->
 		<ul class="nav nav-tabs">
-		  <li class="active" name='analysisViewName' id='analysisView'><a href="javascript:activateView('analysisView'); ">Analysis</a></li>
-		  <li id='comparisonView' name='compareViewName'><a href="javascript:activateView('comparisonView')">Comparison</a></li>
-		  <li id='crossServiceComparisonView' name='crossServiceViewName'><a href="javascript:activateView('crossServiceComparisonView')">Cross Service Comparison</a></li>
+		  <li class="active" name='analysisViewName' id='analysisView'><a href="javascript:activateView('analysisView'); ">Generator</a></li>
+		  <li id='comparisonView' name='compareViewName'><a href="javascript:activateView('comparisonView')">Comparator</a></li>
+		  <li id='crossServiceComparisonView' name='crossServiceViewName'><a href="javascript:activateView('crossServiceComparisonView')">Mapper</a></li>
 		  <li id='settingsView'><a href="javascript:activateView('settingsView')">Settings</a></li>
 		</ul>
 
@@ -66,7 +66,7 @@
 
 			<!-- Analyze the input(s) -->
 			<div id='analyzeSubmitBtn' class="submitBtnDiv">
-				<button type="button" id='analyzeBtn' onClick="analyzeBtn()" class="btn btn-success">Generate WADL</button>
+				<button type="button" id='analyzeBtn' onClick="analyzeBtn()" class="btn btn-success">Generate</button>
 				<!-- <button type="button" onClick="runSampleTest('analyze')" 
 					 class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button> -->
 				<!-- Run Sample Test(s) -->
@@ -90,19 +90,20 @@
 				  <ul class="dropdown-menu" role="menu">
 				    <li><a href="#" onClick="downloadWADL()">WADL</a></li>
 				    <li><a href="#" onClick="downloadWADL(true)">Extended WADL</a></li>
+				    <li><a href="#" id='downloaGenProxy' onClick="downloadGeneratedProxy('" + + "wsdarwin_1.0.0/files/client/proxy.zip')">Generated Proxy</a></li>
 				  </ul>
 				</div>
 			</div>
 
 			<!-- Compare the input(s) -->
 			<div id='compareSubmitBtn' class="compareSubmitBtnDiv">
-				<button type="button" id='compareBtn' onClick="compareBtn()" style="width: 84px;" class="btn btn-primary">Compare</button>
+				<button type="button" id='compareBtn' onClick="compareBtn()" class="btn btn-primary">Compare</button>
 				<button type="button" onClick="runSampleTest('compare')" class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button>
 			</div>
 			
 			<!-- Cross-Service Comparison of the input(s) -->
 			<div id='crossServiceCompareSubmitBtn' class="compareSubmitBtnDiv">
-				<button type="button" id='crossServiceCompareBtn' onClick="crossServiceCompareBtn()" style="width: 180px;" class="btn btn-info">Cross-Service Compare</button>
+				<button type="button" id='crossServiceCompareBtn' onClick="crossServiceCompareBtn()" class="btn btn-info">Map</button>
 				<button type="button" onClick="runSampleTest('crossServiceCompare')" class="btn btn-default" style="margin-left: 7px;">Run Sample Test</button>
 				
 			</div>
